@@ -23,12 +23,12 @@ export default function Layout({ children }: Props) {
               </Link>
             </div>
             <div>
-              {/* <Link
+              <Link
                 className="text-gray-600 hover:text-cyan-600 mx-2 sm:mx-4"
                 href="/projects"
               >
                 Projects
-              </Link> */}
+              </Link>
               <Link
                 className="text-gray-600 hover:text-cyan-600 mx-2 sm:mx-4"
                 href="/skills"

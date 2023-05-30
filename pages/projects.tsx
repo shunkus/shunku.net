@@ -5,28 +5,35 @@ import Link from "next/link";
 
 const projects = [
   {
+    id: 0,
+    title: "My Portfolio",
+    description: "shunku's portfolio website you're visiting now.",
+    technologies: ["JavaScript", "React", "Next.js", "Tailwind"],
+    link: "https://github.com/shunkus/shunku.net",
+  },
+  {
     id: 1,
-    title: "My Awesome App",
+    title: "IAM Actions",
     description:
-      "This is a mobile app that I built using React Native. It helps users track their fitness goals.",
-    technologies: ["React Native", "TypeScript", "Firebase"],
-    link: "https://github.com/johndoe/my-awesome-app",
+      "A tool for quickly viewing a list of AWS Identity and Access Management (IAM) actions",
+    technologies: ["JavaScript", "React", "Next.js", "Tailwind", "AWS"],
+    link: "https://github.com/shunkus/iam-actions",
   },
   {
     id: 2,
-    title: "My Portfolio Site",
+    title: "JavaScript Fundamentals: Your Path to Becoming an Expert",
     description:
-      "This is my personal portfolio site built with Next.js and Tailwind CSS.",
-    technologies: ["Next.js", "Tailwind CSS", "TypeScript"],
-    link: "https://github.com/johndoe/my-portfolio-site",
-  },
-  {
-    id: 3,
-    title: "My API Project",
-    description:
-      "This is an API that I built for a startup company. It was built using Node.js and Express.js.",
-    technologies: ["Node.js", "Express.js", "MongoDB"],
-    link: "https://github.com/johndoe/my-api-project",
+      "An online course that explains the knowledge needed to take JavaScript from beginner to expert.",
+    technologies: [
+      "JavaScript",
+      "React",
+      "Next.js",
+      "Remix",
+      "Gatsby",
+      "Angular",
+      "Vue",
+    ],
+    link: "https://dev.to/shunku/chapter-1-introduction-to-javascript-517n",
   },
 ];
 
@@ -34,7 +41,7 @@ export default function Projects() {
   return (
     <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
       <Head>
-        <title>Projects - John Doe</title>
+        <title>Projects - shunku</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -53,9 +60,9 @@ export default function Projects() {
               </p>
               <Link
                 href={project.link}
-                className="text-lightBlue-500 hover:text-lightBlue-700"
+                className="text-cyan-500 hover:text-cyan-700 inline-block mt-2"
               >
-                View on GitHub
+                View
               </Link>
             </div>
           ))}
