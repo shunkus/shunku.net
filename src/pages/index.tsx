@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { Linkedin, MapPin } from "lucide-react";
+import Head from "next/head";
+import { LinkedinIcon, MapPin } from "lucide-react";
 
 export default function Home() {
   const skills = [
@@ -63,7 +64,11 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <>
+      <Head>
+        <title>Shun Kushigami - Cloud Support Engineer & Software Engineer</title>
+      </Head>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-6xl mx-auto px-4 py-6">
@@ -87,7 +92,7 @@ export default function Home() {
                   <span>Osaka, Japan</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Linkedin size={16} />
+                  <LinkedinIcon size={16} />
                   <a href="https://www.linkedin.com/in/shun-kushigami-b9964272" className="hover:text-blue-600 transition-colors" target="_blank" rel="noopener noreferrer">
                     LinkedIn Profile
                   </a>
@@ -226,6 +231,7 @@ export default function Home() {
           </div>
         </div>
       </footer>
-    </div>
+      </div>
+    </>
   );
 }

@@ -65,7 +65,7 @@ test.describe('Portfolio Site E2E Tests', () => {
     // Check Languages section
     await expect(page.getByRole('heading', { name: /languages/i })).toBeVisible();
     await expect(page.locator('text=Japanese')).toBeVisible();
-    await expect(page.locator('text=English')).toBeVisible();
+    await expect(page.locator('span:has-text("English")')).toBeVisible();
   });
 
   test('should have proper SEO and accessibility', async ({ page }) => {
