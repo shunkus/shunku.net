@@ -1,15 +1,74 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import Home from '../pages/index';
+
+// Mock next/router
+const mockPush = jest.fn();
+jest.mock('next/router', () => ({
+  useRouter: () => ({
+    locale: 'en',
+    locales: ['en', 'ja', 'ko', 'zh', 'es', 'fr'],
+    asPath: '/',
+    push: mockPush,
+  }),
+}));
+
+// Mock next-i18next
+jest.mock('next-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string, options?: { returnObjects?: boolean }) => {
+      const translations: { [key: string]: string } = {
+        'meta.title': 'Shun Kushigami - Cloud Support Engineer & Software Engineer',
+        'name': 'Shun Kushigami',
+        'role': 'Cloud Support Engineer / Software Engineer',
+        'location': 'Osaka, Japan',
+        'linkedinProfile': 'LinkedIn Profile',
+        'sections.about': 'About',
+        'about.description': 'Dedicated and skilled software engineer with over a decade of experience in web development and technical support. Proficient in a wide range of programming languages and tools, with a proven track record of contributing to team success through hard work, attention to detail, and excellent organizational skills. Currently focusing on AWS cloud technologies and automation tooling to improve customer experiences and team efficiency.',
+        'sections.keyAchievements': 'Key Achievements',
+        'achievements.awsSupport.title': 'AWS Support Tools Enhancement',
+        'achievements.automationTraining.title': 'Automation Training Leadership',
+        'achievements.toolingAutomation.title': 'Tooling & Automation Expertise',
+        'achievements.securityLeadership.title': 'Security Leadership',
+        'sections.professionalExperience': 'Professional Experience',
+        'experience.aws.company': 'Amazon Web Services Japan G.K.',
+        'experience.iplug.company': 'i-plug Inc.',
+        'experience.officemiks.company': 'Officemiks Ltd.',
+        'sections.technicalSkills': 'Technical Skills',
+        'sections.recognitionHighlights': 'Recognition Highlights',
+        'recognition.totalAchievements': 'Total Achievements',
+        'recognition.specialistsMentored': 'Specialists Mentored (2024)',
+        'sections.education': 'Education',
+        'education.university': 'Kansai Gaidai University, Faculty of Foreign Studies',
+        'education.degree': 'Bachelor of Arts in English and American Studies',
+        'sections.languages': 'Languages',
+        'languages.japanese': 'Japanese',
+        'languages.english': 'English',
+      };
+      if (options?.returnObjects || key.includes('highlights')) {
+        return ['Sample highlight 1', 'Sample highlight 2'];
+      }
+      return translations[key] || key;
+    },
+  }),
+}));
 
 // Mock Next.js Image component
 jest.mock('next/image', () => ({
   __esModule: true,
-  default: (props: any) => {
-    const { priority, ...otherProps } = props;
+  default: (props: { [key: string]: unknown; alt: string }) => {
+    const { priority: _priority, ...otherProps } = props;
     // eslint-disable-next-line @next/next/no-img-element
-    return <img {...otherProps} alt={props.alt} />;
+    return <img {...(otherProps as React.ImgHTMLAttributes<HTMLImageElement>)} alt={props.alt} />;
   },
 }));
+
+// Mock Link component
+jest.mock('next/link', () => {
+  return ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => {
+    return <a {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}>{children}</a>;
+  };
+});
 
 describe('Home Page', () => {
   beforeEach(() => {
@@ -109,7 +168,8 @@ describe('Home Page', () => {
     expect(languagesHeading).toBeInTheDocument();
 
     expect(screen.getByText('Japanese')).toBeInTheDocument();
-    expect(screen.getByText('English')).toBeInTheDocument();
+    // Use getAllByText for English since it appears multiple times
+    expect(screen.getAllByText('English').length).toBeGreaterThan(0);
   });
 
   it('renders footer with copyright', () => {
@@ -126,5 +186,31 @@ describe('Home Page', () => {
     
     const footer = screen.getByRole('contentinfo');
     expect(footer).toBeInTheDocument();
+  });
+
+  it('renders language switcher dropdown', () => {
+    const languageButton = screen.getByRole('button');
+    expect(languageButton).toBeInTheDocument();
+    expect(languageButton).toHaveTextContent('English');
+  });
+
+  it('displays language options when dropdown is opened', async () => {
+    const user = userEvent.setup();
+    const languageButton = screen.getByRole('button');
+    
+    await user.click(languageButton);
+    
+    // Check for language links
+    expect(screen.getAllByText('English').length).toBeGreaterThan(0);
+    expect(screen.getByText('日本語')).toBeInTheDocument();
+    expect(screen.getByText('한국어')).toBeInTheDocument();
+    expect(screen.getByText('中文')).toBeInTheDocument();
+    expect(screen.getByText('Español')).toBeInTheDocument();
+    expect(screen.getByText('Français')).toBeInTheDocument();
+  });
+
+  it('shows flag icons in language switcher', () => {
+    const languageButton = screen.getByRole('button');
+    expect(languageButton).toHaveTextContent('🇺🇸');
   });
 });

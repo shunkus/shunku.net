@@ -1,0 +1,90 @@
+{
+  "name": "Shun Kushigami",
+  "role": "Ingénieur Support Cloud / Ingénieur Logiciel",
+  "location": "Osaka, Japon",
+  "linkedinProfile": "Profil LinkedIn",
+  "sections": {
+    "about": "À propos",
+    "keyAchievements": "Réalisations Clés",
+    "professionalExperience": "Expérience Professionnelle",
+    "technicalSkills": "Compétences Techniques",
+    "recognitionHighlights": "Points forts des Reconnaissances",
+    "education": "Éducation",
+    "languages": "Langues"
+  },
+  "about": {
+    "description": "Ingénieur logiciel dévoué et compétent avec plus d'une décennie d'expérience dans le développement web et le support technique. Maîtrise d'une large gamme de langages de programmation et d'outils, avec un historique prouvé de contribution au succès de l'équipe grâce au travail acharné, à l'attention aux détails et d'excellentes compétences organisationnelles. Actuellement concentré sur les technologies cloud AWS et les outils d'automatisation pour améliorer les expériences client et l'efficacité de l'équipe."
+  },
+  "achievements": {
+    "awsSupport": {
+      "title": "Améliorations des Outils de Support AWS",
+      "description": "Livré 21 améliorations incrémentales pour la Console EC2 Instance Connect, en se concentrant sur la prévention des cas et la réduction des connexions échouées.",
+      "date": "2025"
+    },
+    "automationTraining": {
+      "title": "Leadership en Formation d'Automatisation",
+      "description": "Dirigé et organisé des camps d'entraînement d'automatisation, formant des ingénieurs et améliorant les taux de réussite d'évaluation à >70%.",
+      "date": "2024"
+    },
+    "toolingAutomation": {
+      "title": "Expertise en Outils et Automatisation",
+      "description": "Mentoré 9 nouveaux spécialistes en automatisation en 2024, contribuant à la croissance de la communauté d'automatisation et d'outils d'AWS Support.",
+      "date": "2024"
+    },
+    "securityLeadership": {
+      "title": "Leadership en Sécurité",
+      "description": "Premier spécialiste en sécurité pour l'équipe de support, améliorant la sécurité dans toute l'organisation grâce au développement d'outils.",
+      "date": "2023"
+    }
+  },
+  "experience": {
+    "aws": {
+      "company": "Amazon Web Services Japan G.K.",
+      "role": "Ingénieur Support Cloud",
+      "period": "Décembre 2017 - Présent",
+      "highlights": [
+        "Fournir un support technique et des conseils sur les services AWS aux clients",
+        "Développer des outils internes pour améliorer l'efficacité de l'équipe et la qualité du service client",
+        "Créer des matériaux de formation et des vidéos pour les nouveaux employés et clients",
+        "Collaborer sur les améliorations de console et les corrections de bugs, améliorant l'expérience utilisateur"
+      ]
+    },
+    "iplug": {
+      "company": "i-plug Inc.",
+      "role": "Ingénieur Logiciel",
+      "period": "Décembre 2014 - Décembre 2017",
+      "highlights": [
+        "Développé et maintenu une plateforme de service de correspondance pour les nouveaux diplômés et les entreprises de recrutement",
+        "Reconçu l'architecture de base de données pour améliorer les performances de recherche de dix fois"
+      ]
+    },
+    "officemiks": {
+      "company": "Officemiks Ltd.",
+      "role": "Ingénieur Logiciel",
+      "period": "Novembre 2011 - Décembre 2014",
+      "highlights": [
+        "Dirigé des projets de développement pour des clients allant des PME aux grandes entreprises",
+        "Créé un CMS personnalisé pour le système de communication interne d'une grande entreprise de boissons"
+      ]
+    }
+  },
+  "recognition": {
+    "totalAchievements": "Total des Réalisations",
+    "specialistsMentored": "Spécialistes Mentorés (2024)",
+    "awardPrograms": "Programmes de Récompenses"
+  },
+  "education": {
+    "university": "Université Kansai Gaidai, Faculté d'Études Étrangères",
+    "degree": "Licence ès Arts en Études Anglaises et Américaines",
+    "graduationDate": "Octobre 2010"
+  },
+  "languages": {
+    "japanese": "Japonais",
+    "english": "Anglais",
+    "native": "Natif",
+    "professional": "Professionnel"
+  },
+  "meta": {
+    "title": "Shun Kushigami - Ingénieur Support Cloud et Ingénieur Logiciel"
+  }
+}

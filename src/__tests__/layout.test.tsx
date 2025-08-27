@@ -10,7 +10,7 @@ describe('App Component', () => {
     const appProps: AppProps = {
       Component: TestComponent,
       pageProps: mockPageProps,
-      router: {} as any,
+      router: {} as AppProps['router'],
     };
     
     const { getByTestId } = render(<App {...appProps} />);
@@ -26,7 +26,7 @@ describe('App Component', () => {
     const appProps: AppProps = {
       Component: TestComponent,
       pageProps: mockPageProps,
-      router: {} as any,
+      router: {} as AppProps['router'],
     };
     
     const { container } = render(<App {...appProps} />);

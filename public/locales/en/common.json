@@ -1,0 +1,94 @@
+{
+  "name": "Shun Kushigami",
+  "role": "Cloud Support Engineer / Software Engineer",
+  "location": "Osaka, Japan",
+  "linkedinProfile": "LinkedIn Profile",
+  "sections": {
+    "about": "About",
+    "keyAchievements": "Key Achievements",
+    "professionalExperience": "Professional Experience",
+    "technicalSkills": "Technical Skills",
+    "recognitionHighlights": "Recognition Highlights",
+    "education": "Education",
+    "languages": "Languages"
+  },
+  "about": {
+    "description": "Dedicated and skilled software engineer with over a decade of experience in web development and technical support. Proficient in a wide range of programming languages and tools, with a proven track record of contributing to team success through hard work, attention to detail, and excellent organizational skills. Currently focusing on AWS cloud technologies and automation tooling to improve customer experiences and team efficiency."
+  },
+  "achievements": {
+    "awsSupport": {
+      "title": "AWS Support Tools Enhancement",
+      "description": "Delivered 21 incremental enhancements for EC2 Instance Connect Console, focusing on case prevention and reducing failed connections.",
+      "date": "2025"
+    },
+    "automationTraining": {
+      "title": "Automation Training Leadership",
+      "description": "Led and organized automation training bootcamps, training engineers and improving assessment pass rates to >70%.",
+      "date": "2024"
+    },
+    "toolingAutomation": {
+      "title": "Tooling & Automation Expertise",
+      "description": "Mentored 9 new automation specialists in 2024, contributing to AWS Support's automation and tooling community growth.",
+      "date": "2024"
+    },
+    "securityLeadership": {
+      "title": "Security Leadership",
+      "description": "First security specialist for the support team, improving security across the organization through tool development.",
+      "date": "2023"
+    }
+  },
+  "experience": {
+    "aws": {
+      "company": "Amazon Web Services Japan G.K.",
+      "role": "Cloud Support Engineer",
+      "period": "December 2017 - Present",
+      "highlights": [
+        "Provide technical support and guidance on AWS services to customers",
+        "Develop internal tools to improve team efficiency and customer service quality",
+        "Create training materials and videos for new employees and customers",
+        "Collaborate on console improvements and bug fixes, enhancing user experience"
+      ]
+    },
+    "iplug": {
+      "company": "i-plug Inc.",
+      "role": "Software Engineer",
+      "period": "December 2014 - December 2017",
+      "highlights": [
+        "Developed and maintained a matching service platform for new graduates and hiring companies",
+        "Redesigned database architecture to improve search performance by tenfold"
+      ]
+    },
+    "officemiks": {
+      "company": "Officemiks Ltd.",
+      "role": "Software Engineer",
+      "period": "November 2011 - December 2014",
+      "highlights": [
+        "Led development projects for clients ranging from SMEs to large corporations",
+        "Created a custom CMS for a major beverage company's internal communication system"
+      ]
+    }
+  },
+  "recognition": {
+    "totalAchievements": "Total Achievements",
+    "specialistsMentored": "Specialists Mentored (2024)",
+    "awardPrograms": "Award Programs"
+  },
+  "education": {
+    "university": "Kansai Gaidai University, Faculty of Foreign Studies",
+    "degree": "Bachelor of Arts in English and American Studies",
+    "graduationDate": "October 2010"
+  },
+  "languages": {
+    "japanese": "Japanese",
+    "english": "English",
+    "native": "Native",
+    "professional": "Professional"
+  },
+  "footer": {
+    "copyright": "© 2024 Shun Kushigami. All rights reserved.",
+    "builtWith": "Built with Next.js and Tailwind CSS"
+  },
+  "meta": {
+    "title": "Shun Kushigami - Cloud Support Engineer & Software Engineer"
+  }
+}

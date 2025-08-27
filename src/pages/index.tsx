@@ -1,8 +1,44 @@
 import Image from "next/image";
 import Head from "next/head";
-import { LinkedinIcon, MapPin } from "lucide-react";
+import { LinkedinIcon, MapPin, ChevronDown } from "lucide-react";
+import { useTranslation } from 'next-i18next';
+import { GetStaticProps } from 'next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
+import { useState, useEffect, useRef } from 'react';
 
 export default function Home() {
+  const { t } = useTranslation('common');
+  const router = useRouter();
+  const { locale, locales, asPath } = router;
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const languageConfig = {
+    en: { name: 'English', flag: '🇺🇸' },
+    ja: { name: '日本語', flag: '🇯🇵' },
+    ko: { name: '한국어', flag: '🇰🇷' },
+    zh: { name: '中文', flag: '🇨🇳' },
+    es: { name: 'Español', flag: '🇪🇸' },
+    fr: { name: 'Français', flag: '🇫🇷' }
+  };
+
+  const currentLanguage = languageConfig[locale as keyof typeof languageConfig] || languageConfig.en;
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+  
   const skills = [
     "JavaScript", "React", "Python", "AWS", "Linux", "MySQL", 
     "TypeScript", "Node.js", "Docker", "Shell Scripting"
@@ -10,68 +46,97 @@ export default function Home() {
 
   const achievements = [
     {
-      title: "AWS Support Tools Enhancement",
-      description: "Delivered 21 incremental enhancements for EC2 Instance Connect Console, focusing on case prevention and reducing failed connections.",
-      date: "2025"
+      title: t('achievements.awsSupport.title'),
+      description: t('achievements.awsSupport.description'),
+      date: t('achievements.awsSupport.date')
     },
     {
-      title: "Automation Training Leadership",
-      description: "Led and organized automation training bootcamps, training engineers and improving assessment pass rates to >70%.",
-      date: "2024"
+      title: t('achievements.automationTraining.title'),
+      description: t('achievements.automationTraining.description'),
+      date: t('achievements.automationTraining.date')
     },
     {
-      title: "Tooling & Automation Expertise",
-      description: "Mentored 9 new automation specialists in 2024, contributing to AWS Support's automation and tooling community growth.",
-      date: "2024"
+      title: t('achievements.toolingAutomation.title'),
+      description: t('achievements.toolingAutomation.description'),
+      date: t('achievements.toolingAutomation.date')
     },
     {
-      title: "Security Leadership",
-      description: "First security specialist for the support team, improving security across the organization through tool development.",
-      date: "2023"
+      title: t('achievements.securityLeadership.title'),
+      description: t('achievements.securityLeadership.description'),
+      date: t('achievements.securityLeadership.date')
     }
   ];
 
   const experience = [
     {
-      company: "Amazon Web Services Japan G.K.",
-      role: "Cloud Support Engineer",
-      period: "December 2017 - Present",
-      highlights: [
-        "Provide technical support and guidance on AWS services to customers",
-        "Develop internal tools to improve team efficiency and customer service quality",
-        "Create training materials and videos for new employees and customers",
-        "Collaborate on console improvements and bug fixes, enhancing user experience"
-      ]
+      company: t('experience.aws.company'),
+      role: t('experience.aws.role'),
+      period: t('experience.aws.period'),
+      highlights: t('experience.aws.highlights', { returnObjects: true }) as string[]
     },
     {
-      company: "i-plug Inc.",
-      role: "Software Engineer",
-      period: "December 2014 - December 2017",
-      highlights: [
-        "Developed and maintained a matching service platform for new graduates and hiring companies",
-        "Redesigned database architecture to improve search performance by tenfold"
-      ]
+      company: t('experience.iplug.company'),
+      role: t('experience.iplug.role'),
+      period: t('experience.iplug.period'),
+      highlights: t('experience.iplug.highlights', { returnObjects: true }) as string[]
     },
     {
-      company: "Officemiks Ltd.",
-      role: "Software Engineer", 
-      period: "November 2011 - December 2014",
-      highlights: [
-        "Led development projects for clients ranging from SMEs to large corporations",
-        "Created a custom CMS for a major beverage company's internal communication system"
-      ]
+      company: t('experience.officemiks.company'),
+      role: t('experience.officemiks.role'),
+      period: t('experience.officemiks.period'),
+      highlights: t('experience.officemiks.highlights', { returnObjects: true }) as string[]
     }
   ];
 
   return (
     <>
       <Head>
-        <title>Shun Kushigami - Cloud Support Engineer & Software Engineer</title>
+        <title>{t('meta.title')}</title>
       </Head>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-6xl mx-auto px-4 py-6">
+          {/* Language Switcher Dropdown */}
+          <div className="flex justify-end mb-4">
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="flex items-center gap-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
+              >
+                <span className="text-lg">{currentLanguage.flag}</span>
+                <span>{currentLanguage.name}</span>
+                <ChevronDown size={16} className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {isDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded-lg shadow-lg z-10">
+                  {locales?.map((loc) => {
+                    const langConfig = languageConfig[loc as keyof typeof languageConfig];
+                    if (!langConfig) return null;
+                    
+                    return (
+                      <Link
+                        key={loc}
+                        href={asPath}
+                        locale={loc}
+                        onClick={() => setIsDropdownOpen(false)}
+                        className={`flex items-center gap-3 px-4 py-3 text-sm hover:bg-gray-50 transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                          locale === loc ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                        }`}
+                      >
+                        <span className="text-lg">{langConfig.flag}</span>
+                        <span className="font-medium">{langConfig.name}</span>
+                        {locale === loc && (
+                          <span className="ml-auto text-blue-600">✓</span>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
           <div className="flex flex-col md:flex-row items-center gap-6">
             <div className="relative">
               <Image
@@ -84,17 +149,17 @@ export default function Home() {
               />
             </div>
             <div className="text-center md:text-left">
-              <h1 className="text-4xl font-bold text-gray-900">Shun Kushigami</h1>
-              <p className="text-xl text-blue-600 mt-2">Cloud Support Engineer / Software Engineer</p>
+              <h1 className="text-4xl font-bold text-gray-900">{t('name')}</h1>
+              <p className="text-xl text-blue-600 mt-2">{t('role')}</p>
               <div className="flex flex-col sm:flex-row items-center gap-4 mt-4 text-gray-600">
                 <div className="flex items-center gap-2">
                   <MapPin size={16} />
-                  <span>Osaka, Japan</span>
+                  <span>{t('location')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <LinkedinIcon size={16} />
                   <a href="https://www.linkedin.com/in/shun-kushigami-b9964272" className="hover:text-blue-600 transition-colors" target="_blank" rel="noopener noreferrer">
-                    LinkedIn Profile
+                    {t('linkedinProfile')}
                   </a>
                 </div>
               </div>
@@ -107,19 +172,16 @@ export default function Home() {
         {/* About Section */}
         <section className="mb-12">
           <div className="bg-white rounded-lg p-6 shadow-sm">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">About</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('sections.about')}</h2>
             <p className="text-gray-700 leading-relaxed">
-              Dedicated and skilled software engineer with over a decade of experience in web development and technical support. 
-              Proficient in a wide range of programming languages and tools, with a proven track record of contributing to team 
-              success through hard work, attention to detail, and excellent organizational skills. Currently focusing on AWS cloud 
-              technologies and automation tooling to improve customer experiences and team efficiency.
+              {t('about.description')}
             </p>
           </div>
         </section>
 
         {/* Key Achievements Section */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Key Achievements</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('sections.keyAchievements')}</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {achievements.map((achievement, index) => (
               <div key={index} className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
@@ -135,7 +197,7 @@ export default function Home() {
 
         {/* Experience Section */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Professional Experience</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('sections.professionalExperience')}</h2>
           <div className="space-y-6">
             {experience.map((job, index) => (
               <div key={index} className="bg-white rounded-lg p-6 shadow-sm">
@@ -158,7 +220,7 @@ export default function Home() {
 
         {/* Skills Section */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Technical Skills</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('sections.technicalSkills')}</h2>
           <div className="bg-white rounded-lg p-6 shadow-sm">
             <div className="flex flex-wrap gap-3">
               {skills.map((skill, index) => (
@@ -175,20 +237,20 @@ export default function Home() {
 
         {/* Recognition Highlights */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Recognition Highlights</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('sections.recognitionHighlights')}</h2>
           <div className="bg-white rounded-lg p-6 shadow-sm">
             <div className="grid md:grid-cols-3 gap-6">
               <div className="text-center">
                 <div className="text-3xl font-bold text-blue-600">53</div>
-                <p className="text-gray-600">Total Achievements</p>
+                <p className="text-gray-600">{t('recognition.totalAchievements')}</p>
               </div>
               <div className="text-center">
                 <div className="text-3xl font-bold text-green-600">9</div>
-                <p className="text-gray-600">Specialists Mentored (2024)</p>
+                <p className="text-gray-600">{t('recognition.specialistsMentored')}</p>
               </div>
               <div className="text-center">
                 <div className="text-3xl font-bold text-purple-600">6+</div>
-                <p className="text-gray-600">Award Programs</p>
+                <p className="text-gray-600">{t('recognition.awardPrograms')}</p>
               </div>
             </div>
           </div>
@@ -196,26 +258,26 @@ export default function Home() {
 
         {/* Education */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Education</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('sections.education')}</h2>
           <div className="bg-white rounded-lg p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900">Kansai Gaidai University, Faculty of Foreign Studies</h3>
-            <p className="text-blue-600 font-medium">Bachelor of Arts in English and American Studies</p>
-            <p className="text-gray-600 text-sm">October 2010</p>
+            <h3 className="text-lg font-semibold text-gray-900">{t('education.university')}</h3>
+            <p className="text-blue-600 font-medium">{t('education.degree')}</p>
+            <p className="text-gray-600 text-sm">{t('education.graduationDate')}</p>
           </div>
         </section>
 
         {/* Languages */}
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Languages</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('sections.languages')}</h2>
           <div className="bg-white rounded-lg p-6 shadow-sm">
             <div className="flex gap-6">
               <div>
-                <span className="font-medium text-gray-900">Japanese</span>
-                <p className="text-sm text-gray-600">Native</p>
+                <span className="font-medium text-gray-900">{t('languages.japanese')}</span>
+                <p className="text-sm text-gray-600">{t('languages.native')}</p>
               </div>
               <div>
-                <span className="font-medium text-gray-900">English</span>
-                <p className="text-sm text-gray-600">Professional</p>
+                <span className="font-medium text-gray-900">{t('languages.english')}</span>
+                <p className="text-sm text-gray-600">{t('languages.professional')}</p>
               </div>
             </div>
           </div>
@@ -235,3 +297,11 @@ export default function Home() {
     </>
   );
 }
+
+export const getStaticProps: GetStaticProps = async ({ locale }) => {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+    },
+  };
+};

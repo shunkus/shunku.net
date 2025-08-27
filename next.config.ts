@@ -1,10 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: 'export',
   trailingSlash: true,
   images: {
     unoptimized: true,
+  },
+  i18n: {
+    locales: ['en', 'ja', 'ko', 'zh', 'es', 'fr'],
+    defaultLocale: 'en',
   },
 };
 

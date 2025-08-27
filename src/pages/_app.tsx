@@ -1,5 +1,6 @@
 import type { AppProps } from "next/app";
 import { Geist, Geist_Mono } from "next/font/google";
+import { appWithTranslation } from 'next-i18next';
 import "../styles/globals.css";
 
 const geistSans = Geist({
@@ -12,10 +13,12 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export default function App({ Component, pageProps }: AppProps) {
+function App({ Component, pageProps }: AppProps) {
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
       <Component {...pageProps} />
     </div>
   );
 }
+
+export default appWithTranslation(App);

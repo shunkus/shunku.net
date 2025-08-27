@@ -65,7 +65,8 @@ test.describe('Portfolio Site E2E Tests', () => {
     // Check Languages section
     await expect(page.getByRole('heading', { name: /languages/i })).toBeVisible();
     await expect(page.locator('text=Japanese')).toBeVisible();
-    await expect(page.locator('span:has-text("English")')).toBeVisible();
+    // Check for English in languages section specifically
+    await expect(page.locator('section').last().locator('text=English')).toBeVisible();
   });
 
   test('should have proper SEO and accessibility', async ({ page }) => {
@@ -138,5 +139,88 @@ test.describe('Portfolio Site E2E Tests', () => {
     
     // Check that there are no console errors
     expect(consoleErrors).toHaveLength(0);
+  });
+
+  test('should display and interact with language switcher', async ({ page }) => {
+    // Check that language switcher is visible
+    const languageButton = page.getByRole('button').filter({ hasText: 'English' });
+    await expect(languageButton).toBeVisible();
+    await expect(languageButton).toContainText('🇺🇸');
+
+    // Click to open dropdown
+    await languageButton.click();
+
+    // Check all language options are visible
+    await expect(page.getByText('English').nth(1)).toBeVisible(); // Dropdown option
+    await expect(page.getByText('日本語')).toBeVisible();
+    await expect(page.getByText('한국어')).toBeVisible();
+    await expect(page.getByText('中文')).toBeVisible();
+    await expect(page.getByText('Español')).toBeVisible();
+    await expect(page.getByText('Français')).toBeVisible();
+
+    // Check that flags are displayed
+    await expect(page.locator('text=🇺🇸').nth(1)).toBeVisible();
+    await expect(page.locator('text=🇯🇵')).toBeVisible();
+    await expect(page.locator('text=🇰🇷')).toBeVisible();
+    await expect(page.locator('text=🇨🇳')).toBeVisible();
+    await expect(page.locator('text=🇪🇸')).toBeVisible();
+    await expect(page.locator('text=🇫🇷')).toBeVisible();
+  });
+
+  test('should switch to Japanese language', async ({ page }) => {
+    // Open language switcher
+    const languageButton = page.getByRole('button').filter({ hasText: 'English' });
+    await languageButton.click();
+
+    // Click on Japanese option
+    const japaneseOption = page.getByRole('link').filter({ hasText: '日本語' });
+    await japaneseOption.click();
+
+    // Wait for navigation
+    await page.waitForURL('**/ja/');
+    
+    // Check that content is in Japanese
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('串上 俊');
+    await expect(page.locator('p:has-text("クラウドサポートエンジニア / ソフトウェアエンジニア")')).toBeVisible();
+    await expect(page.getByRole('heading', { name: /自己紹介/i })).toBeVisible();
+  });
+
+  test('should maintain functionality across different languages', async ({ page }) => {
+    // Test switching to each language
+    const languages = [
+      { code: 'ja', name: '日本語', flag: '🇯🇵', heading: '串上 俊' },
+      { code: 'ko', name: '한국어', flag: '🇰🇷', heading: '구시가미 순' },
+      { code: 'zh', name: '中文', flag: '🇨🇳', heading: '串上俊' },
+      { code: 'es', name: 'Español', flag: '🇪🇸', heading: 'Shun Kushigami' },
+      { code: 'fr', name: 'Français', flag: '🇫🇷', heading: 'Shun Kushigami' }
+    ];
+
+    for (const lang of languages) {
+      // Navigate directly to language
+      await page.goto(`/${lang.code}/`);
+      
+      // Check that the page loads
+      await expect(page.getByRole('heading', { level: 1 })).toContainText(lang.heading);
+      
+      // Check that language switcher shows correct current language
+      const currentLangButton = page.getByRole('button').filter({ hasText: lang.name });
+      await expect(currentLangButton).toBeVisible();
+      await expect(currentLangButton).toContainText(lang.flag);
+    }
+  });
+
+  test('should close language dropdown when clicking outside', async ({ page }) => {
+    // Open language switcher
+    const languageButton = page.getByRole('button').filter({ hasText: 'English' });
+    await languageButton.click();
+
+    // Verify dropdown is open
+    await expect(page.getByText('日本語')).toBeVisible();
+
+    // Click outside the dropdown
+    await page.locator('main').click();
+
+    // Verify dropdown is closed
+    await expect(page.getByText('日本語')).not.toBeVisible();
   });
 });
