@@ -1,6 +1,7 @@
 import type { AppProps } from "next/app";
 import { Geist, Geist_Mono } from "next/font/google";
 import { appWithTranslation } from 'next-i18next';
+import { Analytics } from '@vercel/analytics/react';
 import "../styles/globals.css";
 import "prismjs/themes/prism-tomorrow.css";
 
@@ -18,6 +19,7 @@ function App({ Component, pageProps }: AppProps) {
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
       <Component {...pageProps} />
+      <Analytics />
     </div>
   );
 }
