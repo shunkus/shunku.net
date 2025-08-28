@@ -142,12 +142,13 @@ export default function BlogIndex({ posts }: BlogIndexProps) {
                       <Tag size={16} className="text-gray-500" />
                       <div className="flex flex-wrap gap-2">
                         {post.tags.map((tag) => (
-                          <span
+                          <Link
                             key={tag}
-                            className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full"
+                            href={`/blog/tag/${encodeURIComponent(tag)}`}
+                            className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full hover:bg-blue-200 transition-colors cursor-pointer"
                           >
-                            {tag}
-                          </span>
+                            #{tag}
+                          </Link>
                         ))}
                       </div>
                     </div>

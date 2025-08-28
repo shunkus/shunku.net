@@ -99,5 +99,14 @@
     "readMore": "Leer más",
     "noPosts": "Aún no hay artículos de blog",
     "noPostsDescription": "¡Vuelve pronto para nuevos artículos e ideas!"
-  }
+  },
+  "tagPageTitle": "Artículos etiquetados con \"{{tag}}\"",
+  "tagPageDescription": "{{count}} artículos etiquetados con \"{{tag}}\"",
+  "backToBlog": "Volver al Blog",
+  "postsTaggedWith": "Artículos etiquetados con",
+  "postsFound": "{{count}} artículo encontrado",
+  "postsFound_plural": "{{count}} artículos encontrados",
+  "noPostsFound": "No se encontraron artículos para esta etiqueta",
+  "updated": "Actualizado",
+  "by": "por"
 }

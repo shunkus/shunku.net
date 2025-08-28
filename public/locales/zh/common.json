@@ -84,6 +84,10 @@
     "native": "母语",
     "professional": "专业水平"
   },
+  "footer": {
+    "copyright": "© 2024 串上俊。保留所有权利。",
+    "builtWith": "使用 Next.js 和 Tailwind CSS 构建"
+  },
   "meta": {
     "title": "串上俊 - 云支持工程师和软件工程师"
   },
@@ -99,5 +103,13 @@
     "readMore": "阅读更多",
     "noPosts": "尚无博客文章",
     "noPostsDescription": "请期待新的文章和洞察！"
-  }
+  },
+  "tagPageTitle": "标签为\"{{tag}}\"的文章",
+  "tagPageDescription": "{{count}}篇标签为\"{{tag}}\"的文章",
+  "backToBlog": "返回博客",
+  "postsTaggedWith": "标签为",
+  "postsFound": "找到{{count}}篇文章",
+  "noPostsFound": "没有找到该标签的文章",
+  "updated": "更新",
+  "by": "作者"
 }

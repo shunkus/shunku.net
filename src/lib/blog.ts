@@ -121,3 +121,51 @@ export function getAllBlogSlugs(): { params: { slug: string }; locale: string }[
 
   return allSlugs;
 }
+
+// Get all tags from all posts in a locale
+export function getAllTags(locale: string): string[] {
+  const posts = getBlogPosts(locale);
+  const allTags = posts.flatMap((post) => post.tags || []);
+  return [...new Set(allTags)].sort();
+}
+
+// Get posts by tag
+export function getBlogPostsByTag(tag: string, locale: string): BlogPostMeta[] {
+  const posts = getBlogPosts(locale);
+  return posts.filter((post) => post.tags?.includes(tag));
+}
+
+// Get all unique tags across all locales with their post counts
+export function getAllTagsWithCounts(): { [tag: string]: number } {
+  const locales = ['en', 'ja', 'ko', 'zh', 'es', 'fr'];
+  const tagCounts: { [tag: string]: number } = {};
+
+  for (const locale of locales) {
+    const posts = getBlogPosts(locale);
+    posts.forEach((post) => {
+      post.tags?.forEach((tag) => {
+        tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+      });
+    });
+  }
+
+  return tagCounts;
+}
+
+// Get all tag slugs for static generation
+export function getAllTagSlugs(): { params: { tag: string }; locale: string }[] {
+  const locales = ['en', 'ja', 'ko', 'zh', 'es', 'fr'];
+  const allTagSlugs: { params: { tag: string }; locale: string }[] = [];
+
+  for (const locale of locales) {
+    const tags = getAllTags(locale);
+    const slugs = tags.map((tag) => ({
+      params: { tag: encodeURIComponent(tag) },
+      locale,
+    }));
+
+    allTagSlugs.push(...slugs);
+  }
+
+  return allTagSlugs;
+}

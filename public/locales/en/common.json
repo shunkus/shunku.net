@@ -103,5 +103,14 @@
     "readMore": "Read more",
     "noPosts": "No blog posts yet",
     "noPostsDescription": "Check back soon for new articles and insights!"
-  }
+  },
+  "tagPageTitle": "Posts tagged with \"{{tag}}\"",
+  "tagPageDescription": "{{count}} posts tagged with \"{{tag}}\"",
+  "backToBlog": "Back to Blog",
+  "postsTaggedWith": "Posts tagged with",
+  "postsFound": "{{count}} post found",
+  "postsFound_plural": "{{count}} posts found",
+  "noPostsFound": "No posts found for this tag",
+  "updated": "Updated",
+  "by": "by"
 }

@@ -84,6 +84,10 @@
     "native": "ネイティブ",
     "professional": "ビジネスレベル"
   },
+  "footer": {
+    "copyright": "© 2024 串上 俊。すべての権利を留保します。",
+    "builtWith": "Next.js と Tailwind CSS で構築"
+  },
   "meta": {
     "title": "串上 俊 - クラウドサポートエンジニア・ソフトウェアエンジニア"
   },
@@ -99,5 +103,13 @@
     "readMore": "続きを読む",
     "noPosts": "ブログ記事はまだありません",
     "noPostsDescription": "新しい記事と洞察をお楽しみに！"
-  }
+  },
+  "tagPageTitle": "「{{tag}}」タグの記事",
+  "tagPageDescription": "「{{tag}}」タグの記事（{{count}}件）",
+  "backToBlog": "ブログに戻る",
+  "postsTaggedWith": "タグ付きの記事",
+  "postsFound": "{{count}}件の記事が見つかりました",
+  "noPostsFound": "このタグの記事は見つかりませんでした",
+  "updated": "更新",
+  "by": "著者"
 }
