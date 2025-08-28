@@ -1,7 +1,9 @@
 ---
 title: "CSS 备忘单"
 date: "2013-01-20"
+updatedDate: "2025-02-15"
 excerpt: "Web开发必备的CSS属性和技术的综合指南。"
+tags: ["CSS", "Web开发", "样式设计", "前端", "备忘单"]
 ---
 
 # CSS 备忘单

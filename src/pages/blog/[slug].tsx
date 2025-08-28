@@ -126,6 +126,15 @@ export default function BlogPostPage({ post }: BlogPostPageProps) {
                 </time>
               </div>
               
+              {post.updatedDate && (
+                <div className="flex items-center gap-1 text-green-600">
+                  <span>Updated:</span>
+                  <time dateTime={post.updatedDate}>
+                    {format(new Date(post.updatedDate), 'PPP')}
+                  </time>
+                </div>
+              )}
+              
               {post.author && (
                 <div className="flex items-center gap-1">
                   <User size={16} />

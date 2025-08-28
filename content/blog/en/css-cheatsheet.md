@@ -1,7 +1,9 @@
 ---
 title: "CSS Cheat Sheet"
 date: "2013-01-20"
+updatedDate: "2025-02-15"
 excerpt: "A comprehensive guide to essential CSS properties and techniques for web development."
+tags: ["CSS", "Web Development", "Styling", "Frontend", "Cheat Sheet"]
 ---
 
 # CSS Cheat Sheet

@@ -1,7 +1,9 @@
 ---
 title: "Aide-mémoire CSS"
 date: "2013-01-20"
+updatedDate: "2025-02-15"
 excerpt: "Un guide complet des propriétés et techniques essentielles CSS pour le développement web."
+tags: ["CSS", "Développement Web", "Styles", "Frontend", "Aide-mémoire"]
 ---
 
 # Aide-mémoire CSS

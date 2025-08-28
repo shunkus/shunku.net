@@ -1,7 +1,10 @@
 ---
 title: "Aide-mémoire HTML"
 date: "2012-03-15"
+updatedDate: "2025-01-10"
 excerpt: "Un guide complet des éléments HTML essentiels pour le développement web."
+tags: ["HTML", "Développement Web", "Balisage", "Frontend", "Aide-mémoire"]
+author: "Shun Kushigami"
 ---
 
 # Aide-mémoire HTML

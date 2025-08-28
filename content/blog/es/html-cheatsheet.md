@@ -1,7 +1,10 @@
 ---
 title: "Hoja de Referencia HTML"
 date: "2012-03-15"
+updatedDate: "2025-01-10"
 excerpt: "Una guía completa de elementos HTML esenciales para el desarrollo web."
+tags: ["HTML", "Desarrollo Web", "Marcado", "Frontend", "Hoja de Referencia"]
+author: "Shun Kushigami"
 ---
 
 # Hoja de Referencia HTML

@@ -1,6 +1,7 @@
 ---
 title: "HTML Cheatsheet: Essential Tags and Elements"
 date: "2012-08-15"
+updatedDate: "2025-01-10"
 excerpt: "A comprehensive reference guide for HTML tags and elements with live previews. Perfect for quick lookups during web development projects."
 tags: ["HTML", "Web Development", "Cheatsheet", "Frontend"]
 author: "Shun Kushigami"

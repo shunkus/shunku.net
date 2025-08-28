@@ -1,7 +1,10 @@
 ---
 title: "HTML 치트시트"
 date: "2012-03-15"
+updatedDate: "2025-01-10"
 excerpt: "웹 개발에 필수적인 HTML 요소들의 포괄적인 가이드입니다."
+tags: ["HTML", "웹 개발", "마크업", "프론트엔드", "치트시트"]
+author: "Shun Kushigami"
 ---
 
 # HTML 치트시트

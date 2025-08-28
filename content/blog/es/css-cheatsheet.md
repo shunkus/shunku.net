@@ -1,7 +1,9 @@
 ---
 title: "Hoja de Referencia CSS"
 date: "2013-01-20"
+updatedDate: "2025-02-15"
 excerpt: "Una guía completa de propiedades y técnicas esenciales de CSS para el desarrollo web."
+tags: ["CSS", "Desarrollo Web", "Estilos", "Frontend", "Hoja de Referencia"]
 ---
 
 # Hoja de Referencia CSS

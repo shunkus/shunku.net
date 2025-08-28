@@ -1,7 +1,10 @@
 ---
 title: "HTML 备忘单"
 date: "2012-03-15"
+updatedDate: "2025-01-10"
 excerpt: "Web开发必备的HTML元素综合指南。"
+tags: ["HTML", "Web开发", "标记", "前端", "备忘单"]
+author: "Shun Kushigami"
 ---
 
 # HTML 备忘单
