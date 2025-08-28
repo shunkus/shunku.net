@@ -86,5 +86,18 @@
   },
   "meta": {
     "title": "串上俊 - 云支持工程师和软件工程师"
+  },
+  "nav": {
+    "blog": "博客"
+  },
+  "blog": {
+    "title": "博客",
+    "subtitle": "关于网站开发、云计算和技术的思考",
+    "description": "关于网站开发、云计算和软件工程的技术文章和洞察",
+    "backToHome": "返回主页",
+    "backToBlog": "返回博客",
+    "readMore": "阅读更多",
+    "noPosts": "尚无博客文章",
+    "noPostsDescription": "请期待新的文章和洞察！"
   }
 }

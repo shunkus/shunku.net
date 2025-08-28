@@ -1,1 +1,103 @@
 @import "tailwindcss";
+
+/* Custom prose styles for markdown content */
+.prose {
+  @apply max-w-none text-gray-700 leading-relaxed;
+}
+
+.prose h1 {
+  @apply text-3xl font-bold text-gray-900 mt-8 mb-4 first:mt-0;
+}
+
+.prose h2 {
+  @apply text-2xl font-bold text-gray-900 mt-6 mb-3 border-b border-gray-200 pb-2;
+}
+
+.prose h3 {
+  @apply text-xl font-semibold text-gray-900 mt-5 mb-3;
+}
+
+.prose h4 {
+  @apply text-lg font-semibold text-gray-900 mt-4 mb-2;
+}
+
+.prose h5 {
+  @apply text-base font-semibold text-gray-900 mt-4 mb-2;
+}
+
+.prose h6 {
+  @apply text-base font-medium text-gray-900 mt-4 mb-2;
+}
+
+.prose p {
+  @apply mb-4 leading-relaxed;
+}
+
+.prose ul {
+  @apply mb-4 pl-6 list-disc;
+}
+
+.prose ol {
+  @apply mb-4 pl-6 list-decimal;
+}
+
+.prose li {
+  @apply mb-1;
+}
+
+.prose blockquote {
+  @apply border-l-4 border-blue-200 bg-blue-50 py-2 px-4 my-4 italic;
+}
+
+.prose code {
+  @apply bg-gray-100 text-blue-600 px-1 py-0.5 rounded text-sm font-mono;
+}
+
+.prose pre {
+  @apply bg-gray-50 border border-gray-200 rounded-lg p-4 overflow-x-auto my-4;
+}
+
+.prose pre code {
+  @apply bg-transparent text-gray-800 p-0;
+}
+
+.prose a {
+  @apply text-blue-600 hover:text-blue-800 no-underline hover:underline;
+}
+
+.prose strong {
+  @apply font-semibold text-gray-900;
+}
+
+.prose em {
+  @apply italic;
+}
+
+.prose table {
+  @apply w-full border-collapse my-4;
+}
+
+.prose th {
+  @apply border border-gray-300 bg-gray-50 px-3 py-2 text-left font-semibold;
+}
+
+.prose td {
+  @apply border border-gray-300 px-3 py-2;
+}
+
+.prose img {
+  @apply rounded-lg shadow-sm my-4 max-w-full h-auto;
+}
+
+.prose hr {
+  @apply border-t border-gray-300 my-8;
+}
+
+/* HTML preview boxes styling */
+.prose div[style*="border: 1px solid #ddd"] {
+  @apply border border-gray-300 rounded-lg p-4 my-4 bg-gray-50;
+}
+
+.prose div[style*="border: 1px solid #ddd"] * {
+  @apply m-1;
+}

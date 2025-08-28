@@ -17,6 +17,9 @@ const config = {
     '^@/pages/(.*)$': '<rootDir>/pages/$1',
   },
   testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/', '<rootDir>/e2e/'],
+  transformIgnorePatterns: [
+    'node_modules/(?!(remark|remark-html|unified|bail|is-plain-obj|trough|vfile)/)',
+  ],
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',
     '!src/**/*.d.ts',

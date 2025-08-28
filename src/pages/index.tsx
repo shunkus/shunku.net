@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Head from "next/head";
-import { LinkedinIcon, MapPin, ChevronDown } from "lucide-react";
+import { LinkedinIcon, MapPin, ChevronDown, BookOpen } from "lucide-react";
 import { useTranslation } from 'next-i18next';
 import { GetStaticProps } from 'next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
@@ -97,9 +97,20 @@ export default function Home() {
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-6xl mx-auto px-4 py-6">
-          {/* Language Switcher Dropdown */}
-          <div className="flex justify-end mb-4">
-            <div className="relative" ref={dropdownRef}>
+          {/* Navigation and Language Switcher */}
+          <div className="flex justify-between items-center mb-4">
+            <nav>
+              <Link 
+                href="/blog" 
+                className="flex items-center gap-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-blue-300 hover:text-blue-700 transition-colors shadow-sm"
+              >
+                <BookOpen size={16} />
+                {t('nav.blog')}
+              </Link>
+            </nav>
+            <div className="flex items-center gap-4">
+              {/* Language Switcher Dropdown */}
+              <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="flex items-center gap-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
@@ -135,6 +146,7 @@ export default function Home() {
                   })}
                 </div>
               )}
+              </div>
             </div>
           </div>
           <div className="flex flex-col md:flex-row items-center gap-6">

@@ -15,11 +15,16 @@
     "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
+    "@tailwindcss/typography": "^0.5.16",
+    "date-fns": "^4.1.0",
+    "gray-matter": "^4.0.3",
     "lucide-react": "^0.541.0",
     "next": "15.5.0",
     "next-i18next": "^15.4.2",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "remark": "^15.0.1",
+    "remark-html": "^16.0.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

@@ -86,5 +86,18 @@
   },
   "meta": {
     "title": "Shun Kushigami - Ingeniero de Soporte en la Nube e Ingeniero de Software"
+  },
+  "nav": {
+    "blog": "Blog"
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Reflexiones sobre desarrollo web, computación en la nube y tecnología",
+    "description": "Artículos técnicos e ideas sobre desarrollo web, computación en la nube e ingeniería de software",
+    "backToHome": "Volver al Inicio",
+    "backToBlog": "Volver al Blog",
+    "readMore": "Leer más",
+    "noPosts": "Aún no hay artículos de blog",
+    "noPostsDescription": "¡Vuelve pronto para nuevos artículos e ideas!"
   }
 }

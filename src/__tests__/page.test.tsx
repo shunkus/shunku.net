@@ -44,6 +44,7 @@ jest.mock('next-i18next', () => ({
         'sections.languages': 'Languages',
         'languages.japanese': 'Japanese',
         'languages.english': 'English',
+        'nav.blog': 'Blog',
       };
       if (options?.returnObjects || key.includes('highlights')) {
         return ['Sample highlight 1', 'Sample highlight 2'];
@@ -65,9 +66,11 @@ jest.mock('next/image', () => ({
 
 // Mock Link component
 jest.mock('next/link', () => {
-  return ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => {
+  const MockedLink = ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => {
     return <a {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}>{children}</a>;
   };
+  MockedLink.displayName = 'MockedLink';
+  return MockedLink;
 });
 
 describe('Home Page', () => {
@@ -212,5 +215,11 @@ describe('Home Page', () => {
   it('shows flag icons in language switcher', () => {
     const languageButton = screen.getByRole('button');
     expect(languageButton).toHaveTextContent('🇺🇸');
+  });
+
+  it('renders blog navigation button', () => {
+    const blogButton = screen.getByRole('link', { name: /blog/i });
+    expect(blogButton).toBeInTheDocument();
+    expect(blogButton).toHaveAttribute('href', '/blog');
   });
 });

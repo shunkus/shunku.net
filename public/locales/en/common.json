@@ -90,5 +90,18 @@
   },
   "meta": {
     "title": "Shun Kushigami - Cloud Support Engineer & Software Engineer"
+  },
+  "nav": {
+    "blog": "Blog"
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Thoughts on web development, cloud computing, and technology",
+    "description": "Technical articles and insights on web development, cloud computing, and software engineering",
+    "backToHome": "Back to Home",
+    "backToBlog": "Back to Blog",
+    "readMore": "Read more",
+    "noPosts": "No blog posts yet",
+    "noPostsDescription": "Check back soon for new articles and insights!"
   }
 }
