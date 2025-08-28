@@ -54,11 +54,69 @@
 }
 
 .prose pre {
-  @apply bg-gray-50 border border-gray-200 rounded-lg p-4 overflow-x-auto my-4;
+  @apply rounded-lg p-4 overflow-x-auto my-4 border;
 }
 
 .prose pre code {
-  @apply bg-transparent text-gray-800 p-0;
+  @apply bg-transparent p-0 text-sm;
+}
+
+/* Prism.js syntax highlighting overrides */
+.prose pre[class*="language-"] {
+  @apply border border-gray-200 shadow-sm;
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  background-color: #2d3748 !important;
+}
+
+.prose code[class*="language-"] {
+  font-family: 'Geist Mono', 'Monaco', 'Consolas', 'Courier New', monospace;
+  font-size: 0.875rem;
+}
+
+/* Inline code styling */
+.prose :not(pre) > code[class*="language-"] {
+  @apply bg-gray-100 text-blue-600 px-1 py-0.5 rounded;
+  white-space: nowrap;
+}
+
+/* Code preview boxes styling */
+.prose div[style*="border: 1px solid #ccc"] {
+  @apply border border-gray-200 rounded-lg shadow-sm bg-gray-50;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.prose div[style*="border: 1px solid #ccc"] strong {
+  @apply text-blue-700 font-semibold;
+}
+
+.prose div[style*="border: 1px solid #ccc"] p {
+  @apply mb-2 last:mb-0;
+}
+
+/* Interactive elements in previews */
+.prose div[style*="border: 1px solid #ccc"] button {
+  @apply bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors;
+}
+
+.prose div[style*="border: 1px solid #ccc"] input,
+.prose div[style*="border: 1px solid #ccc"] textarea,
+.prose div[style*="border: 1px solid #ccc"] select {
+  @apply border border-gray-300 rounded px-2 py-1 bg-white;
+}
+
+.prose div[style*="border: 1px solid #ccc"] table {
+  @apply w-full border-collapse;
+}
+
+.prose div[style*="border: 1px solid #ccc"] th,
+.prose div[style*="border: 1px solid #ccc"] td {
+  @apply border border-gray-300 px-2 py-1;
 }
 
 .prose a {

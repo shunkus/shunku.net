@@ -2,6 +2,7 @@ import type { AppProps } from "next/app";
 import { Geist, Geist_Mono } from "next/font/google";
 import { appWithTranslation } from 'next-i18next';
 import "../styles/globals.css";
+import "prismjs/themes/prism-tomorrow.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
