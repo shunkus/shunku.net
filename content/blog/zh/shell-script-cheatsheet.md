@@ -488,7 +488,7 @@ shift $((OPTIND-1))
 
 ## Zsh特定功能
 
-```zsh
+```bash
 # 扩展通配符
 setopt extended_glob
 *.txt~temp.txt                # 除temp.txt外的所有.txt

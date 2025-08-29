@@ -488,7 +488,7 @@ shift $((OPTIND-1))
 
 ## Fonctionnalités Spécifiques à Zsh
 
-```zsh
+```bash
 # Globbing étendu
 setopt extended_glob
 *.txt~temp.txt                # Tous les .txt sauf temp.txt
