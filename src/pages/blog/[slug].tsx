@@ -83,11 +83,11 @@ export default function BlogPostPage({ post }: BlogPostPageProps) {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center gap-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
+                  className="flex items-center gap-2 bg-white border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
                 >
                   <span className="text-lg">{currentLanguage.flag}</span>
-                  <span>{currentLanguage.name}</span>
-                  <ChevronDown size={16} className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                  <span className="hidden sm:inline">{currentLanguage.name}</span>
+                  <ChevronDown size={16} className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''} hidden sm:inline-block`} />
                 </button>
                 
                 {isDropdownOpen && (

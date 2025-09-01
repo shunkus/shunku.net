@@ -92,7 +92,8 @@
     "title": "Shun Kushigami - Cloud Support Engineer & Software Engineer"
   },
   "nav": {
-    "blog": "Blog"
+    "blog": "Blog",
+    "books": "Books"
   },
   "blog": {
     "title": "Blog",
@@ -112,5 +113,26 @@
   "postsFound_plural": "{{count}} posts found",
   "noPostsFound": "No posts found for this tag",
   "updated": "Updated",
-  "by": "by"
+  "by": "by",
+  "books": {
+    "title": "Books",
+    "subtitle": "Online books and technical documentation",
+    "description": "Browse our collection of online books and technical documentation",
+    "backToHome": "Back to Home",
+    "backToList": "Back to Books",
+    "readBook": "Read Book",
+    "noBooks": "No books available",
+    "noBooksDescription": "Check back later for new books and documentation.",
+    "chapters": "chapters",
+    "pages": "pages",
+    "about": "About this book",
+    "tableOfContents": "Table of Contents",
+    "noChapters": "No chapters available",
+    "startReading": "Start Reading",
+    "chapter": "Chapter",
+    "previous": "Previous",
+    "next": "Next",
+    "notFound": "Book not found",
+    "chapterNotFound": "Chapter not found"
+  }
 }

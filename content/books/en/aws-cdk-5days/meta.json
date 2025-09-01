@@ -1,0 +1,11 @@
+{
+  "id": "aws-cdk-5days",
+  "title": "Learn AWS CDK in 5 Days",
+  "subtitle": "A Practical Guide to Infrastructure as Code",
+  "author": "Shun Kushigami",
+  "publishedDate": "2024-08-31",
+  "updatedDate": "2024-08-31",
+  "description": "Learn how to manage infrastructure as code using AWS CDK in 5 days. This practical guide helps you master AWS CDK step by step, from basics to advanced practices. Using TypeScript, you'll gain hands-on knowledge that can be applied to real projects.",
+  "tags": ["AWS", "CDK", "Infrastructure as Code", "TypeScript", "DevOps", "CloudFormation"],
+  "coverImage": "/images/books/lean-aws-cdk-in-5-days.png"
+}

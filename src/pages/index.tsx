@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Head from "next/head";
-import { LinkedinIcon, MapPin, ChevronDown, BookOpen } from "lucide-react";
+import { LinkedinIcon, MapPin, ChevronDown, BookOpen, Library } from "lucide-react";
 import { useTranslation } from 'next-i18next';
 import { GetStaticProps } from 'next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
@@ -99,7 +99,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 py-6">
           {/* Navigation and Language Switcher */}
           <div className="flex justify-between items-center mb-4">
-            <nav>
+            <nav className="flex gap-2">
               <Link 
                 href="/blog" 
                 className="flex items-center gap-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-blue-300 hover:text-blue-700 transition-colors shadow-sm"
@@ -107,17 +107,24 @@ export default function Home() {
                 <BookOpen size={16} />
                 {t('nav.blog')}
               </Link>
+              <Link 
+                href="/books" 
+                className="flex items-center gap-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-blue-300 hover:text-blue-700 transition-colors shadow-sm"
+              >
+                <Library size={16} />
+                {t('nav.books')}
+              </Link>
             </nav>
             <div className="flex items-center gap-4">
               {/* Language Switcher Dropdown */}
               <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
+                className="flex items-center gap-2 bg-white border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
               >
                 <span className="text-lg">{currentLanguage.flag}</span>
-                <span>{currentLanguage.name}</span>
-                <ChevronDown size={16} className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                <span className="hidden sm:inline">{currentLanguage.name}</span>
+                <ChevronDown size={16} className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''} hidden sm:inline-block`} />
               </button>
               
               {isDropdownOpen && (

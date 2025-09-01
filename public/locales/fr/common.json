@@ -88,7 +88,8 @@
     "title": "Shun Kushigami - Ingénieur Support Cloud et Ingénieur Logiciel"
   },
   "nav": {
-    "blog": "Blog"
+    "blog": "Blog",
+    "books": "Livres"
   },
   "blog": {
     "title": "Blog",
@@ -108,5 +109,26 @@
   "postsFound_plural": "{{count}} articles trouvés",
   "noPostsFound": "Aucun article trouvé pour cette étiquette",
   "updated": "Mis à jour",
-  "by": "par"
+  "by": "par",
+  "books": {
+    "title": "Livres",
+    "subtitle": "Livres en ligne et documentation technique",
+    "description": "Parcourez notre collection de livres en ligne et de documentation technique",
+    "backToHome": "Retour à l'Accueil",
+    "backToList": "Retour aux Livres",
+    "readBook": "Lire le Livre",
+    "noBooks": "Aucun livre disponible",
+    "noBooksDescription": "Revenez plus tard pour de nouveaux livres et documentation.",
+    "chapters": "chapitres",
+    "pages": "pages",
+    "about": "À propos de ce livre",
+    "tableOfContents": "Table des matières",
+    "noChapters": "Aucun chapitre disponible",
+    "startReading": "Commencer la Lecture",
+    "chapter": "Chapitre",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "notFound": "Livre non trouvé",
+    "chapterNotFound": "Chapitre non trouvé"
+  }
 }

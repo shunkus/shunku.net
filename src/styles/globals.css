@@ -132,15 +132,27 @@
 }
 
 .prose table {
-  @apply w-full border-collapse my-4;
+  @apply w-full border-collapse my-6 shadow-sm rounded-lg overflow-hidden;
+}
+
+.prose thead {
+  @apply bg-gray-50;
 }
 
 .prose th {
-  @apply border border-gray-300 bg-gray-50 px-3 py-2 text-left font-semibold;
+  @apply border border-gray-200 bg-gray-100 px-4 py-3 text-left font-semibold text-gray-900 text-sm uppercase tracking-wider;
 }
 
 .prose td {
-  @apply border border-gray-300 px-3 py-2;
+  @apply border border-gray-200 px-4 py-3 text-gray-700;
+}
+
+.prose tbody tr:hover {
+  @apply bg-gray-50;
+}
+
+.prose tbody tr:nth-child(even) {
+  @apply bg-gray-50/50;
 }
 
 .prose img {

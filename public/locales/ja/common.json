@@ -92,7 +92,8 @@
     "title": "串上 俊 - クラウドサポートエンジニア・ソフトウェアエンジニア"
   },
   "nav": {
-    "blog": "ブログ"
+    "blog": "ブログ",
+    "books": "書籍"
   },
   "blog": {
     "title": "ブログ",
@@ -111,5 +112,26 @@
   "postsFound": "{{count}}件の記事が見つかりました",
   "noPostsFound": "このタグの記事は見つかりませんでした",
   "updated": "更新",
-  "by": "著者"
+  "by": "著者",
+  "books": {
+    "title": "書籍",
+    "subtitle": "オンライン書籍と技術ドキュメント",
+    "description": "オンライン書籍と技術ドキュメントのコレクションをご覧ください",
+    "backToHome": "ホームに戻る",
+    "backToList": "書籍一覧に戻る",
+    "readBook": "読む",
+    "noBooks": "利用可能な書籍はありません",
+    "noBooksDescription": "新しい書籍とドキュメントは後日追加されます。",
+    "chapters": "章",
+    "pages": "ページ",
+    "about": "この本について",
+    "tableOfContents": "目次",
+    "noChapters": "章がありません",
+    "startReading": "読み始める",
+    "chapter": "第",
+    "previous": "前へ",
+    "next": "次へ",
+    "notFound": "書籍が見つかりません",
+    "chapterNotFound": "章が見つかりません"
+  }
 }

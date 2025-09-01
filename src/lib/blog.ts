@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import { remark } from 'remark';
+import remarkGfm from 'remark-gfm';
 import remarkRehype from 'remark-rehype';
 import rehypePrism from 'rehype-prism-plus';
 import rehypeStringify from 'rehype-stringify';
@@ -78,6 +79,7 @@ export async function getBlogPost(slug: string, locale: string): Promise<BlogPos
 
   // Process markdown content to HTML
   const processedContent = await remark()
+    .use(remarkGfm)
     .use(remarkRehype, { allowDangerousHtml: true })
     .use(rehypePrism)
     .use(rehypeStringify, { allowDangerousHtml: true })

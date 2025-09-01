@@ -88,7 +88,8 @@
     "title": "구시가미 순 - 클라우드 지원 엔지니어 및 소프트웨어 엔지니어"
   },
   "nav": {
-    "blog": "블로그"
+    "blog": "블로그",
+    "books": "책"
   },
   "blog": {
     "title": "블로그",
@@ -107,5 +108,26 @@
   "postsFound": "{{count}}개의 게시물을 찾았습니다",
   "noPostsFound": "이 태그의 게시물을 찾을 수 없습니다",
   "updated": "업데이트",
-  "by": "작성자"
+  "by": "작성자",
+  "books": {
+    "title": "책",
+    "subtitle": "온라인 책과 기술 문서",
+    "description": "온라인 책과 기술 문서 컴렉션을 둘러보세요",
+    "backToHome": "홈으로 돌아가기",
+    "backToList": "책 목록으로 돌아가기",
+    "readBook": "책 읽기",
+    "noBooks": "사용 가능한 책이 없습니다",
+    "noBooksDescription": "새로운 책과 문서를 위해 나중에 다시 확인해 주세요.",
+    "chapters": "장",
+    "pages": "페이지",
+    "about": "이 책에 대한 소개",
+    "tableOfContents": "목차",
+    "noChapters": "사용 가능한 장이 없습니다",
+    "startReading": "읽기 시작",
+    "chapter": "장",
+    "previous": "이전",
+    "next": "다음",
+    "notFound": "책을 찾을 수 없습니다",
+    "chapterNotFound": "장을 찾을 수 없습니다"
+  }
 }
