@@ -265,12 +265,11 @@ export default function BookChapterPage({ book, chapter, currentChapterIndex }: 
                     {book.title}
                   </Link>
                 </div>
-                <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight">{chapter.title}</h1>
               </header>
 
               {/* Chapter Content */}
               <div 
-                className="prose prose-lg max-w-none"
+                className="prose prose-lg max-w-none [&>h1:first-child]:hidden"
                 dangerouslySetInnerHTML={{ __html: chapter.content || '' }}
               />
 

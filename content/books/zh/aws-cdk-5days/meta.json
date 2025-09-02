@@ -1,0 +1,11 @@
+{
+  "id": "aws-cdk-5days",
+  "title": "5天学会AWS CDK",
+  "subtitle": "基础设施即代码实战指南",
+  "author": "串上俊",
+  "publishedDate": "2024-08-31",
+  "updatedDate": "2024-08-31",
+  "description": "通过5天时间学习如何使用AWS CDK以代码方式管理基础设施。从基础到实践，逐步掌握AWS CDK的实用指南。使用TypeScript，获得可在实际项目中应用的知识。",
+  "tags": ["AWS", "CDK", "Infrastructure as Code", "TypeScript", "DevOps", "CloudFormation"],
+  "coverImage": "/images/books/lean-aws-cdk-in-5-days.png"
+}
