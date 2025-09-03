@@ -19,7 +19,7 @@ const config = {
   },
   testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/', '<rootDir>/e2e/'],
   transformIgnorePatterns: [
-    'node_modules/(?!(remark|remark-html|unified|bail|is-plain-obj|trough|vfile)/)',
+    'node_modules/(?!(remark|remark-html|remark-parse|remark-gfm|remark-rehype|rehype-prism-plus|rehype-stringify|unified|bail|is-plain-obj|trough|vfile|micromark|mdast-util|unist-util)/)',
   ],
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',

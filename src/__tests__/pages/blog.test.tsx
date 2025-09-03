@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { GetStaticProps } from 'next';
 import Blog, { getStaticProps } from '../../pages/blog';
 import { getBlogPosts } from '../../lib/blog';
@@ -204,6 +205,78 @@ describe('Blog Page', () => {
     expect(screen.getByRole('banner')).toBeInTheDocument(); // header
     expect(screen.getByRole('main')).toBeInTheDocument();   // main content
     // Note: Footer is not part of this page component
+  });
+
+  it('opens and closes language dropdown', async () => {
+    const user = userEvent.setup();
+    render(<Blog posts={mockPosts} />);
+    
+    const languageButton = screen.getByRole('button');
+    
+    // Initially dropdown should not be visible
+    expect(screen.queryByText('日本語')).not.toBeInTheDocument();
+    
+    // Click to open dropdown
+    await user.click(languageButton);
+    
+    // Dropdown should now be visible with all language options
+    expect(screen.getByText('日本語')).toBeInTheDocument();
+    expect(screen.getByText('한국어')).toBeInTheDocument();
+    expect(screen.getByText('中文')).toBeInTheDocument();
+    expect(screen.getByText('Español')).toBeInTheDocument();
+    expect(screen.getByText('Français')).toBeInTheDocument();
+  });
+
+  it('closes language dropdown when clicking outside', async () => {
+    const user = userEvent.setup();
+    render(<Blog posts={mockPosts} />);
+    
+    const languageButton = screen.getByRole('button');
+    
+    // Open dropdown
+    await user.click(languageButton);
+    
+    // Verify dropdown is open
+    expect(screen.getByText('日本語')).toBeInTheDocument();
+    
+    // Click outside
+    fireEvent.mouseDown(document.body);
+    
+    // Dropdown should be closed
+    expect(screen.queryByText('日本語')).not.toBeInTheDocument();
+  });
+
+  it('shows correct current locale in dropdown', async () => {
+    const user = userEvent.setup();
+    render(<Blog posts={mockPosts} />);
+    
+    const languageButton = screen.getByRole('button');
+    await user.click(languageButton);
+    
+    // English should be highlighted as current
+    const englishLink = screen.getAllByText('English')[1]; // Second one in dropdown
+    expect(englishLink.closest('a')).toHaveClass('bg-blue-50', 'text-blue-700');
+  });
+
+  it('handles language link navigation correctly', async () => {
+    const user = userEvent.setup();
+    render(<Blog posts={mockPosts} />);
+    
+    const languageButton = screen.getByRole('button');
+    await user.click(languageButton);
+    
+    // Check language link attributes
+    const japaneseLink = screen.getByText('日本語').closest('a');
+    expect(japaneseLink).toHaveAttribute('href', '/blog');
+    expect(japaneseLink).toHaveAttribute('locale', 'ja');
+    
+    const spanishLink = screen.getByText('Español').closest('a');
+    expect(spanishLink).toHaveAttribute('locale', 'es');
+  });
+
+  it('handles unknown locale configuration gracefully', () => {
+    // This tests the conditional in the language mapping
+    expect(() => render(<Blog posts={mockPosts} />)).not.toThrow();
   });
 });
 

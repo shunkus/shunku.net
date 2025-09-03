@@ -1,6 +1,7 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import Home from '../pages/index';
+import Home, { getStaticProps } from '../pages/index';
+import { GetStaticProps } from 'next';
 
 // Mock next/router
 const mockPush = jest.fn();
@@ -221,5 +222,122 @@ describe('Home Page', () => {
     const blogButton = screen.getByRole('link', { name: /blog/i });
     expect(blogButton).toBeInTheDocument();
     expect(blogButton).toHaveAttribute('href', '/blog');
+  });
+
+  it('closes language dropdown when clicking outside', async () => {
+    const user = userEvent.setup();
+    const languageButton = screen.getByRole('button');
+    
+    // Open dropdown
+    await user.click(languageButton);
+    
+    // Verify dropdown is open
+    expect(screen.getByText('日本語')).toBeInTheDocument();
+    
+    // Click outside the dropdown
+    fireEvent.mouseDown(document.body);
+    
+    // Dropdown should be closed
+    expect(screen.queryByText('日本語')).not.toBeInTheDocument();
+  });
+
+  it('handles useEffect cleanup', () => {
+    const { unmount } = render(<Home />);
+    
+    // Test that component can be unmounted without errors
+    expect(() => unmount()).not.toThrow();
+  });
+});
+
+// Mock next-i18next/serverSideTranslations
+jest.mock('next-i18next/serverSideTranslations', () => ({
+  serverSideTranslations: jest.fn().mockResolvedValue({
+    _nextI18Next: {
+      initialI18nStore: {},
+      initialLocale: 'en',
+    },
+  }),
+}));
+
+describe('Home getStaticProps', () => {
+  const { serverSideTranslations } = require('next-i18next/serverSideTranslations');
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns props with translations for English locale', async () => {
+    const context = {
+      locale: 'en',
+    };
+
+    const result = await getStaticProps(context as Parameters<GetStaticProps>[0]);
+
+    expect(result).toEqual({
+      props: {
+        _nextI18Next: {
+          initialI18nStore: {},
+          initialLocale: 'en',
+        },
+      },
+    });
+
+    expect(serverSideTranslations).toHaveBeenCalledWith('en', ['common']);
+  });
+
+  it('defaults to English when no locale provided', async () => {
+    const context = {};
+
+    const result = await getStaticProps(context as Parameters<GetStaticProps>[0]);
+
+    expect(result).toEqual({
+      props: {
+        _nextI18Next: {
+          initialI18nStore: {},
+          initialLocale: 'en',
+        },
+      },
+    });
+
+    expect(serverSideTranslations).toHaveBeenCalledWith('en', ['common']);
+  });
+
+  it('handles different locales correctly', async () => {
+    const context = {
+      locale: 'ja',
+    };
+
+    const result = await getStaticProps(context as Parameters<GetStaticProps>[0]);
+
+    expect(result).toEqual({
+      props: {
+        _nextI18Next: {
+          initialI18nStore: {},
+          initialLocale: 'en',
+        },
+      },
+    });
+
+    expect(serverSideTranslations).toHaveBeenCalledWith('ja', ['common']);
+  });
+
+  it('handles null locale correctly', async () => {
+    const context = {
+      locale: null,
+    };
+
+    const result = await getStaticProps(context as Parameters<GetStaticProps>[0]);
+
+    expect(serverSideTranslations).toHaveBeenCalledWith('en', ['common']);
+  });
+
+  it('handles undefined locale correctly', async () => {
+    const context = {
+      locale: undefined,
+    };
+
+    const result = await getStaticProps(context as Parameters<GetStaticProps>[0]);
+
+    expect(serverSideTranslations).toHaveBeenCalledWith('en', ['common']);
   });
 });
