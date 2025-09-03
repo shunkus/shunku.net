@@ -15,6 +15,7 @@ const config = {
   moduleNameMapper: {
     '^@/components/(.*)$': '<rootDir>/components/$1',
     '^@/pages/(.*)$': '<rootDir>/pages/$1',
+    '^@vercel/analytics/react$': '<rootDir>/src/__mocks__/@vercel/analytics/react.js',
   },
   testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/', '<rootDir>/e2e/'],
   transformIgnorePatterns: [
