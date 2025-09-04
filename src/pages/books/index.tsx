@@ -49,7 +49,7 @@ export default function BooksIndex({ books }: BooksIndexProps) {
   return (
     <>
       <Head>
-        <title>{t('books.title')} - {t('name')}</title>
+        <title>{`${t('books.title')} - ${t('name')}`}</title>
         <meta name="description" content={t('books.description')} />
       </Head>
       

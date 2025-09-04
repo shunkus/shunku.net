@@ -47,7 +47,7 @@ export default function BlogIndex({ posts }: BlogIndexProps) {
   return (
     <>
       <Head>
-        <title>{t('blog.title')} - {t('name')}</title>
+        <title>{`${t('blog.title')} - ${t('name')}`}</title>
         <meta name="description" content={t('blog.description')} />
       </Head>
       

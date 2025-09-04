@@ -79,7 +79,7 @@ export default function BookChapterPage({ book, chapter, currentChapterIndex }: 
   return (
     <>
       <Head>
-        <title>{chapter.title} - {book.title}</title>
+        <title>{`${chapter.title} - ${book.title}`}</title>
         <meta name="description" content={`${chapter.title} - ${book.title} by ${book.author}`} />
       </Head>
       

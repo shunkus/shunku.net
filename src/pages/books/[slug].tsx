@@ -66,7 +66,7 @@ export default function BookDetail({ book }: BookDetailProps) {
   return (
     <>
       <Head>
-        <title>{book.title} - {t('books.title')}</title>
+        <title>{`${book.title} - ${t('books.title')}`}</title>
         <meta name="description" content={book.description} />
         {book.author && <meta name="author" content={book.author} />}
       </Head>
