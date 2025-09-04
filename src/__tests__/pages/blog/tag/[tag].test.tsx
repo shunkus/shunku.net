@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { GetStaticProps, GetStaticPaths } from 'next';
+import { GetStaticProps } from 'next';
 import TagPage, { getStaticProps, getStaticPaths } from '../../../../pages/blog/tag/[tag]';
 import { getBlogPostsByTag, getAllTagSlugs } from '../../../../lib/blog';
 

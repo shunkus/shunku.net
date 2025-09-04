@@ -25,7 +25,6 @@ import {
   getBlogPostsByTag,
   getAllTagsWithCounts,
   getAllTagSlugs,
-  BlogPost,
   BlogPostMeta,
 } from '../../lib/blog';
 
@@ -70,12 +69,12 @@ describe('blog.ts', () => {
       const mockFiles = ['post1.md', 'post2.md', 'not-a-post.txt'];
       
       mockFs.existsSync.mockReturnValue(true);
-      mockFs.readdirSync.mockReturnValue(mockFiles as any);
+      mockFs.readdirSync.mockReturnValue(mockFiles as string[]);
       mockFs.readFileSync.mockReturnValue('mock file content');
       mockMatter.mockReturnValue({
         data: mockBlogPostData,
         content: mockBlogPostContent,
-      } as any);
+      } as matter.GrayMatterFile<string>);
 
       const result = getBlogPosts('en');
 
@@ -113,12 +112,12 @@ describe('blog.ts', () => {
       };
 
       mockFs.existsSync.mockReturnValue(true);
-      mockFs.readdirSync.mockReturnValue(['post.md'] as any);
+      mockFs.readdirSync.mockReturnValue(['post.md'] as string[]);
       mockFs.readFileSync.mockReturnValue('mock content');
       mockMatter.mockReturnValue({
         data: mockDataWithoutOptionals,
         content: mockBlogPostContent,
-      } as any);
+      } as matter.GrayMatterFile<string>);
 
       const result = getBlogPosts('en');
 
@@ -140,11 +139,11 @@ describe('blog.ts', () => {
       const mockNewPost = { ...mockBlogPostData, date: '2024-12-31' };
 
       mockFs.existsSync.mockReturnValue(true);
-      mockFs.readdirSync.mockReturnValue(mockFiles as any);
+      mockFs.readdirSync.mockReturnValue(mockFiles as string[]);
       mockFs.readFileSync.mockReturnValue('mock content');
       mockMatter
-        .mockReturnValueOnce({ data: mockOldPost, content: mockBlogPostContent } as any)
-        .mockReturnValueOnce({ data: mockNewPost, content: mockBlogPostContent } as any);
+        .mockReturnValueOnce({ data: mockOldPost, content: mockBlogPostContent } as matter.GrayMatterFile<string>)
+        .mockReturnValueOnce({ data: mockNewPost, content: mockBlogPostContent } as matter.GrayMatterFile<string>);
 
       const result = getBlogPosts('en');
 
@@ -160,7 +159,7 @@ describe('blog.ts', () => {
       mockMatter.mockReturnValue({
         data: mockBlogPostData,
         content: mockBlogPostContent,
-      } as any);
+      } as matter.GrayMatterFile<string>);
 
       const result = await getBlogPost('test-post', 'en');
 
@@ -201,7 +200,7 @@ describe('blog.ts', () => {
       mockMatter.mockReturnValue({
         data: mockDataWithoutOptionals,
         content: mockBlogPostContent,
-      } as any);
+      } as matter.GrayMatterFile<string>);
 
       const result = await getBlogPost('test-post', 'en');
 
@@ -226,7 +225,7 @@ describe('blog.ts', () => {
       
       mockFs.readdirSync.mockImplementation((dirPath) => {
         const locale = dirPath.toString().split('/').pop();
-        return (mockFiles[locale as keyof typeof mockFiles] || []) as any;
+        return (mockFiles[locale as keyof typeof mockFiles] || []) as fs.Dirent[];
       });
 
       const result = getAllBlogSlugs();
@@ -248,7 +247,7 @@ describe('blog.ts', () => {
 
     it('filters out non-markdown files', () => {
       mockFs.existsSync.mockReturnValue(true);
-      mockFs.readdirSync.mockReturnValue(['post1.md', 'readme.txt', 'post2.md'] as any);
+      mockFs.readdirSync.mockReturnValue(['post1.md', 'readme.txt', 'post2.md'] as string[]);
 
       const result = getAllBlogSlugs();
 
@@ -259,32 +258,13 @@ describe('blog.ts', () => {
 
   describe('getAllTags', () => {
     it('returns unique sorted tags for a locale', () => {
-      const mockPosts: BlogPostMeta[] = [
-        {
-          slug: 'post1',
-          title: 'Post 1',
-          date: '2024-01-01',
-          excerpt: 'Excerpt 1',
-          tags: ['React', 'TypeScript'],
-          locale: 'en',
-        },
-        {
-          slug: 'post2',
-          title: 'Post 2',
-          date: '2024-01-02',
-          excerpt: 'Excerpt 2',
-          tags: ['TypeScript', 'Testing'],
-          locale: 'en',
-        },
-      ];
-
       // Mock getBlogPosts to return our test data
       mockFs.existsSync.mockReturnValue(true);
-      mockFs.readdirSync.mockReturnValue(['post1.md', 'post2.md'] as any);
+      mockFs.readdirSync.mockReturnValue(['post1.md', 'post2.md'] as string[]);
       mockFs.readFileSync.mockReturnValue('mock content');
       mockMatter
-        .mockReturnValueOnce({ data: { ...mockBlogPostData, tags: ['React', 'TypeScript'] }, content: '' } as any)
-        .mockReturnValueOnce({ data: { ...mockBlogPostData, tags: ['TypeScript', 'Testing'] }, content: '' } as any);
+        .mockReturnValueOnce({ data: { ...mockBlogPostData, tags: ['React', 'TypeScript'] }, content: '' } as matter.GrayMatterFile<string>)
+        .mockReturnValueOnce({ data: { ...mockBlogPostData, tags: ['TypeScript', 'Testing'] }, content: '' } as matter.GrayMatterFile<string>);
 
       const result = getAllTags('en');
 
@@ -293,12 +273,12 @@ describe('blog.ts', () => {
 
     it('handles posts without tags', () => {
       mockFs.existsSync.mockReturnValue(true);
-      mockFs.readdirSync.mockReturnValue(['post.md'] as any);
+      mockFs.readdirSync.mockReturnValue(['post.md'] as string[]);
       mockFs.readFileSync.mockReturnValue('mock content');
       mockMatter.mockReturnValue({
         data: { title: 'Post', date: '2024-01-01', excerpt: 'Excerpt' },
         content: '',
-      } as any);
+      } as matter.GrayMatterFile<string>);
 
       const result = getAllTags('en');
 
@@ -309,11 +289,11 @@ describe('blog.ts', () => {
   describe('getBlogPostsByTag', () => {
     it('returns posts filtered by tag', () => {
       mockFs.existsSync.mockReturnValue(true);
-      mockFs.readdirSync.mockReturnValue(['post1.md', 'post2.md'] as any);
+      mockFs.readdirSync.mockReturnValue(['post1.md', 'post2.md'] as string[]);
       mockFs.readFileSync.mockReturnValue('mock content');
       mockMatter
-        .mockReturnValueOnce({ data: { ...mockBlogPostData, tags: ['React', 'TypeScript'] }, content: '' } as any)
-        .mockReturnValueOnce({ data: { ...mockBlogPostData, tags: ['Vue', 'JavaScript'] }, content: '' } as any);
+        .mockReturnValueOnce({ data: { ...mockBlogPostData, tags: ['React', 'TypeScript'] }, content: '' } as matter.GrayMatterFile<string>)
+        .mockReturnValueOnce({ data: { ...mockBlogPostData, tags: ['Vue', 'JavaScript'] }, content: '' } as matter.GrayMatterFile<string>);
 
       const result = getBlogPostsByTag('React', 'en');
 
@@ -323,12 +303,12 @@ describe('blog.ts', () => {
 
     it('returns empty array when no posts match the tag', () => {
       mockFs.existsSync.mockReturnValue(true);
-      mockFs.readdirSync.mockReturnValue(['post.md'] as any);
+      mockFs.readdirSync.mockReturnValue(['post.md'] as string[]);
       mockFs.readFileSync.mockReturnValue('mock content');
       mockMatter.mockReturnValue({
         data: { ...mockBlogPostData, tags: ['React'] },
         content: '',
-      } as any);
+      } as matter.GrayMatterFile<string>);
 
       const result = getBlogPostsByTag('Vue', 'en');
 
@@ -342,16 +322,16 @@ describe('blog.ts', () => {
       mockFs.existsSync.mockReturnValue(true);
       mockFs.readdirSync.mockImplementation((dirPath) => {
         const locale = dirPath.toString().split('/').pop();
-        if (locale === 'en') return ['post1.md', 'post2.md'] as any;
-        if (locale === 'ja') return ['post3.md'] as any;
-        return [] as any;
+        if (locale === 'en') return ['post1.md', 'post2.md'] as fs.Dirent[];
+        if (locale === 'ja') return ['post3.md'] as fs.Dirent[];
+        return [] as fs.Dirent[];
       });
       
       mockFs.readFileSync.mockReturnValue('mock content');
       mockMatter
-        .mockReturnValueOnce({ data: { ...mockBlogPostData, tags: ['React', 'TypeScript'] }, content: '' } as any)
-        .mockReturnValueOnce({ data: { ...mockBlogPostData, tags: ['TypeScript', 'Testing'] }, content: '' } as any)
-        .mockReturnValueOnce({ data: { ...mockBlogPostData, tags: ['React'] }, content: '' } as any);
+        .mockReturnValueOnce({ data: { ...mockBlogPostData, tags: ['React', 'TypeScript'] }, content: '' } as matter.GrayMatterFile<string>)
+        .mockReturnValueOnce({ data: { ...mockBlogPostData, tags: ['TypeScript', 'Testing'] }, content: '' } as string[])
+        .mockReturnValueOnce({ data: { ...mockBlogPostData, tags: ['React'] }, content: '' } as matter.GrayMatterFile<string>);
 
       const result = getAllTagsWithCounts();
 
@@ -377,15 +357,15 @@ describe('blog.ts', () => {
       mockFs.existsSync.mockReturnValue(true);
       mockFs.readdirSync.mockImplementation((dirPath) => {
         const locale = dirPath.toString().split('/').pop();
-        if (locale === 'en') return ['post1.md'] as any;
-        return [] as any;
+        if (locale === 'en') return ['post1.md'] as fs.Dirent[];
+        return [] as fs.Dirent[];
       });
       
       mockFs.readFileSync.mockReturnValue('mock content');
       mockMatter.mockReturnValue({
         data: { ...mockBlogPostData, tags: ['React Native', 'TypeScript'] },
         content: '',
-      } as any);
+      } as matter.GrayMatterFile<string>);
 
       const result = getAllTagSlugs();
 

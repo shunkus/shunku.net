@@ -1,6 +1,6 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { GetStaticProps, GetStaticPaths } from 'next';
+import { GetStaticProps } from 'next';
 import BookChapterPage, { getStaticProps, getStaticPaths } from '../../../../pages/books/[slug]/[chapter]';
 import { getBook, getBookChapter, getAllBookChapterSlugs } from '../../../../lib/books';
 

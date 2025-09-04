@@ -25,9 +25,6 @@ import {
   getAllBookChapterSlugs,
   getBooksByTag,
   getAllBookTags,
-  Book,
-  BookMeta,
-  BookChapter,
 } from '../../lib/books';
 
 // Mock file system operations
@@ -91,15 +88,15 @@ describe('books.ts', () => {
         const path = dirPath.toString();
         return !path.includes('nonexistent');
       });
-      mockFs.readdirSync.mockImplementation((dirPath, options) => {
+      mockFs.readdirSync.mockImplementation((dirPath, _options) => {
         const path = dirPath.toString();
-        if (options && typeof options === 'object' && 'withFileTypes' in options) {
-          return mockBookDirs as any;
+        if (_options && typeof _options === 'object' && 'withFileTypes' in _options) {
+          return mockBookDirs as string[];
         }
         if (path.includes('chapters')) {
-          return mockChapterFiles as any;
+          return mockChapterFiles as string[];
         }
-        return [] as any;
+        return [] as string[];
       });
       mockFs.readFileSync.mockReturnValue(JSON.stringify(mockBookMetadata));
 
@@ -142,7 +139,7 @@ describe('books.ts', () => {
         const path = dirPath.toString();
         return !path.includes('meta.json');
       });
-      mockFs.readdirSync.mockReturnValue(mockBookDirs as any);
+      mockFs.readdirSync.mockReturnValue(mockBookDirs as string[]);
 
       const result = getBooks('en');
 
@@ -156,7 +153,7 @@ describe('books.ts', () => {
         const path = dirPath.toString();
         return !path.includes('chapters');
       });
-      mockFs.readdirSync.mockReturnValue(mockBookDirs as any);
+      mockFs.readdirSync.mockReturnValue(mockBookDirs as string[]);
       mockFs.readFileSync.mockReturnValue(JSON.stringify(mockBookMetadata));
 
       const result = getBooks('en');
@@ -175,11 +172,11 @@ describe('books.ts', () => {
       const mockBookDirs = [mockDirent('book1')];
       
       mockFs.existsSync.mockReturnValue(true);
-      mockFs.readdirSync.mockImplementation((dirPath, options) => {
-        if (options && typeof options === 'object' && 'withFileTypes' in options) {
-          return mockBookDirs as any;
+      mockFs.readdirSync.mockImplementation((dirPath, _options) => {
+        if (_options && typeof _options === 'object' && 'withFileTypes' in _options) {
+          return mockBookDirs as string[];
         }
-        return [] as any;
+        return [] as string[];
       });
       mockFs.readFileSync.mockReturnValue(JSON.stringify(mockMetadataMinimal));
 
@@ -207,11 +204,11 @@ describe('books.ts', () => {
       const mockNewBook = { ...mockBookMetadata, publishedDate: '2024-12-31' };
       
       mockFs.existsSync.mockReturnValue(true);
-      mockFs.readdirSync.mockImplementation((dirPath, options) => {
-        if (options && typeof options === 'object' && 'withFileTypes' in options) {
-          return mockBookDirs as any;
+      mockFs.readdirSync.mockImplementation((dirPath, _options) => {
+        if (_options && typeof _options === 'object' && 'withFileTypes' in _options) {
+          return mockBookDirs as string[];
         }
-        return [] as any;
+        return [] as string[];
       });
       mockFs.readFileSync
         .mockReturnValueOnce(JSON.stringify(mockOldBook))
@@ -238,10 +235,10 @@ describe('books.ts', () => {
         }
         return 'mock chapter content';
       });
-      mockFs.readdirSync.mockReturnValue(mockChapterFiles as any);
+      mockFs.readdirSync.mockReturnValue(mockChapterFiles as string[]);
       mockMatter
-        .mockReturnValueOnce({ data: mockChapter1Data, content: mockChapterContent } as any)
-        .mockReturnValueOnce({ data: mockChapter2Data, content: mockChapterContent } as any);
+        .mockReturnValueOnce({ data: mockChapter1Data, content: mockChapterContent } as matter.GrayMatterFile<string>)
+        .mockReturnValueOnce({ data: mockChapter2Data, content: mockChapterContent } as matter.GrayMatterFile<string>);
 
       const result = await getBook('test-book', 'en');
 
@@ -309,11 +306,11 @@ describe('books.ts', () => {
         }
         return 'mock content';
       });
-      mockFs.readdirSync.mockReturnValue(mockChapterFiles as any);
+      mockFs.readdirSync.mockReturnValue(mockChapterFiles as string[]);
       mockMatter
-        .mockReturnValueOnce({ data: mockChapter3, content: '' } as any)
-        .mockReturnValueOnce({ data: mockChapter1, content: '' } as any)
-        .mockReturnValueOnce({ data: mockChapter2, content: '' } as any);
+        .mockReturnValueOnce({ data: mockChapter3, content: '' } as matter.GrayMatterFile<string>)
+        .mockReturnValueOnce({ data: mockChapter1, content: '' } as matter.GrayMatterFile<string>)
+        .mockReturnValueOnce({ data: mockChapter2, content: '' } as matter.GrayMatterFile<string>);
 
       const result = await getBook('test-book', 'en');
 
@@ -334,8 +331,8 @@ describe('books.ts', () => {
         }
         return 'mock content';
       });
-      mockFs.readdirSync.mockReturnValue(mockChapterFiles as any);
-      mockMatter.mockReturnValue({ data: mockChapterData, content: '' } as any);
+      mockFs.readdirSync.mockReturnValue(mockChapterFiles as string[]);
+      mockMatter.mockReturnValue({ data: mockChapterData, content: '' } as matter.GrayMatterFile<string>);
 
       const result = await getBook('test-book', 'en');
 
@@ -350,7 +347,7 @@ describe('books.ts', () => {
       mockMatter.mockReturnValue({
         data: mockChapterData,
         content: mockChapterContent,
-      } as any);
+      } as matter.GrayMatterFile<string>);
 
       const result = await getBookChapter('test-book', 'chapter-1', 'en');
 
@@ -383,7 +380,7 @@ describe('books.ts', () => {
       mockMatter.mockReturnValue({
         data: mockMinimalChapterData,
         content: mockChapterContent,
-      } as any);
+      } as matter.GrayMatterFile<string>);
 
       const result = await getBookChapter('test-book', 'basic-chapter', 'en');
 
@@ -407,11 +404,11 @@ describe('books.ts', () => {
         return !path.includes('nonexistent');
       });
       
-      mockFs.readdirSync.mockImplementation((dirPath, options) => {
+      mockFs.readdirSync.mockImplementation((dirPath, _options) => {
         const path = dirPath.toString();
-        if (path.includes('en')) return mockBookDirsEn as any;
-        if (path.includes('ja')) return mockBookDirsJa as any;
-        return [] as any;
+        if (path.includes('en')) return mockBookDirsEn as string[];
+        if (path.includes('ja')) return mockBookDirsJa as string[];
+        return [] as string[];
       });
 
       const result = getAllBookSlugs();
@@ -439,7 +436,7 @@ describe('books.ts', () => {
       ];
       
       mockFs.existsSync.mockReturnValue(true);
-      mockFs.readdirSync.mockReturnValue(mockEntries as any);
+      mockFs.readdirSync.mockReturnValue(mockEntries as string[]);
 
       const result = getAllBookSlugs();
 
@@ -455,15 +452,15 @@ describe('books.ts', () => {
       const mockChapterFiles = ['chapter1.md', 'chapter2.md'];
       
       mockFs.existsSync.mockReturnValue(true);
-      mockFs.readdirSync.mockImplementation((dirPath, options) => {
+      mockFs.readdirSync.mockImplementation((dirPath, _options) => {
         const path = dirPath.toString();
-        if (options && typeof options === 'object' && 'withFileTypes' in options) {
-          return mockBookDirs as any;
+        if (_options && typeof _options === 'object' && 'withFileTypes' in _options) {
+          return mockBookDirs as string[];
         }
         if (path.includes('chapters')) {
-          return mockChapterFiles as any;
+          return mockChapterFiles as string[];
         }
-        return [] as any;
+        return [] as string[];
       });
 
       const result = getAllBookChapterSlugs();
@@ -485,7 +482,7 @@ describe('books.ts', () => {
         const path = dirPath.toString();
         return !path.includes('chapters');
       });
-      mockFs.readdirSync.mockReturnValue(mockBookDirs as any);
+      mockFs.readdirSync.mockReturnValue(mockBookDirs as string[]);
 
       const result = getAllBookChapterSlugs();
 
@@ -497,15 +494,15 @@ describe('books.ts', () => {
       const mockFiles = ['chapter1.md', 'readme.txt', 'chapter2.md'];
       
       mockFs.existsSync.mockReturnValue(true);
-      mockFs.readdirSync.mockImplementation((dirPath, options) => {
+      mockFs.readdirSync.mockImplementation((dirPath, _options) => {
         const path = dirPath.toString();
-        if (options && typeof options === 'object' && 'withFileTypes' in options) {
-          return mockBookDirs as any;
+        if (_options && typeof _options === 'object' && 'withFileTypes' in _options) {
+          return mockBookDirs as string[];
         }
         if (path.includes('chapters')) {
-          return mockFiles as any;
+          return mockFiles as string[];
         }
-        return [] as any;
+        return [] as string[];
       });
 
       const result = getAllBookChapterSlugs();
@@ -523,11 +520,11 @@ describe('books.ts', () => {
       const mockBookWithVue = { ...mockBookMetadata, tags: ['Vue', 'JavaScript'] };
       
       mockFs.existsSync.mockReturnValue(true);
-      mockFs.readdirSync.mockImplementation((dirPath, options) => {
-        if (options && typeof options === 'object' && 'withFileTypes' in options) {
-          return mockBookDirs as any;
+      mockFs.readdirSync.mockImplementation((dirPath, _options) => {
+        if (_options && typeof _options === 'object' && 'withFileTypes' in _options) {
+          return mockBookDirs as string[];
         }
-        return [] as any;
+        return [] as string[];
       });
       mockFs.readFileSync
         .mockReturnValueOnce(JSON.stringify(mockBookWithReact))
@@ -544,11 +541,11 @@ describe('books.ts', () => {
       const mockBookWithoutTag = { ...mockBookMetadata, tags: ['Vue'] };
       
       mockFs.existsSync.mockReturnValue(true);
-      mockFs.readdirSync.mockImplementation((dirPath, options) => {
-        if (options && typeof options === 'object' && 'withFileTypes' in options) {
-          return mockBookDirs as any;
+      mockFs.readdirSync.mockImplementation((dirPath, _options) => {
+        if (_options && typeof _options === 'object' && 'withFileTypes' in _options) {
+          return mockBookDirs as string[];
         }
-        return [] as any;
+        return [] as string[];
       });
       mockFs.readFileSync.mockReturnValue(JSON.stringify(mockBookWithoutTag));
 
@@ -565,11 +562,11 @@ describe('books.ts', () => {
       const mockBook2 = { ...mockBookMetadata, tags: ['TypeScript', 'Testing'] };
       
       mockFs.existsSync.mockReturnValue(true);
-      mockFs.readdirSync.mockImplementation((dirPath, options) => {
-        if (options && typeof options === 'object' && 'withFileTypes' in options) {
-          return mockBookDirs as any;
+      mockFs.readdirSync.mockImplementation((dirPath, _options) => {
+        if (_options && typeof _options === 'object' && 'withFileTypes' in _options) {
+          return mockBookDirs as string[];
         }
-        return [] as any;
+        return [] as string[];
       });
       mockFs.readFileSync
         .mockReturnValueOnce(JSON.stringify(mockBook1))
@@ -590,11 +587,11 @@ describe('books.ts', () => {
       };
       
       mockFs.existsSync.mockReturnValue(true);
-      mockFs.readdirSync.mockImplementation((dirPath, options) => {
-        if (options && typeof options === 'object' && 'withFileTypes' in options) {
-          return mockBookDirs as any;
+      mockFs.readdirSync.mockImplementation((dirPath, _options) => {
+        if (_options && typeof _options === 'object' && 'withFileTypes' in _options) {
+          return mockBookDirs as string[];
         }
-        return [] as any;
+        return [] as string[];
       });
       mockFs.readFileSync.mockReturnValue(JSON.stringify(mockBookWithoutTags));
 

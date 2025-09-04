@@ -1,6 +1,6 @@
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { GetStaticProps, GetStaticPaths } from 'next';
+import { GetStaticProps } from 'next';
 
 // Mock next/router
 jest.mock('next/router', () => ({
@@ -70,6 +70,7 @@ jest.mock('next/head', () => {
 jest.mock('next/image', () => ({
   __esModule: true,
   default: (props: { [key: string]: unknown; alt: string }) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { priority: _priority, ...otherProps } = props;
     // eslint-disable-next-line @next/next/no-img-element
     return <img {...(otherProps as React.ImgHTMLAttributes<HTMLImageElement>)} alt={props.alt} />;
@@ -78,7 +79,7 @@ jest.mock('next/image', () => ({
 
 // Mock date-fns
 jest.mock('date-fns', () => ({
-  format: (date: Date, formatStr: string) => {
+  format: (date: Date, _formatStr: string) => {
     const mockDate = new Date(date);
     return mockDate.toLocaleDateString('en-US', {
       year: 'numeric',
@@ -89,10 +90,10 @@ jest.mock('date-fns', () => ({
 }));
 
 // Mock Lucide React icons
+/* eslint-disable @typescript-eslint/no-unused-vars */
 jest.mock('lucide-react', () => ({
-  CalendarDays: ({ size, fill, stroke, strokeWidth, ...props }: { size?: number; fill?: unknown; stroke?: unknown; strokeWidth?: unknown; [key: string]: unknown }) => {
-    const { className, ...validProps } = props;
-    return <div data-testid="calendar-icon" className={className as string}>📅</div>;
+  CalendarDays: ({ className }: { className?: string }) => {
+    return <div data-testid="calendar-icon" className={className}>📅</div>;
   },
   Tag: ({ size, fill, stroke, strokeWidth, ...props }: { size?: number; fill?: unknown; stroke?: unknown; strokeWidth?: unknown; [key: string]: unknown }) => {
     const { className, ...validProps } = props;
@@ -135,6 +136,7 @@ jest.mock('lucide-react', () => ({
     return <div data-testid="file-text-icon" className={className as string}>📄</div>;
   },
 }));
+/* eslint-enable @typescript-eslint/no-unused-vars */
 
 // Mock books functions
 jest.mock('../../../lib/books', () => ({

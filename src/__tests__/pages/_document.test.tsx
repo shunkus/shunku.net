@@ -70,7 +70,7 @@ describe('_document.tsx', () => {
       const children = result.props.children;
       
       // Find Head component
-      const headComponent = children.find((child: any) => child.type.toString().includes('Head'));
+      const headComponent = children.find((child: React.ReactElement) => child.type.toString().includes('Head'));
       expect(headComponent).toBeDefined();
       
       // Check meta tags exist
@@ -82,10 +82,10 @@ describe('_document.tsx', () => {
     it('includes all required meta tags', () => {
       const result = Document();
       const children = result.props.children;
-      const headComponent = children.find((child: any) => child.type.toString().includes('Head'));
+      const headComponent = children.find((child: React.ReactElement) => child.type.toString().includes('Head'));
       const metaTags = headComponent.props.children;
       
-      const metaNames = metaTags.map((tag: any) => tag.props?.name || tag.props?.property).filter(Boolean);
+      const metaNames = metaTags.map((tag: React.ReactElement) => tag.props?.name || tag.props?.property).filter(Boolean);
       
       expect(metaNames).toContain('description');
       expect(metaNames).toContain('keywords'); 
@@ -99,12 +99,12 @@ describe('_document.tsx', () => {
     it('has correct meta tag content values', () => {
       const result = Document();
       const children = result.props.children;
-      const headComponent = children.find((child: any) => child.type.toString().includes('Head'));
+      const headComponent = children.find((child: React.ReactElement) => child.type.toString().includes('Head'));
       const metaTags = headComponent.props.children;
       
-      const descriptionTag = metaTags.find((tag: any) => tag.props?.name === 'description');
-      const keywordsTag = metaTags.find((tag: any) => tag.props?.name === 'keywords');
-      const authorTag = metaTags.find((tag: any) => tag.props?.name === 'author');
+      const descriptionTag = metaTags.find((tag: React.ReactElement) => tag.props?.name === 'description');
+      const keywordsTag = metaTags.find((tag: React.ReactElement) => tag.props?.name === 'keywords');
+      const authorTag = metaTags.find((tag: React.ReactElement) => tag.props?.name === 'author');
       
       expect(descriptionTag.props.content).toContain('Shun Kushigami');
       expect(descriptionTag.props.content).toContain('Cloud Support Engineer');
@@ -116,12 +116,12 @@ describe('_document.tsx', () => {
     it('includes correct Open Graph properties', () => {
       const result = Document();
       const children = result.props.children;
-      const headComponent = children.find((child: any) => child.type.toString().includes('Head'));
+      const headComponent = children.find((child: React.ReactElement) => child.type.toString().includes('Head'));
       const metaTags = headComponent.props.children;
       
-      const ogTitleTag = metaTags.find((tag: any) => tag.props?.property === 'og:title');
-      const ogTypeTag = metaTags.find((tag: any) => tag.props?.property === 'og:type');
-      const ogLocaleTag = metaTags.find((tag: any) => tag.props?.property === 'og:locale');
+      const ogTitleTag = metaTags.find((tag: React.ReactElement) => tag.props?.property === 'og:title');
+      const ogTypeTag = metaTags.find((tag: React.ReactElement) => tag.props?.property === 'og:type');
+      const ogLocaleTag = metaTags.find((tag: React.ReactElement) => tag.props?.property === 'og:locale');
       
       expect(ogTitleTag.props.content).toContain('Shun Kushigami');
       expect(ogTypeTag.props.content).toBe('website');
@@ -132,12 +132,12 @@ describe('_document.tsx', () => {
       const result = Document();
       const children = result.props.children;
       
-      const bodyComponent = children.find((child: any) => child.type === 'body');
+      const bodyComponent = children.find((child: React.ReactElement) => child.type === 'body');
       expect(bodyComponent).toBeDefined();
       
       const bodyChildren = bodyComponent.props.children;
-      const hasMain = bodyChildren.some((child: any) => child.type.toString().includes('Main'));
-      const hasNextScript = bodyChildren.some((child: any) => child.type.toString().includes('NextScript'));
+      const hasMain = bodyChildren.some((child: React.ReactElement) => child.type.toString().includes('Main'));
+      const hasNextScript = bodyChildren.some((child: React.ReactElement) => child.type.toString().includes('NextScript'));
       
       expect(hasMain).toBe(true);
       expect(hasNextScript).toBe(true);
@@ -162,11 +162,11 @@ describe('_document.tsx', () => {
     it('validates all meta tag structures', () => {
       const result = Document();
       const children = result.props.children;
-      const headComponent = children.find((child: any) => child.type.toString().includes('Head'));
+      const headComponent = children.find((child: React.ReactElement) => child.type.toString().includes('Head'));
       const metaTags = headComponent.props.children;
       
       // All meta tags should have proper structure
-      metaTags.forEach((tag: any) => {
+      metaTags.forEach((tag: React.ReactElement) => {
         expect(tag.type).toBe('meta');
         expect(tag.props).toBeDefined();
         expect(tag.props.content).toBeDefined();

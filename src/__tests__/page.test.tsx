@@ -2,6 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Home, { getStaticProps } from '../pages/index';
 import { GetStaticProps } from 'next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 // Mock next/router
 const mockPush = jest.fn();
@@ -59,6 +60,7 @@ jest.mock('next-i18next', () => ({
 jest.mock('next/image', () => ({
   __esModule: true,
   default: (props: { [key: string]: unknown; alt: string }) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { priority: _priority, ...otherProps } = props;
     // eslint-disable-next-line @next/next/no-img-element
     return <img {...(otherProps as React.ImgHTMLAttributes<HTMLImageElement>)} alt={props.alt} />;
@@ -260,8 +262,6 @@ jest.mock('next-i18next/serverSideTranslations', () => ({
 }));
 
 describe('Home getStaticProps', () => {
-  const { serverSideTranslations } = require('next-i18next/serverSideTranslations');
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -326,7 +326,7 @@ describe('Home getStaticProps', () => {
       locale: null,
     };
 
-    const result = await getStaticProps(context as Parameters<GetStaticProps>[0]);
+    await getStaticProps(context as Parameters<GetStaticProps>[0]);
 
     expect(serverSideTranslations).toHaveBeenCalledWith('en', ['common']);
   });
@@ -336,7 +336,7 @@ describe('Home getStaticProps', () => {
       locale: undefined,
     };
 
-    const result = await getStaticProps(context as Parameters<GetStaticProps>[0]);
+    await getStaticProps(context as Parameters<GetStaticProps>[0]);
 
     expect(serverSideTranslations).toHaveBeenCalledWith('en', ['common']);
   });

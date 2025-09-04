@@ -79,6 +79,7 @@ jest.mock('next/head', () => {
 jest.mock('next/image', () => ({
   __esModule: true,
   default: (props: { [key: string]: unknown; alt: string }) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { priority: _priority, ...otherProps } = props;
     // eslint-disable-next-line @next/next/no-img-element
     return <img {...(otherProps as React.ImgHTMLAttributes<HTMLImageElement>)} alt={props.alt} />;
