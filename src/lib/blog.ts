@@ -13,11 +13,11 @@ export interface BlogPost {
   slug: string;
   title: string;
   date: string;
-  updatedDate?: string;
+  updatedDate: string | null;
   excerpt: string;
   content: string;
   tags?: string[];
-  author?: string | null;
+  author: string | null;
   locale: string;
 }
 
@@ -25,10 +25,10 @@ export interface BlogPostMeta {
   slug: string;
   title: string;
   date: string;
-  updatedDate?: string;
+  updatedDate: string | null;
   excerpt: string;
   tags?: string[];
-  author?: string | null;
+  author: string | null;
   locale: string;
 }
 
@@ -53,7 +53,7 @@ export function getBlogPosts(locale: string): BlogPostMeta[] {
         slug,
         title: data.title,
         date: data.date,
-        updatedDate: data.updatedDate,
+        updatedDate: data.updatedDate || null,
         excerpt: data.excerpt,
         tags: data.tags || [],
         author: data.author || null,
@@ -90,7 +90,7 @@ export async function getBlogPost(slug: string, locale: string): Promise<BlogPos
     slug,
     title: data.title,
     date: data.date,
-    updatedDate: data.updatedDate,
+    updatedDate: data.updatedDate || null,
     excerpt: data.excerpt,
     content: contentHtml,
     tags: data.tags || [],

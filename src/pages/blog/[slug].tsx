@@ -2,11 +2,12 @@ import { GetStaticPaths, GetStaticProps } from 'next';
 import Link from 'next/link';
 import Head from 'next/head';
 import { format } from 'date-fns';
-import { CalendarDays, Tag, User, ArrowLeft, ChevronDown } from 'lucide-react';
+import { CalendarDays, Tag, User, ArrowLeft, ChevronDown, X } from 'lucide-react';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useRouter } from 'next/router';
 import { useState, useEffect, useRef } from 'react';
+import mermaid from 'mermaid';
 import { getBlogPost, getAllBlogSlugs, BlogPost } from '../../lib/blog';
 
 interface BlogPostPageProps {
@@ -18,7 +19,10 @@ export default function BlogPostPage({ post }: BlogPostPageProps) {
   const router = useRouter();
   const { locale, locales, asPath } = router;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [expandedDiagram, setExpandedDiagram] = useState<string | null>(null);
+  const [processedContent, setProcessedContent] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const languageConfig = {
     en: { name: 'English', flag: '🇺🇸' },
@@ -43,6 +47,113 @@ export default function BlogPostPage({ post }: BlogPostPageProps) {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  // Process mermaid diagrams in content
+  useEffect(() => {
+    if (processedContent !== null) return;
+
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'default',
+      securityLevel: 'loose',
+    });
+
+    const processMermaid = async () => {
+      // Create a temporary container to process the HTML
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = post.content;
+
+      const mermaidBlocks = tempDiv.querySelectorAll('pre > code.language-mermaid');
+      if (mermaidBlocks.length === 0) {
+        setProcessedContent(post.content);
+        return;
+      }
+
+      const svgMap: Record<number, string> = {};
+
+      for (let i = 0; i < mermaidBlocks.length; i++) {
+        const block = mermaidBlocks[i];
+        const code = block.textContent || '';
+        const id = `mermaid-${Date.now()}-${i}`;
+
+        try {
+          const { svg } = await mermaid.render(id, code);
+          svgMap[i] = svg;
+        } catch (error) {
+          console.error('Mermaid rendering error:', error);
+        }
+      }
+
+      // Replace code blocks with rendered SVGs
+      const mermaidBlocksAgain = tempDiv.querySelectorAll('pre > code.language-mermaid');
+      mermaidBlocksAgain.forEach((block, i) => {
+        const pre = block.parentElement;
+        if (!pre || !svgMap[i]) return;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'mermaid-diagram-wrapper';
+        wrapper.setAttribute('data-diagram-index', String(i));
+        wrapper.innerHTML = `
+          <div class="mermaid-diagram">${svgMap[i]}</div>
+          <button class="mermaid-expand-btn" data-diagram-index="${i}" title="Expand diagram">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+          </button>
+        `;
+        pre.replaceWith(wrapper);
+      });
+
+      setProcessedContent(tempDiv.innerHTML);
+    };
+
+    processMermaid();
+  }, [post.content, processedContent]);
+
+  // Reset processed content when post changes
+  useEffect(() => {
+    setProcessedContent(null);
+  }, [post.slug]);
+
+  // Handle click on expand buttons
+  useEffect(() => {
+    const container = contentRef.current;
+    if (!container || !processedContent) return;
+
+    const handleClick = (e: Event) => {
+      const target = e.target as HTMLElement;
+      const btn = target.closest('.mermaid-expand-btn') as HTMLElement;
+      if (!btn) return;
+
+      const wrapper = btn.closest('.mermaid-diagram-wrapper');
+      if (!wrapper) return;
+
+      const svg = wrapper.querySelector('.mermaid-diagram svg');
+      if (svg) {
+        setExpandedDiagram(svg.outerHTML);
+      }
+    };
+
+    container.addEventListener('click', handleClick);
+    return () => container.removeEventListener('click', handleClick);
+  }, [processedContent]);
+
+  // Close modal on ESC key
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setExpandedDiagram(null);
+      }
+    };
+
+    if (expandedDiagram) {
+      document.addEventListener('keydown', handleEsc);
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEsc);
+      document.body.style.overflow = '';
+    };
+  }, [expandedDiagram]);
 
   if (router.isFallback) {
     return <div>Loading...</div>;
@@ -164,15 +275,16 @@ export default function BlogPostPage({ post }: BlogPostPageProps) {
 
         <main className="max-w-4xl mx-auto px-4 py-8">
           <article className="bg-white rounded-lg shadow-sm p-8">
-            <div 
+            <div
+              ref={contentRef}
               className="prose prose-lg"
-              dangerouslySetInnerHTML={{ __html: post.content }}
+              dangerouslySetInnerHTML={{ __html: processedContent || post.content }}
             />
           </article>
 
           {/* Navigation */}
           <div className="mt-8 flex justify-center">
-            <Link 
+            <Link
               href="/blog"
               className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
             >
@@ -181,6 +293,36 @@ export default function BlogPostPage({ post }: BlogPostPageProps) {
           </div>
         </main>
       </div>
+
+      {/* Mermaid Diagram Modal */}
+      {expandedDiagram && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80"
+          onClick={() => setExpandedDiagram(null)}
+        >
+          <div
+            className="relative w-full h-full max-w-[95vw] max-h-[95vh] bg-white rounded-xl shadow-2xl flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200">
+              <span className="text-sm text-gray-500">Click outside or press ESC to close</span>
+              <button
+                onClick={() => setExpandedDiagram(null)}
+                className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                aria-label="Close"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-auto p-6">
+              <div
+                className="mermaid-modal-content w-full h-full flex items-center justify-center"
+                dangerouslySetInnerHTML={{ __html: expandedDiagram }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
