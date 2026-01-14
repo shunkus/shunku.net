@@ -192,7 +192,7 @@ export async function getBookChapter(
 }
 
 export function getAllBookSlugs(): { params: { slug: string }; locale: string }[] {
-  const locales = ['en', 'ja', 'ko', 'zh', 'es', 'fr'];
+  const locales = ['en', 'ja'];
   const allSlugs: { params: { slug: string }; locale: string }[] = [];
 
   for (const locale of locales) {
@@ -215,11 +215,11 @@ export function getAllBookSlugs(): { params: { slug: string }; locale: string }[
   return allSlugs;
 }
 
-export function getAllBookChapterSlugs(): { 
-  params: { bookSlug: string; chapterSlug: string }; 
-  locale: string 
+export function getAllBookChapterSlugs(): {
+  params: { bookSlug: string; chapterSlug: string };
+  locale: string
 }[] {
-  const locales = ['en', 'ja', 'ko', 'zh', 'es', 'fr'];
+  const locales = ['en', 'ja'];
   const allSlugs: { 
     params: { bookSlug: string; chapterSlug: string }; 
     locale: string 
