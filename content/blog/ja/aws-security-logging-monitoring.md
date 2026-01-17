@@ -40,6 +40,34 @@ author: "Shunku"
 
 CloudTrailはAWSサービスに対して行われたAPI呼び出しを記録します。誰かまたは何かがAWSとやり取りするたびに—EC2インスタンスの作成、セキュリティグループの変更、S3オブジェクトへのアクセス—CloudTrailはそのイベントをキャプチャできます。
 
+```mermaid
+flowchart LR
+    subgraph Sources["APIソース"]
+        Console["AWSコンソール"]
+        CLI["AWS CLI"]
+        SDK["AWS SDK"]
+        Service["AWSサービス"]
+    end
+
+    subgraph CloudTrail["CloudTrail"]
+        Trail["証跡"]
+    end
+
+    subgraph Destinations["送信先"]
+        S3["S3バケット"]
+        CWL["CloudWatch Logs"]
+        Lake["CloudTrail Lake"]
+    end
+
+    Sources --> CloudTrail
+    Trail --> S3
+    Trail --> CWL
+    Trail --> Lake
+
+    style CloudTrail fill:#f59e0b,color:#000
+    style Destinations fill:#22c55e,color:#fff
+```
+
 ### CloudTrailが記録するもの
 
 CloudTrailは以下をキャプチャします：
@@ -261,6 +289,47 @@ EventBridgeのターゲットには以下が含まれます：
 ### ログアーキテクチャ
 
 完全なセキュリティログアーキテクチャには以下が含まれます：
+
+```mermaid
+flowchart TB
+    subgraph Collection["1. 収集"]
+        CT["CloudTrail"]
+        VFL["VPC Flow Logs"]
+        CWL["CloudWatch Logs"]
+        Config["AWS Config"]
+    end
+
+    subgraph Storage["2. 保存"]
+        S3["S3<br/>(長期)"]
+        CWS["CloudWatch<br/>(リアルタイム)"]
+    end
+
+    subgraph Analysis["3. 分析"]
+        Insights["Logs Insights"]
+        Athena["Athena"]
+        OS["OpenSearch"]
+    end
+
+    subgraph Alerting["4. アラート"]
+        Alarms["CloudWatch Alarms"]
+        EB["EventBridge"]
+        SNS["SNS"]
+    end
+
+    subgraph Response["5. 応答"]
+        Lambda["Lambda"]
+        SSM["Systems Manager"]
+        SF["Step Functions"]
+    end
+
+    Collection --> Storage --> Analysis --> Alerting --> Response
+
+    style Collection fill:#3b82f6,color:#fff
+    style Storage fill:#6366f1,color:#fff
+    style Analysis fill:#8b5cf6,color:#fff
+    style Alerting fill:#f59e0b,color:#000
+    style Response fill:#22c55e,color:#fff
+```
 
 1. **収集**：API呼び出しのCloudTrail、ネットワークトラフィックのVPC Flow Logs、アプリケーションログのCloudWatch Logs、リソース状態のConfig
 

@@ -34,6 +34,33 @@ A VPC is a logically isolated section of AWS where you launch resources. Think o
 
 The fundamental network security design pattern in AWS is separating public and private subnets:
 
+```mermaid
+flowchart TB
+    Internet["Internet"] --> IGW["Internet Gateway"]
+
+    subgraph VPC["VPC (10.0.0.0/16)"]
+        IGW --> Public
+        subgraph Public["Public Subnet"]
+            ALB["Load Balancer"]
+            NAT["NAT Gateway"]
+        end
+
+        subgraph Private["Private Subnet"]
+            App["App Servers"]
+            DB["Database"]
+        end
+
+        ALB --> App
+        App --> DB
+        App --> NAT
+        NAT --> IGW
+    end
+
+    style Internet fill:#ef4444,color:#fff
+    style Public fill:#f59e0b,color:#000
+    style Private fill:#22c55e,color:#fff
+```
+
 **Public Subnets** have a route to an Internet Gateway. Resources here can receive traffic directly from the internet (if security groups allow). Use public subnets for:
 - Load balancers that receive user traffic
 - Bastion hosts for administrative access
@@ -131,6 +158,26 @@ NACLs shine when you need capabilities security groups lack:
 **Compliance Requirements**: Some compliance frameworks require explicit deny capabilities or subnet-level logging.
 
 ### Security Groups vs. NACLs
+
+```mermaid
+flowchart LR
+    subgraph SG["Security Groups"]
+        SG1["Stateful"]
+        SG2["Allow Only"]
+        SG3["Instance Level"]
+        SG4["All Rules Evaluated"]
+    end
+
+    subgraph NACL["Network ACLs"]
+        N1["Stateless"]
+        N2["Allow & Deny"]
+        N3["Subnet Level"]
+        N4["Ordered Rules"]
+    end
+
+    style SG fill:#3b82f6,color:#fff
+    style NACL fill:#8b5cf6,color:#fff
+```
 
 | Aspect | Security Group | NACL |
 |--------|---------------|------|
@@ -311,32 +358,42 @@ Flow logs can be sent to CloudWatch Logs (for real-time analysis) or S3 (for lon
 
 Effective VPC security uses multiple layers of controls. Each layer provides protection if another fails:
 
-```
-Layer 1: Edge (Internet-Facing)
-├── AWS Shield (DDoS protection)
-├── AWS WAF (Application protection)
-└── CloudFront (CDN with security features)
-         │
-         ▼
-Layer 2: VPC Perimeter
-├── Internet Gateway (entry point)
-├── Network Firewall (deep inspection)
-└── VPC Endpoints (private AWS access)
-         │
-         ▼
-Layer 3: Subnet
-├── Network ACLs (stateless filtering)
-└── Route Tables (traffic control)
-         │
-         ▼
-Layer 4: Instance
-├── Security Groups (stateful filtering)
-└── Host-based controls (OS firewalls)
-         │
-         ▼
-Layer 5: Data
-├── Encryption in transit
-└── Application-level controls
+```mermaid
+flowchart TB
+    subgraph L1["Layer 1: Edge"]
+        E1["AWS Shield"]
+        E2["AWS WAF"]
+        E3["CloudFront"]
+    end
+
+    subgraph L2["Layer 2: VPC Perimeter"]
+        P1["Internet Gateway"]
+        P2["Network Firewall"]
+        P3["VPC Endpoints"]
+    end
+
+    subgraph L3["Layer 3: Subnet"]
+        S1["Network ACLs"]
+        S2["Route Tables"]
+    end
+
+    subgraph L4["Layer 4: Instance"]
+        I1["Security Groups"]
+        I2["Host-based Controls"]
+    end
+
+    subgraph L5["Layer 5: Data"]
+        D1["Encryption in Transit"]
+        D2["Application Controls"]
+    end
+
+    L1 --> L2 --> L3 --> L4 --> L5
+
+    style L1 fill:#ef4444,color:#fff
+    style L2 fill:#f59e0b,color:#000
+    style L3 fill:#eab308,color:#000
+    style L4 fill:#22c55e,color:#fff
+    style L5 fill:#3b82f6,color:#fff
 ```
 
 ### Why Layers Matter

@@ -180,6 +180,23 @@ Detectiveは人間の調査を置き換えるのではなく、関連データ�
 
 効果的なインシデント対応は構造化されたアプローチに従います：
 
+```mermaid
+flowchart LR
+    P["1. 準備"] --> D["2. 検出<br/>& 分析"]
+    D --> C["3. 封じ込め"]
+    C --> E["4. 根絶"]
+    E --> R["5. 復旧"]
+    R --> PI["6. 事後活動"]
+    PI -.->|"教訓"| P
+
+    style P fill:#3b82f6,color:#fff
+    style D fill:#f59e0b,color:#000
+    style C fill:#ef4444,color:#fff
+    style E fill:#8b5cf6,color:#fff
+    style R fill:#22c55e,color:#fff
+    style PI fill:#6366f1,color:#fff
+```
+
 **準備**：インシデントが発生する前に、対応手順を確立し、対応者を指定し、ランブックを作成し、机上演習を通じて練習します。
 
 **検出と分析**：インシデントが発生したことを特定し、その性質と範囲を理解します。
@@ -234,6 +251,31 @@ AWSは以下を通じて自動応答を可能にします：
 ## セキュリティサービスエコシステム
 
 AWSセキュリティサービスは連携して動作します：
+
+```mermaid
+flowchart TB
+    subgraph Sources["検出サービス"]
+        GD["GuardDuty<br/>(脅威)"]
+        Insp["Inspector<br/>(脆弱性)"]
+        Macie["Macie<br/>(機密データ)"]
+        AA["IAM Access Analyzer<br/>(外部アクセス)"]
+        Config["Config<br/>(コンプライアンス)"]
+    end
+
+    subgraph Hub["集約"]
+        SH["Security Hub"]
+    end
+
+    subgraph Investigation["調査"]
+        Det["Detective"]
+    end
+
+    Sources --> SH
+    GD --> Det
+
+    style Hub fill:#f59e0b,color:#000
+    style Investigation fill:#3b82f6,color:#fff
+```
 
 **Inspector**はEC2インスタンス、コンテナイメージ、Lambda関数の脆弱性をスキャンします。検出結果はSecurity Hubに流れます。
 

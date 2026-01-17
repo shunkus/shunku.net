@@ -46,6 +46,33 @@ The principle of least privilege states that every identity should have only the
 
 IAM provides several identity types, each serving different use cases. Choosing the right identity type is a critical security decision.
 
+```mermaid
+flowchart TB
+    subgraph Principals["IAM Principals"]
+        U["IAM Users<br/>(Long-term credentials)"]
+        R["IAM Roles<br/>(Temporary credentials)"]
+        G["IAM Groups<br/>(User containers)"]
+    end
+
+    subgraph Policies["Permission Attachments"]
+        IP["Identity-Based<br/>Policies"]
+        PB["Permissions<br/>Boundaries"]
+    end
+
+    U --> G
+    G --> IP
+    U --> IP
+    R --> IP
+    U --> PB
+    R --> PB
+
+    style U fill:#ef4444,color:#fff
+    style R fill:#22c55e,color:#fff
+    style G fill:#3b82f6,color:#fff
+    style IP fill:#f59e0b,color:#000
+    style PB fill:#8b5cf6,color:#fff
+```
+
 ### IAM Users: For Humans Who Need Long-Term Access
 
 IAM users have permanent credentials (passwords and/or access keys). They're appropriate when:
@@ -161,6 +188,27 @@ Important: SCPs don't grant permissions. Even if an SCP allows an action, identi
 
 When a principal requests an action, AWS evaluates all applicable policies:
 
+```mermaid
+flowchart TD
+    Start["Request"] --> D1{"Explicit Deny<br/>in any policy?"}
+    D1 -->|Yes| Deny["DENY"]
+    D1 -->|No| D2{"SCP Allows?"}
+    D2 -->|No| Deny
+    D2 -->|Yes| D3{"Resource-based<br/>policy allows?"}
+    D3 -->|Yes| Allow["ALLOW"]
+    D3 -->|No| D4{"Identity-based<br/>policy allows?"}
+    D4 -->|No| Deny
+    D4 -->|Yes| D5{"Permissions<br/>boundary allows?"}
+    D5 -->|No| Deny
+    D5 -->|Yes| D6{"Session policy<br/>allows?"}
+    D6 -->|No| Deny
+    D6 -->|Yes| Allow
+
+    style Deny fill:#ef4444,color:#fff
+    style Allow fill:#22c55e,color:#fff
+    style Start fill:#3b82f6,color:#fff
+```
+
 1. **Explicit Deny Check**: If any policy explicitly denies the action, the request is denied. Explicit denies are absolute.
 
 2. **Organization SCPs**: If the account is in an Organization, SCPs must allow the action. No SCP permission = implicit deny.
@@ -217,11 +265,19 @@ Federation allows identities managed outside AWS to access AWS resources. This i
 
 SAML federation works with enterprise identity providers like Active Directory Federation Services (AD FS), Okta, and Azure AD.
 
-The flow:
-1. User authenticates with the identity provider
-2. Identity provider generates a SAML assertion (signed proof of identity and attributes)
-3. User exchanges the SAML assertion for AWS temporary credentials
-4. User accesses AWS with those credentials
+```mermaid
+sequenceDiagram
+    participant User
+    participant IdP as Identity Provider<br/>(Okta, AD FS, etc.)
+    participant STS as AWS STS
+    participant AWS as AWS Services
+
+    User->>IdP: 1. Authenticate
+    IdP->>User: 2. SAML Assertion
+    User->>STS: 3. AssumeRoleWithSAML
+    STS->>User: 4. Temporary Credentials
+    User->>AWS: 5. Access AWS Resources
+```
 
 SAML federation eliminates IAM user management for human access. The enterprise identity provider handles authentication, password policies, and MFA.
 

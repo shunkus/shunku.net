@@ -24,28 +24,27 @@ The model divides responsibilities into two clear categories:
 
 **Security IN the Cloud** — Customers are responsible for security configurations, data protection, and access management within the services they use.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    CUSTOMER RESPONSIBILITY                   │
-│                   (Security IN the Cloud)                    │
-├─────────────────────────────────────────────────────────────┤
-│  Customer Data                                               │
-│  Platform, Applications, Identity & Access Management        │
-│  Operating System, Network & Firewall Configuration          │
-│  Client-Side Data Encryption, Server-Side Encryption         │
-│  Network Traffic Protection                                  │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      AWS RESPONSIBILITY                      │
-│                   (Security OF the Cloud)                    │
-├─────────────────────────────────────────────────────────────┤
-│  Software: Compute, Storage, Database, Networking           │
-│  Hardware / AWS Global Infrastructure                        │
-│  Regions, Availability Zones, Edge Locations                │
-│  Physical Security, Environmental Controls                   │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Customer["CUSTOMER RESPONSIBILITY<br/>(Security IN the Cloud)"]
+        C1["Customer Data"]
+        C2["Platform, Applications, IAM"]
+        C3["Operating System, Network & Firewall Configuration"]
+        C4["Client-Side & Server-Side Encryption"]
+        C5["Network Traffic Protection"]
+    end
+
+    subgraph AWS["AWS RESPONSIBILITY<br/>(Security OF the Cloud)"]
+        A1["Software: Compute, Storage, Database, Networking"]
+        A2["Hardware / AWS Global Infrastructure"]
+        A3["Regions, Availability Zones, Edge Locations"]
+        A4["Physical Security, Environmental Controls"]
+    end
+
+    Customer --> AWS
+
+    style Customer fill:#f59e0b,color:#000
+    style AWS fill:#3b82f6,color:#fff
 ```
 
 ## What AWS Secures: Security OF the Cloud
@@ -101,6 +100,27 @@ Your responsibilities vary based on which AWS services you use. Understanding th
 ### The Service Model Spectrum
 
 AWS services fall along a spectrum from Infrastructure as a Service (IaaS) to fully managed services:
+
+```mermaid
+flowchart LR
+    subgraph IaaS["IaaS<br/>(EC2, EBS)"]
+        I1["High Customer<br/>Responsibility"]
+    end
+
+    subgraph PaaS["Container/Platform<br/>(RDS, ECS)"]
+        P1["Medium Customer<br/>Responsibility"]
+    end
+
+    subgraph Serverless["Managed/Serverless<br/>(Lambda, S3, DynamoDB)"]
+        S1["Lower Customer<br/>Responsibility"]
+    end
+
+    IaaS --> PaaS --> Serverless
+
+    style IaaS fill:#ef4444,color:#fff
+    style PaaS fill:#f59e0b,color:#000
+    style Serverless fill:#22c55e,color:#fff
+```
 
 | Service Type | Examples | Customer Responsibility Level |
 |--------------|----------|------------------------------|
@@ -250,35 +270,45 @@ Many AWS security features are available but not enabled by default:
 
 Security controls should be layered:
 
-```
-Layer 1: Edge Protection
-├── AWS Shield (DDoS protection)
-├── AWS WAF (Web Application Firewall)
-└── CloudFront (CDN with security features)
-         │
-         ▼
-Layer 2: Network Protection
-├── VPC design (public/private subnets)
-├── Network ACLs
-└── VPC Flow Logs
-         │
-         ▼
-Layer 3: Compute Protection
-├── Security Groups
-├── OS hardening
-└── Host-based firewalls
-         │
-         ▼
-Layer 4: Application Protection
-├── Secure coding practices
-├── Input validation
-└── Authentication/Authorization
-         │
-         ▼
-Layer 5: Data Protection
-├── Encryption at rest
-├── Encryption in transit
-└── Access controls
+```mermaid
+flowchart TB
+    subgraph L1["Layer 1: Edge Protection"]
+        E1["AWS Shield"]
+        E2["AWS WAF"]
+        E3["CloudFront"]
+    end
+
+    subgraph L2["Layer 2: Network Protection"]
+        N1["VPC Design"]
+        N2["Network ACLs"]
+        N3["VPC Flow Logs"]
+    end
+
+    subgraph L3["Layer 3: Compute Protection"]
+        C1["Security Groups"]
+        C2["OS Hardening"]
+        C3["Host-based Firewalls"]
+    end
+
+    subgraph L4["Layer 4: Application Protection"]
+        A1["Secure Coding"]
+        A2["Input Validation"]
+        A3["AuthN/AuthZ"]
+    end
+
+    subgraph L5["Layer 5: Data Protection"]
+        D1["Encryption at Rest"]
+        D2["Encryption in Transit"]
+        D3["Access Controls"]
+    end
+
+    L1 --> L2 --> L3 --> L4 --> L5
+
+    style L1 fill:#3b82f6,color:#fff
+    style L2 fill:#6366f1,color:#fff
+    style L3 fill:#8b5cf6,color:#fff
+    style L4 fill:#a855f7,color:#fff
+    style L5 fill:#d946ef,color:#fff
 ```
 
 ### Step 4: Monitor and Audit

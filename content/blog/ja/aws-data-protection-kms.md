@@ -47,6 +47,24 @@ KMSでデータを暗号化する際、データを暗号化のためにAWSに�
 
 KMSは階層的なキー構造を使用します：
 
+```mermaid
+flowchart TB
+    subgraph KMS["AWS KMS"]
+        CMK["KMSキー<br/>(KMSを離れない)"]
+    end
+
+    CMK -->|"暗号化"| DEK["データキー<br/>(暗号化済み)"]
+    DEK -->|"一緒に保存"| Data["暗号化データ"]
+
+    subgraph App["アプリケーション"]
+        PTEK["データキー<br/>(平文)"]
+        PTEK -->|"暗号化"| Data
+    end
+
+    style KMS fill:#3b82f6,color:#fff
+    style App fill:#22c55e,color:#fff
+```
+
 **KMSキー（旧称カスタマーマスターキー）**：これらはKMSに保存されるトップレベルのキーです。暗号化されていない状態でKMSを離れることはありません。KMSキーは少量のデータ（最大4KB）を直接暗号化するか、より一般的にはデータキーを暗号化します。
 
 **データキー**：実際にデータを暗号化するために使用されるキーです。KMSはオンデマンドでデータキーを生成し、KMSキーで暗号化して、平文キー（即時使用用）と暗号化キー（保存用）の両方を提供します。このパターンはエンベロープ暗号化と呼ばれます。
@@ -89,6 +107,27 @@ KMSはネットワークサービスです。すべての暗号化操作にはAW
 KMSは最大4KBのデータしか直接暗号化できません。これは意図的な設計選択です—KMSはバルクデータ暗号化ではなく、キー保護に最適化されています。エンベロープ暗号化はこの制限を完全に取り除きます。
 
 ### 実際の動作
+
+```mermaid
+sequenceDiagram
+    participant App as アプリケーション
+    participant KMS as AWS KMS
+    participant Store as ストレージ (S3/EBS)
+
+    Note over App,Store: 暗号化フロー
+    App->>KMS: 1. GenerateDataKey
+    KMS->>App: 2. 平文キー + 暗号化キー
+    App->>App: 3. ローカルでデータ暗号化
+    App->>Store: 4. 暗号化データ + 暗号化キーを保存
+    App->>App: 5. 平文キー破棄
+
+    Note over App,Store: 復号フロー
+    App->>Store: 6. 暗号化データ + キーを取得
+    App->>KMS: 7. Decrypt (暗号化キー)
+    KMS->>App: 8. 平文キー
+    App->>App: 9. ローカルでデータ復号
+    App->>App: 10. 平文キー破棄
+```
 
 暗号化時：
 1. KMS GenerateDataKeyを呼び出して、平文データキーとその暗号化形式を取得

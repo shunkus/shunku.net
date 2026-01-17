@@ -180,6 +180,23 @@ Detection is only valuable if you can respond effectively. Incident response is 
 
 Effective incident response follows a structured approach:
 
+```mermaid
+flowchart LR
+    P["1. Preparation"] --> D["2. Detection<br/>& Analysis"]
+    D --> C["3. Containment"]
+    C --> E["4. Eradication"]
+    E --> R["5. Recovery"]
+    R --> PI["6. Post-Incident"]
+    PI -.->|"Lessons Learned"| P
+
+    style P fill:#3b82f6,color:#fff
+    style D fill:#f59e0b,color:#000
+    style C fill:#ef4444,color:#fff
+    style E fill:#8b5cf6,color:#fff
+    style R fill:#22c55e,color:#fff
+    style PI fill:#6366f1,color:#fff
+```
+
 **Preparation**: Before incidents occur, establish response procedures, designate responders, create runbooks, and practice through tabletop exercises.
 
 **Detection and Analysis**: Identify that an incident has occurred and understand its nature and scope.
@@ -234,6 +251,31 @@ A typical automated response might:
 ## The Security Services Ecosystem
 
 AWS security services work together:
+
+```mermaid
+flowchart TB
+    subgraph Sources["Detection Services"]
+        GD["GuardDuty<br/>(Threats)"]
+        Insp["Inspector<br/>(Vulnerabilities)"]
+        Macie["Macie<br/>(Sensitive Data)"]
+        AA["IAM Access Analyzer<br/>(External Access)"]
+        Config["Config<br/>(Compliance)"]
+    end
+
+    subgraph Hub["Aggregation"]
+        SH["Security Hub"]
+    end
+
+    subgraph Investigation["Investigation"]
+        Det["Detective"]
+    end
+
+    Sources --> SH
+    GD --> Det
+
+    style Hub fill:#f59e0b,color:#000
+    style Investigation fill:#3b82f6,color:#fff
+```
 
 **Inspector** scans for vulnerabilities in EC2 instances, container images, and Lambda functions. Findings flow to Security Hub.
 

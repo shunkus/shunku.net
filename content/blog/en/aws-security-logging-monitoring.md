@@ -40,6 +40,34 @@ Without proper logging, compliance audits become impossible.
 
 CloudTrail records API calls made to AWS services. Every time someone or something interacts with AWS—creating an EC2 instance, modifying a security group, accessing an S3 object—CloudTrail can capture that event.
 
+```mermaid
+flowchart LR
+    subgraph Sources["API Sources"]
+        Console["AWS Console"]
+        CLI["AWS CLI"]
+        SDK["AWS SDK"]
+        Service["AWS Services"]
+    end
+
+    subgraph CloudTrail["CloudTrail"]
+        Trail["Trail"]
+    end
+
+    subgraph Destinations["Destinations"]
+        S3["S3 Bucket"]
+        CWL["CloudWatch Logs"]
+        Lake["CloudTrail Lake"]
+    end
+
+    Sources --> CloudTrail
+    Trail --> S3
+    Trail --> CWL
+    Trail --> Lake
+
+    style CloudTrail fill:#f59e0b,color:#000
+    style Destinations fill:#22c55e,color:#fff
+```
+
 ### What CloudTrail Records
 
 CloudTrail captures:
@@ -261,6 +289,47 @@ For example: When root account login is detected, EventBridge triggers a Lambda 
 ### The Logging Architecture
 
 A complete security logging architecture includes:
+
+```mermaid
+flowchart TB
+    subgraph Collection["1. Collection"]
+        CT["CloudTrail"]
+        VFL["VPC Flow Logs"]
+        CWL["CloudWatch Logs"]
+        Config["AWS Config"]
+    end
+
+    subgraph Storage["2. Storage"]
+        S3["S3<br/>(Long-term)"]
+        CWS["CloudWatch<br/>(Real-time)"]
+    end
+
+    subgraph Analysis["3. Analysis"]
+        Insights["Logs Insights"]
+        Athena["Athena"]
+        OS["OpenSearch"]
+    end
+
+    subgraph Alerting["4. Alerting"]
+        Alarms["CloudWatch Alarms"]
+        EB["EventBridge"]
+        SNS["SNS"]
+    end
+
+    subgraph Response["5. Response"]
+        Lambda["Lambda"]
+        SSM["Systems Manager"]
+        SF["Step Functions"]
+    end
+
+    Collection --> Storage --> Analysis --> Alerting --> Response
+
+    style Collection fill:#3b82f6,color:#fff
+    style Storage fill:#6366f1,color:#fff
+    style Analysis fill:#8b5cf6,color:#fff
+    style Alerting fill:#f59e0b,color:#000
+    style Response fill:#22c55e,color:#fff
+```
 
 1. **Collection**: CloudTrail for API calls, VPC Flow Logs for network traffic, CloudWatch Logs for application logs, Config for resource state
 

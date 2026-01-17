@@ -47,6 +47,24 @@ When you encrypt data with KMS, you're not sending your data to AWS for encrypti
 
 KMS uses a hierarchical key structure:
 
+```mermaid
+flowchart TB
+    subgraph KMS["AWS KMS"]
+        CMK["KMS Key<br/>(never leaves KMS)"]
+    end
+
+    CMK -->|"Encrypts"| DEK["Data Key<br/>(Encrypted)"]
+    DEK -->|"Stored with"| Data["Encrypted Data"]
+
+    subgraph App["Your Application"]
+        PTEK["Data Key<br/>(Plaintext)"]
+        PTEK -->|"Encrypts"| Data
+    end
+
+    style KMS fill:#3b82f6,color:#fff
+    style App fill:#22c55e,color:#fff
+```
+
 **KMS Keys (formerly Customer Master Keys)**: These are the top-level keys stored in KMS. They never leave KMS unencrypted. KMS keys can directly encrypt small amounts of data (up to 4 KB) or, more commonly, encrypt data keys.
 
 **Data Keys**: These are the keys actually used to encrypt your data. KMS generates data keys on demand, encrypts them with a KMS key, and gives you both the plaintext key (for immediate use) and the encrypted key (for storage). This pattern is called envelope encryption.
@@ -89,6 +107,27 @@ Envelope encryption solves this by limiting KMS calls. You call KMS once to gene
 KMS can only directly encrypt up to 4 KB of data. This is a deliberate design choice—KMS is optimized for key protection, not bulk data encryption. Envelope encryption removes this limitation entirely.
 
 ### How It Works in Practice
+
+```mermaid
+sequenceDiagram
+    participant App as Application
+    participant KMS as AWS KMS
+    participant Store as Storage (S3/EBS)
+
+    Note over App,Store: Encryption Flow
+    App->>KMS: 1. GenerateDataKey
+    KMS->>App: 2. Plaintext Key + Encrypted Key
+    App->>App: 3. Encrypt data locally
+    App->>Store: 4. Store encrypted data + encrypted key
+    App->>App: 5. Discard plaintext key
+
+    Note over App,Store: Decryption Flow
+    App->>Store: 6. Retrieve encrypted data + key
+    App->>KMS: 7. Decrypt (encrypted key)
+    KMS->>App: 8. Plaintext key
+    App->>App: 9. Decrypt data locally
+    App->>App: 10. Discard plaintext key
+```
 
 When encrypting:
 1. Call KMS GenerateDataKey to get a plaintext data key and its encrypted form

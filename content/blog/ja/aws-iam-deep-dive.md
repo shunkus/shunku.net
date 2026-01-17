@@ -46,6 +46,33 @@ IAMは以下のための統一フレームワークを提供することでこ�
 
 IAMはいくつかのアイデンティティタイプを提供し、それぞれ異なるユースケースに対応します。適切なアイデンティティタイプを選択することは、重要なセキュリティ上の決定です。
 
+```mermaid
+flowchart TB
+    subgraph Principals["IAMプリンシパル"]
+        U["IAMユーザー<br/>(長期認証情報)"]
+        R["IAMロール<br/>(一時認証情報)"]
+        G["IAMグループ<br/>(ユーザーコンテナ)"]
+    end
+
+    subgraph Policies["権限アタッチメント"]
+        IP["アイデンティティ<br/>ベースポリシー"]
+        PB["アクセス許可<br/>境界"]
+    end
+
+    U --> G
+    G --> IP
+    U --> IP
+    R --> IP
+    U --> PB
+    R --> PB
+
+    style U fill:#ef4444,color:#fff
+    style R fill:#22c55e,color:#fff
+    style G fill:#3b82f6,color:#fff
+    style IP fill:#f59e0b,color:#000
+    style PB fill:#8b5cf6,color:#fff
+```
+
 ### IAMユーザー：長期アクセスが必要な人間向け
 
 IAMユーザーは永続的な認証情報（パスワードやアクセスキー）を持っています。以下の場合に適しています：
@@ -161,6 +188,27 @@ SCPは以下に強力です：
 
 プリンシパルがアクションを要求すると、AWSは適用可能なすべてのポリシーを評価します：
 
+```mermaid
+flowchart TD
+    Start["リクエスト"] --> D1{"明示的拒否<br/>いずれかのポリシーで?"}
+    D1 -->|Yes| Deny["拒否"]
+    D1 -->|No| D2{"SCPが許可?"}
+    D2 -->|No| Deny
+    D2 -->|Yes| D3{"リソースベース<br/>ポリシーが許可?"}
+    D3 -->|Yes| Allow["許可"]
+    D3 -->|No| D4{"アイデンティティベース<br/>ポリシーが許可?"}
+    D4 -->|No| Deny
+    D4 -->|Yes| D5{"アクセス許可<br/>境界が許可?"}
+    D5 -->|No| Deny
+    D5 -->|Yes| D6{"セッション<br/>ポリシーが許可?"}
+    D6 -->|No| Deny
+    D6 -->|Yes| Allow
+
+    style Deny fill:#ef4444,color:#fff
+    style Allow fill:#22c55e,color:#fff
+    style Start fill:#3b82f6,color:#fff
+```
+
 1. **明示的拒否チェック**：いずれかのポリシーがアクションを明示的に拒否している場合、要求は拒否されます。明示的拒否は絶対的です。
 
 2. **組織SCP**：アカウントがOrganizationに属している場合、SCPがアクションを許可する必要があります。SCP権限なし=暗黙の拒否。
@@ -217,11 +265,19 @@ AWS Security Token Service（STS）は、自動的に期限切れになる一時
 
 SAMLフェデレーションは、Active Directoryフェデレーションサービス（AD FS）、Okta、Azure ADなどのエンタープライズIDプロバイダーと連携します。
 
-フロー：
-1. ユーザーがIDプロバイダーで認証
-2. IDプロバイダーがSAMLアサーション（署名された本人確認と属性の証明）を生成
-3. ユーザーがSAMLアサーションをAWS一時認証情報と交換
-4. ユーザーがその認証情報でAWSにアクセス
+```mermaid
+sequenceDiagram
+    participant User as ユーザー
+    participant IdP as IDプロバイダー<br/>(Okta, AD FS等)
+    participant STS as AWS STS
+    participant AWS as AWSサービス
+
+    User->>IdP: 1. 認証
+    IdP->>User: 2. SAMLアサーション
+    User->>STS: 3. AssumeRoleWithSAML
+    STS->>User: 4. 一時認証情報
+    User->>AWS: 5. AWSリソースにアクセス
+```
 
 SAMLフェデレーションは、人間のアクセスのためのIAMユーザー管理を排除します。エンタープライズIDプロバイダーが認証、パスワードポリシー、MFAを処理します。
 
