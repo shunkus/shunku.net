@@ -1,718 +1,382 @@
 ---
 title: "AWS VPC Security: Security Groups, NACLs, and Network Protection"
 date: "2025-11-11"
-excerpt: "Master AWS VPC security - Security Groups vs NACLs, VPC Endpoints, Network Firewall, WAF, and defense-in-depth strategies."
+excerpt: "Master AWS VPC security - understand Security Groups vs NACLs, VPC Endpoints, Network Firewall, and defense-in-depth strategies."
 tags: ["AWS", "Security", "VPC", "Networking", "Certification"]
 author: "Shunku"
 ---
 
-AWS Virtual Private Cloud (VPC) security is a critical domain for the AWS Security Specialty certification. Understanding network security controls helps you build secure, isolated environments.
+AWS Virtual Private Cloud (VPC) is your private network within AWS. Understanding VPC security is critical because the network layer is often your first line of defense against threats—and your last line of defense when other controls fail.
 
-## VPC Security Overview
+## Why VPC Security Matters
 
-```mermaid
-flowchart TB
-    subgraph Internet
-        A[Internet Traffic]
-    end
+In a traditional data center, physical network boundaries provide implicit security. Servers on different network segments cannot communicate unless explicitly connected. The network perimeter—firewalls, routers, switches—provides a natural chokepoint for security controls.
 
-    subgraph Edge["Edge Protection"]
-        B[AWS Shield]
-        C[AWS WAF]
-        D[CloudFront]
-    end
+In the cloud, these physical boundaries don't exist in the same way. All of AWS shares the same underlying infrastructure. Your VPC creates a logical boundary, but you must explicitly configure that boundary's security. Without proper VPC security:
 
-    subgraph VPC["VPC"]
-        E[Internet Gateway]
-        F[Network Firewall]
+- Resources in your VPC could be accessible from the internet when they shouldn't be
+- Internal resources could communicate with each other without restriction
+- Compromised instances could pivot to attack other resources
+- Data could leave your network without detection
 
-        subgraph Public["Public Subnet"]
-            G[NACL]
-            H[ALB]
-            I[Security Group]
-        end
+VPC security is about creating and enforcing the network boundaries that protect your workloads.
 
-        subgraph Private["Private Subnet"]
-            J[NACL]
-            K[EC2 Instances]
-            L[Security Group]
-        end
-    end
+## Understanding VPCs: Your Private Network
 
-    A --> B --> C --> D --> E
-    E --> F --> G --> H --> I
-    I --> J --> K --> L
+A VPC is a logically isolated section of AWS where you launch resources. Think of it as your own private data center in the cloud, but with complete control over:
 
-    style Edge fill:#f59e0b,color:#fff
-    style VPC fill:#3b82f6,color:#fff
-```
+- **IP Address Range**: You define the CIDR block (e.g., 10.0.0.0/16)
+- **Subnets**: Divide your VPC into segments, each in a specific Availability Zone
+- **Routing**: Control how traffic flows between subnets and to/from the internet
+- **Gateways**: Define entry and exit points for internet, VPN, and peered VPC traffic
 
-## Security Groups vs NACLs
+### Public vs. Private Subnets
 
-### Comparison
+The fundamental network security design pattern in AWS is separating public and private subnets:
 
-| Feature | Security Groups | NACLs |
-|---------|----------------|-------|
+**Public Subnets** have a route to an Internet Gateway. Resources here can receive traffic directly from the internet (if security groups allow). Use public subnets for:
+- Load balancers that receive user traffic
+- Bastion hosts for administrative access
+- NAT Gateways (to provide outbound internet access for private subnets)
+
+**Private Subnets** have no direct route to the internet. Resources here are protected from direct internet access. Use private subnets for:
+- Application servers
+- Databases
+- Internal services
+- Any resource that doesn't need to receive traffic from the internet
+
+This design ensures that even if someone knows the private IP of your database server, they cannot reach it from the internet—there's simply no route.
+
+## Security Groups: Your Instance-Level Firewall
+
+Security Groups are virtual firewalls that control traffic at the instance (ENI) level. They're the most commonly used network security control in AWS.
+
+### Key Characteristics
+
+**Stateful**: If you allow traffic in one direction, the response is automatically allowed in the other direction. If you create an inbound rule allowing HTTPS, the response traffic is permitted without an explicit outbound rule.
+
+**Allow-Only**: Security groups can only allow traffic—they cannot explicitly deny. If traffic doesn't match any allow rule, it's denied.
+
+**All Rules Evaluated**: Unlike NACLs, all security group rules are evaluated before deciding. If any rule allows the traffic, it's permitted.
+
+**Instance-Level**: Each instance can have multiple security groups. The effective rules are the union of all attached security groups.
+
+### Why Stateful Matters
+
+The stateful nature of security groups dramatically simplifies configuration. Consider a web server:
+
+- **Inbound rule**: Allow TCP 443 from anywhere
+- **Outbound rule**: (Default allows all)
+
+When a client connects on port 443, the server responds from an ephemeral port (e.g., 49152). Because security groups are stateful, this response is automatically allowed—you don't need to explicitly allow outbound traffic on ephemeral ports.
+
+### Security Group Referencing
+
+One of the most powerful security group features is referencing other security groups instead of IP ranges. This enables patterns like:
+
+- Allow database access only from application servers (not by IP, but by security group membership)
+- Allow load balancer health checks only from the load balancer's security group
+
+This approach:
+- **Scales automatically**: Add a new app server, it immediately has database access
+- **Is more secure**: You can't accidentally allow the wrong IP
+- **Survives IP changes**: Auto-scaling, instance replacement—no rule updates needed
+
+### Common Security Group Mistakes
+
+**Opening 0.0.0.0/0 for SSH/RDP**: This allows administrative access from anywhere on the internet. Attackers constantly scan for these open ports. Instead, use Systems Manager Session Manager, bastion hosts with restricted access, or VPN.
+
+**Using "-1" Protocol (All Traffic)**: This allows all protocols and ports. It's rarely what you actually need and dramatically increases attack surface.
+
+**Not Using Security Group References**: Hardcoding IP addresses means manual updates when infrastructure changes and potential security gaps during transitions.
+
+## Network ACLs: Your Subnet-Level Firewall
+
+Network Access Control Lists (NACLs) operate at the subnet level, filtering traffic entering and leaving subnets.
+
+### Key Characteristics
+
+**Stateless**: Unlike security groups, NACLs don't track connections. You must explicitly allow both inbound and outbound traffic—including response traffic.
+
+**Allow and Deny**: NACLs can explicitly deny traffic, which security groups cannot.
+
+**Ordered Rule Evaluation**: Rules are evaluated in order (lowest rule number first). The first matching rule is applied, and evaluation stops.
+
+**Subnet-Level**: All traffic entering or leaving the subnet passes through the NACL.
+
+### Why Stateless Matters
+
+Because NACLs are stateless, you must account for response traffic. For a web server allowing HTTPS:
+
+**Inbound rules needed**:
+- Allow TCP 443 from anywhere (client requests)
+- Allow TCP 1024-65535 from anywhere (responses to outbound requests)
+
+**Outbound rules needed**:
+- Allow TCP 1024-65535 to anywhere (responses to inbound requests)
+- Allow TCP 443 to anywhere (outbound HTTPS requests)
+
+The ephemeral port range (1024-65535) is necessary because responses use high-numbered ports. This is more complex than security groups but provides additional control.
+
+### When to Use NACLs
+
+NACLs shine when you need capabilities security groups lack:
+
+**Explicit Deny Rules**: Block known bad IP addresses at the subnet boundary, even if a security group would allow them.
+
+**Subnet-Level Control**: Apply consistent rules to all resources in a subnet, regardless of their individual security group configurations.
+
+**Defense in Depth**: Provide an additional layer of protection. Even if a security group is misconfigured, the NACL can provide a safety net.
+
+**Compliance Requirements**: Some compliance frameworks require explicit deny capabilities or subnet-level logging.
+
+### Security Groups vs. NACLs
+
+| Aspect | Security Group | NACL |
+|--------|---------------|------|
 | Level | Instance/ENI | Subnet |
 | State | Stateful | Stateless |
 | Rules | Allow only | Allow and Deny |
-| Evaluation | All rules evaluated | Rules in order |
-| Default | Deny all inbound | Allow all |
-| Association | Multiple per instance | One per subnet |
+| Evaluation | All rules, union | Ordered, first match |
+| Default | Deny all inbound, allow all outbound | Allow all |
+| Common Use | Primary access control | Additional blocking, compliance |
 
-### Security Groups (Stateful)
+In practice, most organizations use security groups as their primary control and NACLs for additional defense-in-depth or specific blocking requirements.
 
-```python
-import boto3
+## VPC Endpoints: Keeping AWS Traffic Private
 
-ec2 = boto3.client('ec2')
+When resources in your VPC access AWS services (S3, DynamoDB, Secrets Manager), by default that traffic goes over the internet. VPC Endpoints keep this traffic entirely within the AWS network.
 
-# Create security group
-response = ec2.create_security_group(
-    GroupName='web-server-sg',
-    Description='Web server security group',
-    VpcId='vpc-12345678'
-)
+### Why This Matters
 
-sg_id = response['GroupId']
+**Security**: Traffic that never leaves the AWS network cannot be intercepted on the public internet.
 
-# Add inbound rules
-ec2.authorize_security_group_ingress(
-    GroupId=sg_id,
-    IpPermissions=[
-        {
-            'IpProtocol': 'tcp',
-            'FromPort': 443,
-            'ToPort': 443,
-            'IpRanges': [{'CidrIp': '0.0.0.0/0', 'Description': 'HTTPS from anywhere'}]
-        },
-        {
-            'IpProtocol': 'tcp',
-            'FromPort': 80,
-            'ToPort': 80,
-            'IpRanges': [{'CidrIp': '0.0.0.0/0', 'Description': 'HTTP from anywhere'}]
-        }
-    ]
-)
+**Compliance**: Some compliance frameworks require data to stay within private networks.
 
-# Security group referencing another security group
-ec2.authorize_security_group_ingress(
-    GroupId=sg_id,
-    IpPermissions=[
-        {
-            'IpProtocol': 'tcp',
-            'FromPort': 3306,
-            'ToPort': 3306,
-            'UserIdGroupPairs': [
-                {
-                    'GroupId': 'sg-app-servers',
-                    'Description': 'MySQL from app servers'
-                }
-            ]
-        }
-    ]
-)
+**Cost**: Data transfer through VPC endpoints can be cheaper than internet egress.
+
+**Reliability**: You're not dependent on internet connectivity to reach AWS services.
+
+### Gateway Endpoints vs. Interface Endpoints
+
+**Gateway Endpoints** (S3 and DynamoDB only):
+- Appear as route table entries
+- No per-hour charge
+- Limited to S3 and DynamoDB
+- Use endpoint policies for access control
+
+**Interface Endpoints** (most other AWS services):
+- Create ENIs in your subnets
+- Hourly charge + data processing
+- Support most AWS services and third-party PrivateLink services
+- Use security groups + endpoint policies for access control
+- Support private DNS (service endpoints resolve to private IPs)
+
+### Endpoint Policies
+
+Both endpoint types support policies that restrict what can be accessed through the endpoint:
+
+- Restrict to specific S3 buckets
+- Allow only certain API actions
+- Require conditions (source VPC, IAM principal)
+
+This enables patterns like: "Resources in this VPC can only access our company's S3 buckets, not any arbitrary bucket."
+
+## AWS Network Firewall: Deep Packet Inspection
+
+Network Firewall provides stateful inspection, intrusion detection and prevention, and domain filtering at the VPC level.
+
+### When You Need Network Firewall
+
+- **Compliance requirements** mandate IDS/IPS capabilities
+- You need to **inspect encrypted traffic** (with TLS inspection)
+- You want to **filter by domain name** (allow only *.amazonaws.com)
+- You need **centralized network security** across multiple VPCs
+- You require **Suricata-compatible rules** for custom detection
+
+### How It Works
+
+Network Firewall deploys managed endpoints in your subnets. You route traffic through these endpoints using route tables. The firewall inspects traffic and applies rules:
+
+**Stateless Rules**: Simple packet filtering (source/destination IP and port). Evaluated first, can pass traffic to stateful rules or drop/forward immediately.
+
+**Stateful Rules**: Connection-aware inspection. Can use domain lists, Suricata rules, or standard 5-tuple rules.
+
+**Domain Filtering**: Allow or block traffic based on HTTP Host header or TLS SNI (Server Name Indication).
+
+### Network Firewall vs. Security Groups/NACLs
+
+Network Firewall provides capabilities that security groups and NACLs cannot:
+
+- **Domain-based filtering**: Allow traffic to *.amazonaws.com but not arbitrary domains
+- **IDS/IPS**: Detect and block known attack patterns
+- **Centralized management**: Apply consistent rules across multiple VPCs
+- **Detailed logging**: Log full traffic details, not just accept/reject
+
+The cost is significant ($0.395/hour per endpoint plus data processing), so it's typically used for compliance requirements or high-security environments rather than general use.
+
+## AWS WAF: Application Layer Protection
+
+Web Application Firewall (WAF) operates at layer 7 (HTTP/HTTPS), protecting web applications from common exploits.
+
+### What WAF Protects Against
+
+- **SQL Injection**: Malicious SQL in request parameters
+- **Cross-Site Scripting (XSS)**: Script injection attacks
+- **Common Exploits**: Known vulnerabilities in common software
+- **Bot Traffic**: Automated attacks and scraping
+- **Rate-Based Attacks**: Too many requests from single sources
+
+### AWS Managed Rules
+
+AWS provides managed rule sets maintained by AWS security researchers:
+
+- **Core Rule Set (CRS)**: General protection against common threats
+- **SQL Injection Rules**: Detect SQLi patterns
+- **Known Bad Inputs**: Block requests with known malicious patterns
+- **Admin Protection**: Protect administrative endpoints
+- **Bot Control**: Identify and manage bot traffic
+
+These rules are updated by AWS as new threats emerge—you don't need to maintain them yourself.
+
+### Where WAF Applies
+
+WAF protects:
+- CloudFront distributions
+- Application Load Balancers
+- API Gateway REST APIs
+- AppSync GraphQL APIs
+- Cognito User Pools
+
+WAF doesn't protect resources directly—it protects the entry points through which traffic reaches your resources.
+
+## AWS Shield: DDoS Protection
+
+Shield protects against Distributed Denial of Service (DDoS) attacks that attempt to overwhelm your resources with traffic.
+
+### Shield Standard (Free)
+
+All AWS customers automatically receive Shield Standard protection:
+- Protects against common layer 3/4 attacks
+- Always-on detection and automatic mitigation
+- No action required—it's automatic
+
+### Shield Advanced ($3,000/month + data transfer)
+
+For applications requiring stronger protection:
+- Enhanced detection and mitigation for larger, more sophisticated attacks
+- Protection for Elastic IPs, CloudFront, Route 53, Global Accelerator, ALB, NLB
+- 24/7 access to the DDoS Response Team (DRT)
+- Cost protection (AWS credits for scaling costs during attacks)
+- AWS WAF at no additional cost for protected resources
+- Detailed attack visibility and post-attack analysis
+
+Shield Advanced makes sense for business-critical applications where downtime costs exceed the Shield Advanced subscription.
+
+## VPC Flow Logs: Network Visibility
+
+Flow Logs capture metadata about network traffic in your VPC—essential for security monitoring, troubleshooting, and compliance.
+
+### What Flow Logs Capture
+
+For each network flow, logs record:
+- Source and destination IP addresses
+- Source and destination ports
+- Protocol
+- Packet and byte counts
+- Action (ACCEPT or REJECT)
+- Interface, subnet, and VPC identifiers
+
+### What Flow Logs Don't Capture
+
+- Packet payloads (only metadata)
+- DNS queries to Route 53 Resolver
+- Traffic to/from instance metadata service
+- DHCP traffic
+- Traffic to the reserved IP addresses in a subnet
+
+### Using Flow Logs for Security
+
+**Detect Anomalies**: Identify unexpected traffic patterns, connections to known bad IPs, or unusual port usage.
+
+**Investigate Incidents**: When a security event occurs, flow logs show what communications happened.
+
+**Verify Segmentation**: Confirm that traffic between subnets matches your expected patterns.
+
+**Compliance Evidence**: Demonstrate that network controls are working as designed.
+
+Flow logs can be sent to CloudWatch Logs (for real-time analysis) or S3 (for long-term storage and Athena queries).
+
+## Defense in Depth: Layered Security
+
+Effective VPC security uses multiple layers of controls. Each layer provides protection if another fails:
+
+```
+Layer 1: Edge (Internet-Facing)
+├── AWS Shield (DDoS protection)
+├── AWS WAF (Application protection)
+└── CloudFront (CDN with security features)
+         │
+         ▼
+Layer 2: VPC Perimeter
+├── Internet Gateway (entry point)
+├── Network Firewall (deep inspection)
+└── VPC Endpoints (private AWS access)
+         │
+         ▼
+Layer 3: Subnet
+├── Network ACLs (stateless filtering)
+└── Route Tables (traffic control)
+         │
+         ▼
+Layer 4: Instance
+├── Security Groups (stateful filtering)
+└── Host-based controls (OS firewalls)
+         │
+         ▼
+Layer 5: Data
+├── Encryption in transit
+└── Application-level controls
 ```
 
-### Network ACLs (Stateless)
+### Why Layers Matter
 
-```python
-import boto3
+**No Single Point of Failure**: If a security group is misconfigured, NACLs might still block the traffic.
 
-ec2 = boto3.client('ec2')
+**Different Capabilities**: Each layer provides capabilities others lack (e.g., NACLs can deny, WAF understands HTTP).
 
-# Create NACL
-nacl = ec2.create_network_acl(VpcId='vpc-12345678')
-nacl_id = nacl['NetworkAcl']['NetworkAclId']
+**Defense Against Different Threats**: DDoS protection at the edge, SQL injection protection at the application layer.
 
-# Add inbound rules (must specify both directions)
-# Rule 100: Allow HTTPS inbound
-ec2.create_network_acl_entry(
-    NetworkAclId=nacl_id,
-    RuleNumber=100,
-    Protocol='6',  # TCP
-    RuleAction='allow',
-    Egress=False,
-    CidrBlock='0.0.0.0/0',
-    PortRange={'From': 443, 'To': 443}
-)
-
-# Rule 200: Allow ephemeral ports for responses
-ec2.create_network_acl_entry(
-    NetworkAclId=nacl_id,
-    RuleNumber=200,
-    Protocol='6',
-    RuleAction='allow',
-    Egress=False,
-    CidrBlock='0.0.0.0/0',
-    PortRange={'From': 1024, 'To': 65535}
-)
-
-# Outbound rules
-# Rule 100: Allow HTTPS outbound
-ec2.create_network_acl_entry(
-    NetworkAclId=nacl_id,
-    RuleNumber=100,
-    Protocol='6',
-    RuleAction='allow',
-    Egress=True,
-    CidrBlock='0.0.0.0/0',
-    PortRange={'From': 443, 'To': 443}
-)
-
-# Rule 200: Allow ephemeral ports for responses
-ec2.create_network_acl_entry(
-    NetworkAclId=nacl_id,
-    RuleNumber=200,
-    Protocol='6',
-    RuleAction='allow',
-    Egress=True,
-    CidrBlock='0.0.0.0/0',
-    PortRange={'From': 1024, 'To': 65535}
-)
-```
-
-### When to Use Each
-
-```mermaid
-flowchart LR
-    subgraph NACL["Use NACLs For"]
-        A[Subnet-level blocking]
-        B[Explicit deny rules]
-        C[Block specific IPs]
-    end
-
-    subgraph SG["Use Security Groups For"]
-        D[Instance-level access]
-        E[Application tier separation]
-        F[Reference other SGs]
-    end
-
-    style NACL fill:#f59e0b,color:#fff
-    style SG fill:#3b82f6,color:#fff
-```
-
-## VPC Endpoints
-
-### Gateway Endpoints (S3, DynamoDB)
-
-```python
-import boto3
-
-ec2 = boto3.client('ec2')
-
-# Create gateway endpoint for S3
-response = ec2.create_vpc_endpoint(
-    VpcId='vpc-12345678',
-    ServiceName='com.amazonaws.us-east-1.s3',
-    VpcEndpointType='Gateway',
-    RouteTableIds=['rtb-12345678']
-)
-
-endpoint_id = response['VpcEndpoint']['VpcEndpointId']
-```
-
-### Gateway Endpoint Policy
-
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "RestrictToSpecificBucket",
-      "Effect": "Allow",
-      "Principal": "*",
-      "Action": [
-        "s3:GetObject",
-        "s3:PutObject"
-      ],
-      "Resource": "arn:aws:s3:::my-private-bucket/*"
-    },
-    {
-      "Sid": "DenyOtherBuckets",
-      "Effect": "Deny",
-      "Principal": "*",
-      "Action": "s3:*",
-      "Resource": "*",
-      "Condition": {
-        "StringNotEquals": {
-          "s3:ResourceAccount": "123456789012"
-        }
-      }
-    }
-  ]
-}
-```
-
-### Interface Endpoints (PrivateLink)
-
-```python
-import boto3
-
-ec2 = boto3.client('ec2')
-
-# Create interface endpoint for Secrets Manager
-response = ec2.create_vpc_endpoint(
-    VpcId='vpc-12345678',
-    ServiceName='com.amazonaws.us-east-1.secretsmanager',
-    VpcEndpointType='Interface',
-    SubnetIds=['subnet-private-1', 'subnet-private-2'],
-    SecurityGroupIds=['sg-endpoint'],
-    PrivateDnsEnabled=True
-)
-```
-
-### Endpoint Security Comparison
-
-| Feature | Gateway Endpoint | Interface Endpoint |
-|---------|-----------------|-------------------|
-| Services | S3, DynamoDB | Most AWS services |
-| Cost | Free | Hourly + data charges |
-| DNS | Route table entry | Private DNS |
-| Security | Endpoint policy | Security Group + Policy |
-| HA | Built-in | Multi-AZ deployment |
-
-## AWS Network Firewall
-
-```mermaid
-flowchart LR
-    A[Internet] --> B[IGW]
-    B --> C[Network Firewall]
-    C --> D{Rules}
-    D -->|Allow| E[Protected Subnets]
-    D -->|Drop| F[Blocked]
-    D -->|Alert| G[Logging]
-
-    style C fill:#f59e0b,color:#fff
-```
-
-### Firewall Configuration
-
-```python
-import boto3
-
-network_firewall = boto3.client('network-firewall')
-
-# Create stateless rule group
-stateless_rules = network_firewall.create_rule_group(
-    RuleGroupName='block-bad-ips',
-    Type='STATELESS',
-    Capacity=100,
-    RuleGroup={
-        'RulesSource': {
-            'StatelessRulesAndCustomActions': {
-                'StatelessRules': [
-                    {
-                        'RuleDefinition': {
-                            'MatchAttributes': {
-                                'Sources': [
-                                    {'AddressDefinition': '192.0.2.0/24'}
-                                ]
-                            },
-                            'Actions': ['aws:drop']
-                        },
-                        'Priority': 1
-                    }
-                ]
-            }
-        }
-    }
-)
-
-# Create stateful rule group with domain filtering
-stateful_rules = network_firewall.create_rule_group(
-    RuleGroupName='allow-domains',
-    Type='STATEFUL',
-    Capacity=100,
-    RuleGroup={
-        'RulesSource': {
-            'RulesSourceList': {
-                'Targets': [
-                    '.amazonaws.com',
-                    '.github.com'
-                ],
-                'TargetTypes': ['HTTP_HOST', 'TLS_SNI'],
-                'GeneratedRulesType': 'ALLOWLIST'
-            }
-        }
-    }
-)
-```
-
-### Suricata Rules
-
-```python
-# Create stateful rule group with Suricata rules
-suricata_rules = network_firewall.create_rule_group(
-    RuleGroupName='intrusion-detection',
-    Type='STATEFUL',
-    Capacity=100,
-    RuleGroup={
-        'RulesSource': {
-            'RulesString': '''
-# Block SQL injection attempts
-drop http any any -> any any (msg:"SQL Injection"; content:"SELECT"; nocase; content:"FROM"; nocase; sid:1000001; rev:1;)
-
-# Alert on suspicious user agents
-alert http any any -> any any (msg:"Suspicious UA"; http.user_agent; content:"sqlmap"; nocase; sid:1000002; rev:1;)
-'''
-        }
-    }
-)
-```
-
-## AWS WAF
-
-### Web ACL Configuration
-
-```python
-import boto3
-
-wafv2 = boto3.client('wafv2')
-
-# Create Web ACL
-response = wafv2.create_web_acl(
-    Name='api-protection',
-    Scope='REGIONAL',  # or 'CLOUDFRONT'
-    DefaultAction={'Allow': {}},
-    Rules=[
-        {
-            'Name': 'AWS-AWSManagedRulesCommonRuleSet',
-            'Priority': 1,
-            'Statement': {
-                'ManagedRuleGroupStatement': {
-                    'VendorName': 'AWS',
-                    'Name': 'AWSManagedRulesCommonRuleSet'
-                }
-            },
-            'OverrideAction': {'None': {}},
-            'VisibilityConfig': {
-                'SampledRequestsEnabled': True,
-                'CloudWatchMetricsEnabled': True,
-                'MetricName': 'CommonRules'
-            }
-        },
-        {
-            'Name': 'AWS-AWSManagedRulesSQLiRuleSet',
-            'Priority': 2,
-            'Statement': {
-                'ManagedRuleGroupStatement': {
-                    'VendorName': 'AWS',
-                    'Name': 'AWSManagedRulesSQLiRuleSet'
-                }
-            },
-            'OverrideAction': {'None': {}},
-            'VisibilityConfig': {
-                'SampledRequestsEnabled': True,
-                'CloudWatchMetricsEnabled': True,
-                'MetricName': 'SQLiRules'
-            }
-        },
-        {
-            'Name': 'RateLimit',
-            'Priority': 3,
-            'Statement': {
-                'RateBasedStatement': {
-                    'Limit': 2000,
-                    'AggregateKeyType': 'IP'
-                }
-            },
-            'Action': {'Block': {}},
-            'VisibilityConfig': {
-                'SampledRequestsEnabled': True,
-                'CloudWatchMetricsEnabled': True,
-                'MetricName': 'RateLimit'
-            }
-        }
-    ],
-    VisibilityConfig={
-        'SampledRequestsEnabled': True,
-        'CloudWatchMetricsEnabled': True,
-        'MetricName': 'api-protection'
-    }
-)
-```
-
-### Custom Rules
-
-```python
-# Geo-blocking rule
-geo_rule = {
-    'Name': 'GeoBlock',
-    'Priority': 0,
-    'Statement': {
-        'GeoMatchStatement': {
-            'CountryCodes': ['RU', 'CN', 'KP']
-        }
-    },
-    'Action': {'Block': {}},
-    'VisibilityConfig': {
-        'SampledRequestsEnabled': True,
-        'CloudWatchMetricsEnabled': True,
-        'MetricName': 'GeoBlock'
-    }
-}
-
-# IP set blocking
-ip_set = wafv2.create_ip_set(
-    Name='blocked-ips',
-    Scope='REGIONAL',
-    IPAddressVersion='IPV4',
-    Addresses=['192.0.2.0/24', '198.51.100.0/24']
-)
-
-ip_block_rule = {
-    'Name': 'BlockedIPs',
-    'Priority': 1,
-    'Statement': {
-        'IPSetReferenceStatement': {
-            'ARN': ip_set['Summary']['ARN']
-        }
-    },
-    'Action': {'Block': {}},
-    'VisibilityConfig': {
-        'SampledRequestsEnabled': True,
-        'CloudWatchMetricsEnabled': True,
-        'MetricName': 'BlockedIPs'
-    }
-}
-```
-
-## AWS Shield
-
-### Shield Standard vs Advanced
-
-| Feature | Standard | Advanced |
-|---------|----------|----------|
-| Cost | Free | $3,000/month |
-| Protection | Layer 3/4 DDoS | Layer 3/4/7 DDoS |
-| Response Team | - | 24/7 DRT access |
-| Cost Protection | - | DDoS cost protection |
-| WAF Integration | - | Free WAF for protected resources |
-| Visibility | CloudWatch | Real-time metrics |
-
-### Shield Advanced Protection
-
-```python
-import boto3
-
-shield = boto3.client('shield')
-
-# Create protection for resources
-shield.create_protection(
-    Name='ALB-Protection',
-    ResourceArn='arn:aws:elasticloadbalancing:region:account:loadbalancer/app/my-alb/xxx'
-)
-
-# Enable proactive engagement
-shield.enable_proactive_engagement()
-
-# Associate health check
-shield.associate_health_check(
-    ProtectionId='protection-id',
-    HealthCheckArn='arn:aws:route53:::healthcheck/xxx'
-)
-```
-
-## VPC Flow Logs
-
-### Enable Flow Logs
-
-```python
-import boto3
-
-ec2 = boto3.client('ec2')
-
-# Create flow log to CloudWatch
-response = ec2.create_flow_logs(
-    ResourceIds=['vpc-12345678'],
-    ResourceType='VPC',
-    TrafficType='ALL',  # ACCEPT, REJECT, or ALL
-    LogDestinationType='cloud-watch-logs',
-    LogGroupName='/aws/vpc/flow-logs',
-    DeliverLogsPermissionArn='arn:aws:iam::account:role/flow-logs-role',
-    MaxAggregationInterval=60,
-    LogFormat='${version} ${account-id} ${interface-id} ${srcaddr} ${dstaddr} ${srcport} ${dstport} ${protocol} ${packets} ${bytes} ${start} ${end} ${action} ${log-status} ${vpc-id} ${subnet-id} ${instance-id} ${tcp-flags} ${type} ${pkt-srcaddr} ${pkt-dstaddr}'
-)
-
-# Create flow log to S3
-response = ec2.create_flow_logs(
-    ResourceIds=['vpc-12345678'],
-    ResourceType='VPC',
-    TrafficType='REJECT',
-    LogDestinationType='s3',
-    LogDestination='arn:aws:s3:::my-flow-logs-bucket/vpc-logs/'
-)
-```
-
-### Analyze Flow Logs with Athena
-
-```sql
--- Create table for VPC Flow Logs
-CREATE EXTERNAL TABLE vpc_flow_logs (
-    version INT,
-    account_id STRING,
-    interface_id STRING,
-    srcaddr STRING,
-    dstaddr STRING,
-    srcport INT,
-    dstport INT,
-    protocol INT,
-    packets BIGINT,
-    bytes BIGINT,
-    start_time BIGINT,
-    end_time BIGINT,
-    action STRING,
-    log_status STRING
-)
-PARTITIONED BY (dt STRING)
-ROW FORMAT DELIMITED
-FIELDS TERMINATED BY ' '
-LOCATION 's3://my-flow-logs-bucket/vpc-logs/';
-
--- Find rejected traffic
-SELECT srcaddr, dstaddr, dstport, COUNT(*) as count
-FROM vpc_flow_logs
-WHERE action = 'REJECT'
-GROUP BY srcaddr, dstaddr, dstport
-ORDER BY count DESC
-LIMIT 10;
-
--- Find top talkers
-SELECT srcaddr, SUM(bytes) as total_bytes
-FROM vpc_flow_logs
-WHERE action = 'ACCEPT'
-GROUP BY srcaddr
-ORDER BY total_bytes DESC
-LIMIT 10;
-```
-
-## Defense in Depth Architecture
-
-```mermaid
-flowchart TB
-    subgraph Layer1["Layer 1: Edge"]
-        A[Route 53]
-        B[CloudFront]
-        C[AWS Shield]
-        D[AWS WAF]
-    end
-
-    subgraph Layer2["Layer 2: Network"]
-        E[VPC]
-        F[Network Firewall]
-        G[NACLs]
-    end
-
-    subgraph Layer3["Layer 3: Compute"]
-        H[Security Groups]
-        I[EC2/ECS/Lambda]
-        J[Host Firewall]
-    end
-
-    subgraph Layer4["Layer 4: Data"]
-        K[Encryption at Rest]
-        L[Encryption in Transit]
-        M[Access Controls]
-    end
-
-    Layer1 --> Layer2 --> Layer3 --> Layer4
-
-    style Layer1 fill:#ef4444,color:#fff
-    style Layer2 fill:#f59e0b,color:#fff
-    style Layer3 fill:#3b82f6,color:#fff
-    style Layer4 fill:#10b981,color:#fff
-```
-
-## Best Practices
-
-### 1. Least Privilege Network Access
-
-```python
-# ❌ Bad: Allow all traffic
-ec2.authorize_security_group_ingress(
-    GroupId=sg_id,
-    IpPermissions=[{
-        'IpProtocol': '-1',
-        'IpRanges': [{'CidrIp': '0.0.0.0/0'}]
-    }]
-)
-
-# ✅ Good: Specific ports and sources
-ec2.authorize_security_group_ingress(
-    GroupId=sg_id,
-    IpPermissions=[{
-        'IpProtocol': 'tcp',
-        'FromPort': 443,
-        'ToPort': 443,
-        'UserIdGroupPairs': [{'GroupId': 'sg-alb'}]
-    }]
-)
-```
-
-### 2. Use VPC Endpoints for AWS Services
-
-```python
-# Keep traffic within AWS network
-endpoints = [
-    'com.amazonaws.us-east-1.s3',
-    'com.amazonaws.us-east-1.dynamodb',
-    'com.amazonaws.us-east-1.secretsmanager',
-    'com.amazonaws.us-east-1.kms'
-]
-
-for service in endpoints:
-    ec2.create_vpc_endpoint(
-        VpcId='vpc-12345678',
-        ServiceName=service,
-        VpcEndpointType='Interface' if 'secretsmanager' in service else 'Gateway'
-    )
-```
-
-### 3. Enable Flow Logs for All VPCs
-
-```python
-# Enable on all VPCs
-vpcs = ec2.describe_vpcs()
-
-for vpc in vpcs['Vpcs']:
-    ec2.create_flow_logs(
-        ResourceIds=[vpc['VpcId']],
-        ResourceType='VPC',
-        TrafficType='ALL',
-        LogDestinationType='s3',
-        LogDestination='arn:aws:s3:::central-flow-logs/'
-    )
-```
+**Compliance Requirements**: Many frameworks require multiple layers of network controls.
 
 ## Summary
 
-| Control | Level | Use Case |
-|---------|-------|----------|
-| Security Groups | Instance | Application-level access control |
-| NACLs | Subnet | Subnet-level blocking, explicit deny |
+VPC security is about creating and enforcing network boundaries:
+
+| Control | Level | Purpose |
+|---------|-------|---------|
+| Security Groups | Instance | Primary access control (stateful, allow-only) |
+| NACLs | Subnet | Additional control (stateless, allow/deny) |
 | VPC Endpoints | VPC | Private AWS service access |
-| Network Firewall | VPC | Deep packet inspection, IDS/IPS |
-| AWS WAF | Application | Layer 7 protection, OWASP rules |
-| AWS Shield | Edge | DDoS protection |
-| VPC Flow Logs | VPC | Traffic analysis, forensics |
+| Network Firewall | VPC | Deep inspection, IDS/IPS |
+| WAF | Application | HTTP/HTTPS protection |
+| Shield | Edge | DDoS protection |
+| Flow Logs | VPC | Network visibility and audit |
 
-Key takeaways:
+Key principles:
+- **Least Privilege**: Only allow traffic that's explicitly needed
+- **Private by Default**: Use private subnets, VPC endpoints
+- **Defense in Depth**: Multiple layers of controls
+- **Visibility**: Enable flow logs, monitor traffic patterns
+- **Segmentation**: Separate tiers (web, app, database) into different subnets/security groups
 
-- Use Security Groups for stateful, instance-level access control
-- Use NACLs for stateless subnet-level blocking
-- Implement VPC Endpoints to keep AWS traffic private
-- Deploy Network Firewall for advanced inspection
-- Enable AWS WAF on all public-facing resources
-- Enable VPC Flow Logs for visibility and compliance
-- Build defense in depth with multiple layers
-
-VPC security is essential for the AWS Security Specialty exam and for protecting production workloads.
+Network security is often invisible when working—and catastrophically visible when failing. Investing in proper VPC security design prevents incidents before they happen.
 
 ## References
 
 - [VPC Security](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Security.html)
+- [Security Groups](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html)
+- [Network ACLs](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html)
 - [AWS Network Firewall](https://docs.aws.amazon.com/network-firewall/)
-- [AWS WAF Developer Guide](https://docs.aws.amazon.com/waf/)
-- Muñoz, Mauricio, et al. *AWS Certified Security Study Guide, 2nd Edition*. Wiley, 2025.
-- Book, Adam, and Stuart Scott. *AWS Certified Security – Specialty (SCS-C02) Exam Guide*. Packt, 2024.
+- Crane, Dylan. *AWS Security*. Manning Publications, 2022.
+- Muñoz, Mauricio, et al. *Mastering AWS Security, 2nd Edition*. Packt, 2024.

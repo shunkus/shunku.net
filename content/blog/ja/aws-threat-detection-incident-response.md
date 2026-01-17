@@ -1,731 +1,303 @@
 ---
 title: "AWS脅威検出とインシデント対応: GuardDuty、Security Hub、Detective"
 date: "2025-11-05"
-excerpt: "AWS脅威検出とインシデント対応をマスター - 脅威検出のGuardDuty、セキュリティ体制のSecurity Hub、調査のDetective、インシデント対応計画。"
+excerpt: "AWS脅威検出とインシデント対応をマスター - GuardDuty、Security Hub、Detectiveがどのように連携するか、効果的なインシデント対応能力を構築する方法を理解する。"
 tags: ["AWS", "Security", "GuardDuty", "Incident Response", "Certification"]
 author: "Shunku"
 ---
 
-脅威検出とインシデント対応は、AWSセキュリティスペシャリティ認定の重要なドメインです。脅威を検出し、セキュリティインシデントに対応する方法を理解することは、AWS環境を保護するために不可欠です。
-
-## 脅威検出の概要
-
-```mermaid
-flowchart TB
-    subgraph Detection["脅威検出"]
-        A[GuardDuty]
-        B[Security Hub]
-        C[Inspector]
-        D[Macie]
-    end
-
-    subgraph Investigation["調査"]
-        E[Detective]
-        F[CloudTrail]
-        G[VPC Flow Logs]
-    end
-
-    subgraph Response["対応"]
-        H[Lambda]
-        I[Systems Manager]
-        J[Step Functions]
-    end
-
-    Detection --> Investigation --> Response
-
-    style Detection fill:#ef4444,color:#fff
-    style Investigation fill:#f59e0b,color:#fff
-    style Response fill:#10b981,color:#fff
-```
-
-## Amazon GuardDuty
-
-### GuardDutyの有効化
-
-```python
-import boto3
-
-guardduty = boto3.client('guardduty')
-
-# ディテクターを作成
-response = guardduty.create_detector(
-    Enable=True,
-    DataSources={
-        'S3Logs': {'Enable': True},
-        'Kubernetes': {
-            'AuditLogs': {'Enable': True}
-        },
-        'MalwareProtection': {
-            'ScanEc2InstanceWithFindings': {
-                'EbsVolumes': {'Enable': True}
-            }
-        }
-    },
-    Features=[
-        {'Name': 'EKS_AUDIT_LOGS', 'Status': 'ENABLED'},
-        {'Name': 'EBS_MALWARE_PROTECTION', 'Status': 'ENABLED'},
-        {'Name': 'RDS_LOGIN_EVENTS', 'Status': 'ENABLED'},
-        {'Name': 'LAMBDA_NETWORK_LOGS', 'Status': 'ENABLED'}
-    ],
-    FindingPublishingFrequency='FIFTEEN_MINUTES'
-)
-
-detector_id = response['DetectorId']
-```
-
-### GuardDuty検出結果タイプ
-
-| カテゴリ | 検出結果タイプ |
-|---------|-------------|
-| EC2 | Backdoor、CryptoCurrency、Trojan、UnauthorizedAccess |
-| IAM | CredentialAccess、DefenseEvasion、Persistence |
-| S3 | Exfiltration、Stealth、Discovery |
-| Kubernetes | Execution、Impact、CredentialAccess |
-| マルウェア | Execution、C&C、Dropper |
-
-### 検出結果の処理
-
-```python
-import boto3
-import json
-
-guardduty = boto3.client('guardduty')
-
-def get_high_severity_findings(detector_id):
-    """高重大度のGuardDuty検出結果を取得"""
-
-    findings = []
-    paginator = guardduty.get_paginator('list_findings')
-
-    for page in paginator.paginate(
-        DetectorId=detector_id,
-        FindingCriteria={
-            'Criterion': {
-                'severity': {
-                    'Gte': 7  # 高重大度（7-8.9）
-                },
-                'service.archived': {
-                    'Eq': ['false']
-                }
-            }
-        },
-        SortCriteria={
-            'AttributeName': 'severity',
-            'OrderBy': 'DESC'
-        }
-    ):
-        finding_ids = page['FindingIds']
-
-        if finding_ids:
-            details = guardduty.get_findings(
-                DetectorId=detector_id,
-                FindingIds=finding_ids
-            )
-            findings.extend(details['Findings'])
-
-    return findings
-
-
-def lambda_handler(event, context):
-    """EventBridgeからのGuardDuty検出結果を処理"""
-
-    finding = event['detail']
-
-    severity = finding['severity']
-    finding_type = finding['type']
-    resource = finding['resource']
-
-    # 高重大度 - 即時対応
-    if severity >= 7:
-        isolate_resource(resource)
-        notify_security_team(finding)
-        create_incident_ticket(finding)
-
-    # 中重大度 - アラートと調査
-    elif severity >= 4:
-        notify_security_team(finding)
-        schedule_investigation(finding)
-
-    # 低重大度 - ログと監視
-    else:
-        log_finding(finding)
-
-
-def isolate_resource(resource):
-    """侵害されたリソースを分離"""
-
-    ec2 = boto3.client('ec2')
-
-    if resource['resourceType'] == 'Instance':
-        instance_id = resource['instanceDetails']['instanceId']
-
-        # 分離用セキュリティグループを作成
-        isolation_sg = create_isolation_security_group()
-
-        # セキュリティグループを置き換え
-        ec2.modify_instance_attribute(
-            InstanceId=instance_id,
-            Groups=[isolation_sg]
-        )
-
-        # フォレンジック用スナップショットを作成
-        volumes = ec2.describe_volumes(
-            Filters=[
-                {'Name': 'attachment.instance-id', 'Values': [instance_id]}
-            ]
-        )
-
-        for volume in volumes['Volumes']:
-            ec2.create_snapshot(
-                VolumeId=volume['VolumeId'],
-                Description=f'フォレンジックスナップショット - {instance_id}'
-            )
-```
-
-### 検出結果の抑制
-
-```python
-# 既知の誤検知を抑制するフィルターを作成
-guardduty.create_filter(
-    DetectorId=detector_id,
-    Name='suppress-internal-scanners',
-    Description='承認された脆弱性スキャナーからの検出結果を抑制',
-    Action='ARCHIVE',
-    Rank=1,
-    FindingCriteria={
-        'Criterion': {
-            'service.action.networkConnectionAction.remoteIpDetails.ipAddressV4': {
-                'Eq': ['10.0.1.100', '10.0.1.101']  # スキャナーIP
-            },
-            'type': {
-                'Eq': ['Recon:EC2/PortProbeUnprotectedPort']
-            }
-        }
-    }
-)
-```
-
-## AWS Security Hub
-
-### Security Hubの有効化
-
-```python
-import boto3
-
-securityhub = boto3.client('securityhub')
-
-# Security Hubを有効化
-securityhub.enable_security_hub(
-    EnableDefaultStandards=True,
-    ControlFindingGenerator='SECURITY_CONTROL'
-)
-
-# 特定の標準を有効化
-securityhub.batch_enable_standards(
-    StandardsSubscriptionRequests=[
-        {
-            'StandardsArn': 'arn:aws:securityhub:::ruleset/cis-aws-foundations-benchmark/v/1.4.0'
-        },
-        {
-            'StandardsArn': 'arn:aws:securityhub:us-east-1::standards/aws-foundational-security-best-practices/v/1.0.0'
-        },
-        {
-            'StandardsArn': 'arn:aws:securityhub:us-east-1::standards/pci-dss/v/3.2.1'
-        }
-    ]
-)
-```
-
-### Security Hub統合
-
-```python
-# 統合を有効化
-integrations = [
-    'arn:aws:securityhub:us-east-1::product/aws/guardduty',
-    'arn:aws:securityhub:us-east-1::product/aws/inspector',
-    'arn:aws:securityhub:us-east-1::product/aws/macie',
-    'arn:aws:securityhub:us-east-1::product/aws/config'
-]
-
-for integration in integrations:
-    securityhub.enable_import_findings_for_product(
-        ProductArn=integration
-    )
-```
-
-### Security Hub検出結果の処理
-
-```python
-def get_critical_findings():
-    """クリティカルおよび高重大度の検出結果を取得"""
-
-    findings = []
-    paginator = securityhub.get_paginator('get_findings')
-
-    for page in paginator.paginate(
-        Filters={
-            'SeverityLabel': [
-                {'Value': 'CRITICAL', 'Comparison': 'EQUALS'},
-                {'Value': 'HIGH', 'Comparison': 'EQUALS'}
-            ],
-            'WorkflowStatus': [
-                {'Value': 'NEW', 'Comparison': 'EQUALS'}
-            ],
-            'RecordState': [
-                {'Value': 'ACTIVE', 'Comparison': 'EQUALS'}
-            ]
-        },
-        SortCriteria=[
-            {'Field': 'SeverityNormalized', 'SortOrder': 'desc'}
-        ]
-    ):
-        findings.extend(page['Findings'])
-
-    return findings
-
-
-def update_finding_workflow(finding_id, status):
-    """検出結果のワークフローステータスを更新"""
-
-    securityhub.batch_update_findings(
-        FindingIdentifiers=[
-            {
-                'Id': finding_id,
-                'ProductArn': finding['ProductArn']
-            }
-        ],
-        Workflow={'Status': status},  # NEW, NOTIFIED, RESOLVED, SUPPRESSED
-        Note={
-            'Text': f'ステータスを{status}に更新',
-            'UpdatedBy': 'security-automation'
-        }
-    )
-```
-
-### カスタムインサイト
-
-```python
-# カスタムインサイトを作成
-securityhub.create_insight(
-    Name='最も検出結果の多いリソース トップ10',
-    Filters={
-        'SeverityLabel': [
-            {'Value': 'CRITICAL', 'Comparison': 'EQUALS'},
-            {'Value': 'HIGH', 'Comparison': 'EQUALS'}
-        ],
-        'WorkflowStatus': [
-            {'Value': 'NEW', 'Comparison': 'EQUALS'}
-        ]
-    },
-    GroupByAttribute='ResourceId'
-)
-
-# 失敗したコンプライアンスチェックのインサイト
-securityhub.create_insight(
-    Name='失敗したCISベンチマークコントロール',
-    Filters={
-        'ComplianceStatus': [
-            {'Value': 'FAILED', 'Comparison': 'EQUALS'}
-        ],
-        'GeneratorId': [
-            {'Value': 'cis-aws-foundations-benchmark', 'Comparison': 'PREFIX'}
-        ]
-    },
-    GroupByAttribute='GeneratorId'
-)
-```
-
-## Amazon Detective
-
-### Detectiveの有効化
-
-```python
-import boto3
-
-detective = boto3.client('detective')
-
-# 動作グラフを作成
-response = detective.create_graph(
-    Tags={'Environment': 'Production'}
-)
-
-graph_arn = response['GraphArn']
-
-# メンバーアカウントを追加
-detective.create_members(
-    GraphArn=graph_arn,
-    Accounts=[
-        {'AccountId': '111122223333', 'EmailAddress': 'security@company.com'},
-        {'AccountId': '444455556666', 'EmailAddress': 'security@company.com'}
-    ]
-)
-```
+予防は不可欠ですが、予防だけでは不十分です。セキュリティコントロールをどれだけ適切に設定しても、侵害は発生する可能性があります—ゼロデイ脆弱性、ソーシャルエンジニアリング、内部者の脅威、設定ミスを通じて。迅速に回復する組織と壊滅的な被害を受ける組織を分けるのは、脅威を迅速に検出し効果的に対応する能力です。
+
+## なぜ脅威検出が重要なのか
+
+### 侵害の前提
+
+現代のセキュリティ思考は、あなたが侵害されるという前提から始まります。これは悲観主義ではなく、現実主義です。十分な時間とリソースがあれば、決意のある攻撃者は侵入方法を見つけることができます。問題は侵害されるかどうかではなく、それがいつ起きるかを知ることができるかどうかです。
+
+すでに侵害されていると仮定する組織は：
+- 予防だけでなく検出に焦点を当てる
+- セグメンテーションを通じて爆発半径を制限する
+- インシデントが発生する前にインシデント対応を練習する
+- 調査のためのフォレンジック能力を維持する
+
+### 検出ウィンドウ
+
+初期侵害から検出までの時間は「滞留時間」と呼ばれます。業界調査は一貫して、滞留時間が数ヶ月単位であることを示しています。この期間中、攻撃者は：
+- 永続的なアクセスを確立（バックドア、追加アカウント）
+- より価値のあるターゲットに横方向に移動
+- アラートをトリガーしないようにゆっくりとデータを流出
+- より壊滅的な攻撃の準備
+
+滞留時間を短縮することは、あなたができる最もインパクトのあるセキュリティ改善の1つです。AWSはこの目的のために特別に設計されたサービスを提供しています。
+
+## Amazon GuardDuty：インテリジェントな脅威検出
+
+GuardDutyはAWSのマネージド脅威検出サービスです。複数のソースからデータを継続的に分析し、不審なアクティビティを特定します。
+
+### GuardDutyが分析するもの
+
+GuardDutyは以下を取り込み分析します：
+
+**CloudTrailイベント**：AWSアカウント全体のAPI呼び出し。GuardDutyは異常を探します—異常なAPIパターン、予期しない場所からの呼び出し、または既知の攻撃シグネチャ。
+
+**VPC Flow Logs**：ネットワークトラフィックメタデータ。GuardDutyは偵察活動、既知の悪意のあるIPアドレスとの通信、異常なデータ転送パターンを特定します。
+
+**DNSログ**：ドメイン解決リクエスト。GuardDutyはコマンドアンドコントロールドメインや暗号通貨マイニングプールとの通信を検出します。
+
+**EKS監査ログ**：Kubernetes APIサーバーログ。GuardDutyは不審なコンテナアクティビティ、特権昇格、異常なクラスター動作を特定します。
+
+**S3データイベント**：オブジェクトレベルの操作。GuardDutyはデータ流出を示す可能性のある異常なアクセスパターンを検出します。
+
+### GuardDutyが脅威を検出する方法
+
+GuardDutyは複数の検出方法を使用します：
+
+**シグネチャベースの検出**：既知の攻撃パターンとのマッチング—マルウェアに関連するIPとの通信、暗号通貨マイニング活動、または既知の攻撃技術。
+
+**異常検出**：機械学習が環境の正常な動作のベースラインを確立します。アクティビティが正常から大幅に逸脱すると、GuardDutyは検出結果を生成します。これにより、既知のシグネチャに一致しない新しい攻撃をキャッチします。
+
+**脅威インテリジェンス**：AWSの脅威インテリジェンスとサードパーティフィードとの統合により、既知の悪意のあるインフラとの通信を特定します。
+
+### 検出結果の重大度を理解する
+
+GuardDutyは検出結果を重大度別に分類します：
+
+**クリティカル（9.0以上）**：即時対応が必要。アクティブな侵害またはデータ流出が進行中。すべてを中断して対応。
+
+**高（7.0-8.9）**：迅速な対応が必要な重大な脅威。誤検知ではなく、実際の悪意のあるアクティビティを示している可能性が高い。
+
+**中（4.0-6.9）**：調査が必要な不審なアクティビティ。正当なアクティビティまたは攻撃の初期段階かもしれない。
+
+**低（1.0-3.9）**：潜在的に懸念されるが、しばしば良性。パターンを監視。
+
+### 一般的な検出結果タイプ
+
+GuardDutyが何を検出するかを理解することで、適切に対応できます：
+
+**認証情報関連**：異常な場所からのアクセスキー使用、不審なIPからのコンソールログイン、予期しないパターンでのルートアカウント使用。
+
+**ネットワーク関連**：インスタンスからのポートスキャン、既知の悪意のあるIPとの通信、異常なアウトバウンドトラフィック量。
+
+**インスタンス関連**：暗号通貨マイニングアクティビティ、バックドアのインストール、コマンドアンドコントロールドメインへのDNSクエリ。
+
+**S3関連**：異常なアクセスパターン、予期しないソースからのパブリックバケット変更、大量ダウンロード。
+
+### 誤検知の管理
+
+すべての検出結果が実際の脅威を表すわけではありません。一部の正当なアクティビティがGuardDutyをトリガーします：
+- 承認されたペネトレーションテスト
+- 内部脆弱性スキャナー
+- 異常なトラフィックパターンを持つ開発環境
+
+GuardDutyは既知の良性アクティビティをフィルタリングする抑制ルールを提供します。ただし、抑制は慎重に使用してください—過度の抑制は実際の脅威を見逃す原因になります。
+
+## AWS Security Hub：一元化されたセキュリティ管理
+
+Security HubはAWSサービス全体からセキュリティ検出結果を集約し、セキュリティ体制の統一されたビューを提供します。
+
+### なぜ集約が重要なのか
+
+Security Hubがなければ、セキュリティ検出結果は散在します：
+- GuardDuty検出結果はGuardDutyコンソールに
+- ConfigコンプライアンスはAWS Configに
+- Inspector脆弱性はInspectorに
+- IAM Access Analyzer検出結果はIAMに
+
+Security Hubはすべてを単一のダッシュボードに統合します。さらに重要なのは、検出結果を共通フォーマット（AWSセキュリティ検出結果フォーマット）に正規化し、ソースに関係なく一貫した処理を可能にすることです。
+
+### セキュリティ標準
+
+Security Hubは業界ベンチマークに対して環境を評価します：
+
+**AWS基盤セキュリティベストプラクティス**：最も重要なセキュリティ設定をカバーするAWSがキュレーションしたセキュリティコントロール。
+
+**CIS AWSファンデーションベンチマーク**：Center for Internet Securityからの業界標準セキュリティコントロール。
+
+**PCI DSS**：ペイメントカードデータ処理に関連するコントロール。
+
+**NISTサイバーセキュリティフレームワーク**：NISTガイドラインにマッピングされたコントロール。
+
+各標準には数十の自動チェックが含まれています。Security Hubはリソースを継続的に評価し、コンプライアンスステータスを報告します。
+
+### セキュリティスコア
+
+Security Hubはセキュリティスコア—合格したコントロールの割合—を計算します。不完全ではありますが（すべてのコントロールが等しく重要ではない）、スコアは以下を提供します：
+- セキュリティ体制の迅速なヘルスチェック
+- 時間経過に伴う傾向追跡
+- アカウント間の比較（マルチアカウント設定で）
+
+スコアに執着しないでください。ただし、失敗しているコントロール、特にクリティカルまたは高重大度とマークされたものには注意を払ってください。
+
+### クロスアカウント集約
+
+複数のAWSアカウントを持つ組織では、Security Hubの集約機能が不可欠です。指定された管理者アカウントは：
+- すべてのメンバーアカウントからの検出結果を表示
+- 一貫したセキュリティ標準を適用
+- 組織全体のセキュリティ体制を追跡
+- 組織全体で脅威に対応
+
+攻撃者はアカウント境界を尊重しないため、この一元化された可視性は重要です—攻撃は1つのアカウントで始まり、他のアカウントにピボットする可能性があります。
+
+## Amazon Detective：セキュリティ調査
+
+GuardDutyが検出結果を生成したら、調査する必要があります。何が起きたのか？攻撃者はどのように侵入したのか？他に何にアクセスしたのか？Detectiveはこれらの質問に答えるために設計されています。
+
+### Detectiveが提供するもの
+
+Detectiveは、CloudTrail、VPC Flow Logs、GuardDuty検出結果から自動的に動作グラフを構築します。このグラフにより：
+
+**関係の可視化**：エンティティ間の接続を確認—どのユーザーがどのリソースにアクセスしたか、どのインスタンスがどのIPアドレスと通信したか、異なるアクティビティがどのように関連するか。
+
+**履歴コンテキスト**：任意のエンティティの「正常」がどのように見えるかを理解。このAPI呼び出しはこのユーザーにとって異常か？このインスタンスはこのIPと以前通信したことがあるか？
+
+**タイムライン分析**：イベントの順序を再構築。不審なアクティビティの前に何が起きたか？その後に何が起きたか？
+
+### Detectiveを使用するタイミング
+
+Detectiveは以下の場合に最も価値があります：
+- GuardDuty検出結果を調査して、それが実際の脅威かどうかを判断する
+- 確認された侵害の範囲を理解する
+- 攻撃者が環境をどのように移動したかを追跡する
+- 侵害された可能性のある他のリソースを特定する
+
+Detectiveは人間の調査を置き換えるのではなく、関連データを意味のある方法で提示することで加速します。
 
 ### 調査ワークフロー
 
-```mermaid
-sequenceDiagram
-    participant GD as GuardDuty
-    participant SH as Security Hub
-    participant DT as Detective
-    participant Analyst as セキュリティアナリスト
+典型的な調査フロー：
+1. GuardDutyが検出結果を生成
+2. Security Hubがオンコールセキュリティアナリストにアラート
+3. アナリストがDetectiveを開いて調査
+4. Detectiveが関連エンティティと履歴動作を表示
+5. アナリストが検出結果が実際の脅威を表すかどうかを判断
+6. 確認された場合、アナリストがインシデント対応を開始
 
-    GD->>SH: 検出結果生成
-    SH->>Analyst: アラート通知
-    Analyst->>DT: 検出結果を調査
-    DT->>DT: 行動パターンを分析
-    DT->>DT: 関連エンティティを表示
-    DT->>Analyst: 調査サマリー
-    Analyst->>SH: 検出結果ステータスを更新
-```
+## 効果的なインシデント対応の構築
 
-### Detectiveで調査
+検出は効果的に対応できる場合にのみ価値があります。インシデント対応は実践された規律であり、即興の反応ではありません。
 
-```python
-def investigate_finding(finding):
-    """Detectiveを使用してGuardDuty検出結果を調査"""
+### インシデント対応ライフサイクル
 
-    detective = boto3.client('detective')
+効果的なインシデント対応は構造化されたアプローチに従います：
 
-    # 調査詳細を取得
-    # Detectiveはコンソールでビジュアル分析を提供
+**準備**：インシデントが発生する前に、対応手順を確立し、対応者を指定し、ランブックを作成し、机上演習を通じて練習します。
 
-    # インジケーターで検索
-    indicators = detective.list_indicators(
-        GraphArn=graph_arn,
-        InvestigationId=finding['service']['detectorId'],
-        IndicatorType='TTP_OBSERVED'  # 戦術、技術、手順
-    )
+**検出と分析**：インシデントが発生したことを特定し、その性質と範囲を理解します。
 
-    # 関連エンティティを取得
-    entity_id = finding['resource']['instanceDetails']['instanceId']
+**封じ込め**：インシデントの拡散を止めます。証拠を保存しながら、影響を受けたリソースを分離します。
 
-    # エンティティの調査をリスト
-    investigations = detective.list_investigations(
-        GraphArn=graph_arn,
-        FilterCriteria={
-            'EntityArn': {
-                'Value': f'arn:aws:ec2:us-east-1:123456789012:instance/{entity_id}'
-            }
-        }
-    )
+**根絶**：攻撃者の存在を除去—侵害されたアカウント、マルウェア、バックドア。
 
-    return investigations
-```
+**復旧**：検証されたクリーンなシステムで通常の運用を復元します。
 
-## インシデント対応計画
+**事後活動**：何が起きたかを文書化し、改善点を特定し、手順を更新します。
 
-### インシデント対応フェーズ
+### 封じ込め戦略
 
-```mermaid
-flowchart LR
-    A[準備] --> B[検出]
-    B --> C[分析]
-    C --> D[封じ込め]
-    D --> E[根絶]
-    E --> F[復旧]
-    F --> G[事後対応]
-    G --> A
+AWSでインシデントに対応する際、一般的な封じ込めアクションには以下が含まれます：
 
-    style A fill:#3b82f6,color:#fff
-    style D fill:#ef4444,color:#fff
-    style F fill:#10b981,color:#fff
-```
+**ネットワーク分離**：セキュリティグループをすべてのトラフィックをブロックする分離グループに置き換えます。侵害されたインスタンスは何とも通信できません—攻撃者とも、正当なシステムとも。
 
-### 自動インシデント対応
+**認証情報の無効化**：認証情報が侵害された場合、直ちにアクセスキーを無効化し、コンソールパスワードを削除し、deny-allポリシーを適用します。単にローテーションするだけではダメです—攻撃者が追加の認証情報を作成している可能性があります。
 
-```python
-import boto3
-import json
+**リソースの終了**：簡単に置き換え可能なリソースの場合、終了が適切かもしれません。ただし、まずフォレンジック証拠を保存してください。
 
-def create_incident_response_automation():
-    """インシデント対応用Step Functionsステートマシンを作成"""
+### フォレンジック保存
 
-    sfn = boto3.client('stepfunctions')
+封じ込めアクションを取る前に、証拠を保存してください：
 
-    definition = {
-        'Comment': 'インシデント対応自動化',
-        'StartAt': 'ClassifyIncident',
-        'States': {
-            'ClassifyIncident': {
-                'Type': 'Task',
-                'Resource': 'arn:aws:lambda:us-east-1:123456789012:function:classify-incident',
-                'Next': 'RouteBySeverity'
-            },
-            'RouteBySeverity': {
-                'Type': 'Choice',
-                'Choices': [
-                    {
-                        'Variable': '$.severity',
-                        'StringEquals': 'CRITICAL',
-                        'Next': 'CriticalResponse'
-                    },
-                    {
-                        'Variable': '$.severity',
-                        'StringEquals': 'HIGH',
-                        'Next': 'HighResponse'
-                    }
-                ],
-                'Default': 'StandardResponse'
-            },
-            'CriticalResponse': {
-                'Type': 'Parallel',
-                'Branches': [
-                    {
-                        'StartAt': 'IsolateResource',
-                        'States': {
-                            'IsolateResource': {
-                                'Type': 'Task',
-                                'Resource': 'arn:aws:lambda:...:function:isolate-resource',
-                                'End': True
-                            }
-                        }
-                    },
-                    {
-                        'StartAt': 'NotifySecurityTeam',
-                        'States': {
-                            'NotifySecurityTeam': {
-                                'Type': 'Task',
-                                'Resource': 'arn:aws:lambda:...:function:notify-team',
-                                'End': True
-                            }
-                        }
-                    },
-                    {
-                        'StartAt': 'CreateForensicSnapshot',
-                        'States': {
-                            'CreateForensicSnapshot': {
-                                'Type': 'Task',
-                                'Resource': 'arn:aws:lambda:...:function:create-snapshot',
-                                'End': True
-                            }
-                        }
-                    }
-                ],
-                'Next': 'CreateIncidentTicket'
-            },
-            'HighResponse': {
-                'Type': 'Task',
-                'Resource': 'arn:aws:lambda:...:function:high-severity-response',
-                'Next': 'CreateIncidentTicket'
-            },
-            'StandardResponse': {
-                'Type': 'Task',
-                'Resource': 'arn:aws:lambda:...:function:standard-response',
-                'End': True
-            },
-            'CreateIncidentTicket': {
-                'Type': 'Task',
-                'Resource': 'arn:aws:lambda:...:function:create-ticket',
-                'End': True
-            }
-        }
-    }
+**ボリュームのスナップショット**：インスタンスを変更または終了する前にEBSスナップショットを作成します。これらのスナップショットにより、後で分析が可能になります。
 
-    sfn.create_state_machine(
-        name='incident-response',
-        definition=json.dumps(definition),
-        roleArn='arn:aws:iam::123456789012:role/step-functions-role'
-    )
-```
+**ログのエクスポート**：関連するCloudTrail、VPC Flow Logs、アプリケーションログがアクセス制限されたフォレンジックアカウントに保存されていることを確認します。
 
-### EC2インスタンスの分離
+**メモリキャプチャ**：可能であれば、マルウェア分析のためにインスタンスメモリをキャプチャします。これには事前にインストールされたツールまたはSSMコマンドが必要です。
 
-```python
-import boto3
+**すべてを文書化**：何を観察したか、何のアクションを取ったか、いつ取ったかを記録します。この文書化は事後レビューと潜在的な法的手続きに不可欠です。
 
-def isolate_ec2_instance(instance_id, vpc_id):
-    """侵害されたEC2インスタンスを分離"""
+### インシデント対応における自動化
 
-    ec2 = boto3.client('ec2')
+手動のインシデント対応はスケールしません。高重大度の検出結果に迅速に対応する必要がある場合、自動化は不可欠です。
 
-    # 分離用セキュリティグループを作成（インバウンド/アウトバウンドなし）
-    isolation_sg = ec2.create_security_group(
-        GroupName=f'isolation-{instance_id}',
-        Description='インシデント対応用分離セキュリティグループ',
-        VpcId=vpc_id
-    )
+AWSは以下を通じて自動応答を可能にします：
+- **EventBridgeルール**：特定の検出結果が発生したときにLambda関数をトリガー
+- **Step Functions**：複雑な応答ワークフローをオーケストレーション
+- **Systems Manager**：影響を受けたインスタンスでコマンドを実行
+- **Lambda**：カスタム応答ロジック
 
-    sg_id = isolation_sg['GroupId']
+典型的な自動応答は：
+1. EventBridge経由で高重大度のGuardDuty検出結果を受信
+2. 自動的にフォレンジックスナップショットを作成
+3. 影響を受けたインスタンスに分離セキュリティグループを適用
+4. セキュリティチームに通知を送信
+5. ITSMシステムでインシデントチケットを作成
 
-    # デフォルトのアウトバウンドルールを削除
-    ec2.revoke_security_group_egress(
-        GroupId=sg_id,
-        IpPermissions=[
-            {
-                'IpProtocol': '-1',
-                'IpRanges': [{'CidrIp': '0.0.0.0/0'}]
-            }
-        ]
-    )
+## セキュリティサービスエコシステム
 
-    # 現在のセキュリティグループを取得
-    instance = ec2.describe_instances(InstanceIds=[instance_id])
-    current_sgs = [sg['GroupId'] for sg in
-                   instance['Reservations'][0]['Instances'][0]['SecurityGroups']]
+AWSセキュリティサービスは連携して動作します：
 
-    # 元のセキュリティグループをタグ付け
-    ec2.create_tags(
-        Resources=[instance_id],
-        Tags=[
-            {'Key': 'OriginalSecurityGroups', 'Value': ','.join(current_sgs)},
-            {'Key': 'IsolatedAt', 'Value': str(datetime.now())},
-            {'Key': 'IncidentStatus', 'Value': 'ISOLATED'}
-        ]
-    )
+**Inspector**はEC2インスタンス、コンテナイメージ、Lambda関数の脆弱性をスキャンします。検出結果はSecurity Hubに流れます。
 
-    # 分離用セキュリティグループを適用
-    ec2.modify_instance_attribute(
-        InstanceId=instance_id,
-        Groups=[sg_id]
-    )
+**Macie**はS3内の機密データを検出・分類します。公開されたPIIや認証情報を見つけると、検出結果がSecurity Hubに流れます。
 
-    return sg_id
-```
+**IAM Access Analyzer**はアカウントまたは組織外で共有されているリソースを特定します。意図しない外部アクセスの検出結果がSecurity Hubに流れます。
 
-### 認証情報のローテーション
+**Config**はルールに対してリソース構成を継続的に評価します。非準拠リソースはSecurity Hubに流れる検出結果を生成します。
 
-```python
-import boto3
+**GuardDuty**はアクティブな脅威を検出します。検出結果はSecurity Hubに流れます。
 
-def rotate_compromised_credentials(user_name):
-    """侵害されたIAMユーザーの認証情報をローテーション"""
+Security Hubはすべてを集約し、単一のガラス窓を提供します。GuardDuty検出結果の詳細な調査には、Detectiveが分析ツールを提供します。
 
-    iam = boto3.client('iam')
+## よくある間違い
 
-    # アクセスキーをリストして無効化
-    keys = iam.list_access_keys(UserName=user_name)
+### GuardDutyをすべての場所で有効にしない
 
-    for key in keys['AccessKeyMetadata']:
-        # キーを無効化
-        iam.update_access_key(
-            UserName=user_name,
-            AccessKeyId=key['AccessKeyId'],
-            Status='Inactive'
-        )
+GuardDutyはすべてのリージョンとアカウントで有効にする必要があります。攻撃者はあなたが監視していないリージョンを標的にします。委任管理者を使用して組織全体でGuardDutyを有効にし、集中管理します。
 
-        # 追跡用にタグ付け
-        iam.tag_user(
-            UserName=user_name,
-            Tags=[
-                {
-                    'Key': f'DeactivatedKey-{key["AccessKeyId"]}',
-                    'Value': str(datetime.now())
-                }
-            ]
-        )
+### 低重大度の検出結果を無視する
 
-    # ログインプロファイル（コンソールアクセス）を削除
-    try:
-        iam.delete_login_profile(UserName=user_name)
-    except iam.exceptions.NoSuchEntityException:
-        pass
+低重大度の検出結果はしばしば偵察または初期アクセスの試みを表します。個々の低重大度の検出結果は緊急ではないかもしれませんが、低重大度の検出結果のパターンは進行中の攻撃を示す可能性があります。
 
-    # MFAデバイスをリストして削除
-    mfa_devices = iam.list_mfa_devices(UserName=user_name)
+### 練習されたインシデント対応がない
 
-    for device in mfa_devices['MFADevices']:
-        iam.deactivate_mfa_device(
-            UserName=user_name,
-            SerialNumber=device['SerialNumber']
-        )
+ランブックを持っているだけでは不十分です—チームは練習する必要があります。机上演習は手順のギャップ、不明確な責任、欠落した能力を明らかにします。実際に対応する必要がある前に練習してください。
 
-    # deny-allポリシーをアタッチ
-    deny_policy = {
-        'Version': '2012-10-17',
-        'Statement': [
-            {
-                'Effect': 'Deny',
-                'Action': '*',
-                'Resource': '*'
-            }
-        ]
-    }
+### セーフガードなしの過度な自動化
 
-    iam.put_user_policy(
-        UserName=user_name,
-        PolicyName='DenyAll-IncidentResponse',
-        PolicyDocument=json.dumps(deny_policy)
-    )
+自動化は強力ですが危険です。検出結果に基づいて自動的にインスタンスを終了すると、誤検知により本番システムを終了する可能性があります。控えめな自動応答（通知、分離）から始め、自信を持ってからより積極的なアクションを追加してください。
 
-    return {'status': 'credentials_rotated', 'user': user_name}
-```
+### 事後レビューを忘れる
 
-## フォレンジック分析
-
-### フォレンジックスナップショットの作成
-
-```python
-def create_forensic_snapshot(instance_id):
-    """調査用フォレンジックスナップショットを作成"""
-
-    ec2 = boto3.client('ec2')
-
-    # アタッチされたボリュームを取得
-    instance = ec2.describe_instances(InstanceIds=[instance_id])
-    volumes = instance['Reservations'][0]['Instances'][0]['BlockDeviceMappings']
-
-    snapshots = []
-
-    for volume in volumes:
-        volume_id = volume['Ebs']['VolumeId']
-
-        snapshot = ec2.create_snapshot(
-            VolumeId=volume_id,
-            Description=f'インシデントのフォレンジックスナップショット - {instance_id}',
-            TagSpecifications=[
-                {
-                    'ResourceType': 'snapshot',
-                    'Tags': [
-                        {'Key': 'Purpose', 'Value': 'Forensics'},
-                        {'Key': 'SourceInstance', 'Value': instance_id},
-                        {'Key': 'CreatedAt', 'Value': str(datetime.now())}
-                    ]
-                }
-            ]
-        )
-
-        snapshots.append(snapshot['SnapshotId'])
-
-    # フォレンジックアカウントにコピー
-    for snapshot_id in snapshots:
-        ec2.modify_snapshot_attribute(
-            SnapshotId=snapshot_id,
-            Attribute='createVolumePermission',
-            OperationType='add',
-            UserIds=['forensic-account-id']
-        )
-
-    return snapshots
-```
+インシデントが解決された後、先に進もうとするプレッシャーがあります。しかし、事後レビューは学びの場です。もっと早く検出できたことは何か？対応が予想より遅くなった原因は何か？どのようなプロセス改善が必要か？
 
 ## まとめ
 
-| サービス | 目的 | 主な機能 |
-|---------|-----|---------|
-| GuardDuty | 脅威検出 | MLベース、継続的モニタリング |
-| Security Hub | セキュリティ体制 | 集約、標準、インサイト |
-| Detective | 調査 | 行動分析、可視化 |
-| Inspector | 脆弱性スキャン | EC2、ECR、Lambdaスキャン |
-| Macie | データ検出 | PII検出、S3セキュリティ |
+AWSでの脅威検出とインシデント対応には、複数のサービスが連携して動作する必要があります：
 
-重要なポイント：
+| サービス | 目的 | 使用するタイミング |
+|---------|-----|-----------------|
+| GuardDuty | 脅威検出 | すべての場所で常に有効化 |
+| Security Hub | 集約と体制 | すべてのセキュリティ検出結果を一元化 |
+| Detective | 調査 | GuardDuty検出結果の詳細な調査 |
+| Inspector | 脆弱性スキャン | 継続的な脆弱性評価 |
+| Macie | データ検出 | 機密データの露出を特定 |
 
-- すべてのアカウントとリージョンでGuardDutyを有効化
-- 中央可視性のためにSecurity Hubで検出結果を集約
-- インシデントの詳細調査にはDetectiveを使用
-- LambdaとStep Functionsでインシデント対応を自動化
-- 修復前にフォレンジックスナップショットを作成
-- 侵害されたリソースを即座に分離
-- 侵害されたアカウントの認証情報をローテーション
-- すべてのインシデントを文書化し、改善のためにレビュー
+重要な原則：
 
-脅威検出とインシデント対応は、AWSセキュリティスペシャリティ認定と強力なセキュリティ体制の維持に不可欠です。
+- **侵害を前提に**：予防だけでなく検出に焦点を当てる
+- **滞留時間を短縮**：より早く検出すれば、攻撃者ができる被害も少なくなる
+- **可視性を一元化**：Security Hubで検出結果を集約
+- **インシデント前に準備**：定期的に対応手順を練習
+- **証拠を保存**：封じ込めアクション前にフォレンジックスナップショット
+- **賢く自動化**：控えめに始め、自信を持って自動化を増やす
+- **インシデントから学ぶ**：事後レビューが継続的改善を推進
+
+脅威検出は、攻撃者が環境に滞在する時間を短縮することです。インシデント対応は、脅威が検出されたときの被害を最小限に抑えることです。どちらも準備、練習、適切なツールが必要です。AWSはツールを提供します—効果的な検出と対応能力を構築するのはあなたの責任です。
 
 ## 参考文献
 
 - [Amazon GuardDuty User Guide](https://docs.aws.amazon.com/guardduty/latest/ug/)
 - [AWS Security Hub User Guide](https://docs.aws.amazon.com/securityhub/latest/userguide/)
 - [Amazon Detective User Guide](https://docs.aws.amazon.com/detective/latest/userguide/)
-- Muñoz, Mauricio, et al. *AWS Certified Security Study Guide, 2nd Edition*. Wiley, 2025.
-- Book, Adam, and Stuart Scott. *AWS Certified Security – Specialty (SCS-C02) Exam Guide*. Packt, 2024.
+- [AWS Security Incident Response Guide](https://docs.aws.amazon.com/whitepapers/latest/aws-security-incident-response-guide/welcome.html)
+- Crane, Dylan. *AWS Security*. Manning Publications, 2022.
+- Muñoz, Mauricio, et al. *Mastering AWS Security, 2nd Edition*. Packt, 2024.

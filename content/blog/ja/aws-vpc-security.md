@@ -1,718 +1,382 @@
 ---
-title: "AWS VPCセキュリティ: セキュリティグループ、NACL、ネットワーク保護"
+title: "AWS VPCセキュリティ：セキュリティグループ、NACL、ネットワーク保護"
 date: "2025-11-11"
-excerpt: "AWS VPCセキュリティをマスター - セキュリティグループ vs NACL、VPCエンドポイント、Network Firewall、WAF、多層防御戦略。"
+excerpt: "AWS VPCセキュリティをマスター - セキュリティグループ vs NACL、VPCエンドポイント、Network Firewall、多層防御戦略を理解する。"
 tags: ["AWS", "Security", "VPC", "Networking", "Certification"]
 author: "Shunku"
 ---
 
-AWS Virtual Private Cloud（VPC）セキュリティは、AWSセキュリティスペシャリティ認定の重要なドメインです。ネットワークセキュリティコントロールを理解することで、安全で分離された環境を構築できます。
+AWS Virtual Private Cloud（VPC）は、AWS内のプライベートネットワークです。VPCセキュリティを理解することは重要です。ネットワーク層は脅威に対する最初の防御線であり、他のコントロールが失敗した場合の最後の防御線でもあるからです。
 
-## VPCセキュリティの概要
+## なぜVPCセキュリティが重要なのか
 
-```mermaid
-flowchart TB
-    subgraph Internet
-        A[インターネットトラフィック]
-    end
+従来のデータセンターでは、物理的なネットワーク境界が暗黙のセキュリティを提供していました。異なるネットワークセグメント上のサーバーは、明示的に接続されない限り通信できません。ネットワーク境界（ファイアウォール、ルーター、スイッチ）は、セキュリティコントロールの自然なチョークポイントを提供します。
 
-    subgraph Edge["エッジ保護"]
-        B[AWS Shield]
-        C[AWS WAF]
-        D[CloudFront]
-    end
+クラウドでは、これらの物理的な境界は同じようには存在しません。AWSのすべてが同じ基盤インフラストラクチャを共有しています。VPCは論理的な境界を作成しますが、その境界のセキュリティを明示的に設定する必要があります。適切なVPCセキュリティがなければ：
 
-    subgraph VPC["VPC"]
-        E[インターネットゲートウェイ]
-        F[Network Firewall]
+- VPC内のリソースが、本来アクセスされるべきでないのにインターネットからアクセス可能になる可能性がある
+- 内部リソースが制限なしに相互に通信できる可能性がある
+- 侵害されたインスタンスが他のリソースを攻撃するためにピボットできる可能性がある
+- データが検出されずにネットワークから流出する可能性がある
 
-        subgraph Public["パブリックサブネット"]
-            G[NACL]
-            H[ALB]
-            I[セキュリティグループ]
-        end
+VPCセキュリティとは、ワークロードを保護するネットワーク境界を作成し、強制することです。
 
-        subgraph Private["プライベートサブネット"]
-            J[NACL]
-            K[EC2インスタンス]
-            L[セキュリティグループ]
-        end
-    end
+## VPCの理解：プライベートネットワーク
 
-    A --> B --> C --> D --> E
-    E --> F --> G --> H --> I
-    I --> J --> K --> L
+VPCは、リソースを起動するAWSの論理的に分離されたセクションです。クラウド内の独自のプライベートデータセンターと考えてください。ただし、以下を完全に制御できます：
 
-    style Edge fill:#f59e0b,color:#fff
-    style VPC fill:#3b82f6,color:#fff
-```
+- **IPアドレス範囲**：CIDRブロックを定義（例：10.0.0.0/16）
+- **サブネット**：VPCをセグメントに分割、各セグメントは特定のアベイラビリティゾーンに
+- **ルーティング**：サブネット間およびインターネットへ/からのトラフィックフローを制御
+- **ゲートウェイ**：インターネット、VPN、ピアリングVPCトラフィックの入口と出口を定義
 
-## セキュリティグループ vs NACL
+### パブリックサブネット vs プライベートサブネット
 
-### 比較
+AWSにおける基本的なネットワークセキュリティ設計パターンは、パブリックサブネットとプライベートサブネットの分離です：
 
-| 機能 | セキュリティグループ | NACL |
-|-----|-------------------|------|
+**パブリックサブネット**はインターネットゲートウェイへのルートを持っています。ここのリソースはインターネットから直接トラフィックを受信できます（セキュリティグループが許可している場合）。パブリックサブネットは以下に使用します：
+- ユーザートラフィックを受け取るロードバランサー
+- 管理アクセス用の踏み台ホスト
+- NATゲートウェイ（プライベートサブネットにアウトバウンドインターネットアクセスを提供）
+
+**プライベートサブネット**はインターネットへの直接ルートを持ちません。ここのリソースは直接のインターネットアクセスから保護されています。プライベートサブネットは以下に使用します：
+- アプリケーションサーバー
+- データベース
+- 内部サービス
+- インターネットからのトラフィックを受信する必要がないリソース
+
+この設計により、誰かがデータベースサーバーのプライベートIPを知っていても、インターネットからは到達できません。単純にルートがないからです。
+
+## セキュリティグループ：インスタンスレベルのファイアウォール
+
+セキュリティグループは、インスタンス（ENI）レベルでトラフィックを制御する仮想ファイアウォールです。AWSで最も一般的に使用されるネットワークセキュリティコントロールです。
+
+### 主な特徴
+
+**ステートフル**：一方向でトラフィックを許可すると、反対方向のレスポンスは自動的に許可されます。HTTPSを許可するインバウンドルールを作成すると、明示的なアウトバウンドルールなしでレスポンストラフィックが許可されます。
+
+**許可のみ**：セキュリティグループはトラフィックを許可することしかできません。明示的に拒否することはできません。どの許可ルールにも一致しないトラフィックは拒否されます。
+
+**すべてのルールを評価**：NACLとは異なり、すべてのセキュリティグループルールが評価されてから決定されます。いずれかのルールがトラフィックを許可すれば、許可されます。
+
+**インスタンスレベル**：各インスタンスは複数のセキュリティグループを持つことができます。有効なルールは、アタッチされたすべてのセキュリティグループの和集合です。
+
+### ステートフルが重要な理由
+
+セキュリティグループのステートフルな性質は、設定を劇的に簡素化します。Webサーバーを考えてみましょう：
+
+- **インバウンドルール**：どこからでもTCP 443を許可
+- **アウトバウンドルール**：（デフォルトですべて許可）
+
+クライアントがポート443で接続すると、サーバーはエフェメラルポート（例：49152）から応答します。セキュリティグループはステートフルなので、このレスポンスは自動的に許可されます。エフェメラルポートでのアウトバウンドトラフィックを明示的に許可する必要はありません。
+
+### セキュリティグループ参照
+
+セキュリティグループの最も強力な機能の1つは、IP範囲の代わりに他のセキュリティグループを参照することです。これにより以下のようなパターンが可能になります：
+
+- データベースアクセスをアプリケーションサーバーからのみ許可（IPではなく、セキュリティグループメンバーシップで）
+- ロードバランサーのヘルスチェックをロードバランサーのセキュリティグループからのみ許可
+
+このアプローチは：
+- **自動的にスケール**：新しいアプリサーバーを追加すると、すぐにデータベースアクセスを持つ
+- **より安全**：誤って間違ったIPを許可することがない
+- **IP変更に対応**：オートスケーリング、インスタンス置き換え、ルール更新不要
+
+### よくあるセキュリティグループの間違い
+
+**SSH/RDPに0.0.0.0/0を開く**：これはインターネット上のどこからでも管理アクセスを許可します。攻撃者はこれらの開いたポートを常にスキャンしています。代わりに、Systems Manager Session Manager、制限付きアクセスの踏み台ホスト、またはVPNを使用してください。
+
+**「-1」プロトコル（全トラフィック）を使用**：これはすべてのプロトコルとポートを許可します。実際に必要なことはまれで、攻撃対象面を劇的に増加させます。
+
+**セキュリティグループ参照を使用しない**：IPアドレスをハードコーディングすると、インフラストラクチャが変更されたときに手動更新が必要になり、移行中にセキュリティギャップが発生する可能性があります。
+
+## ネットワークACL：サブネットレベルのファイアウォール
+
+ネットワークアクセスコントロールリスト（NACL）はサブネットレベルで動作し、サブネットに出入りするトラフィックをフィルタリングします。
+
+### 主な特徴
+
+**ステートレス**：セキュリティグループとは異なり、NACLは接続を追跡しません。インバウンドとアウトバウンドの両方のトラフィックを明示的に許可する必要があります。レスポンストラフィックも含めて。
+
+**許可と拒否**：NACLはトラフィックを明示的に拒否できます。これはセキュリティグループにはできません。
+
+**順序付きルール評価**：ルールは順番に評価されます（最も低いルール番号が最初）。最初に一致するルールが適用され、評価は停止します。
+
+**サブネットレベル**：サブネットに出入りするすべてのトラフィックがNACLを通過します。
+
+### ステートレスが重要な理由
+
+NACLはステートレスなので、レスポンストラフィックを考慮する必要があります。HTTPSを許可するWebサーバーの場合：
+
+**必要なインバウンドルール**：
+- どこからでもTCP 443を許可（クライアントリクエスト）
+- どこからでもTCP 1024-65535を許可（アウトバウンドリクエストへのレスポンス）
+
+**必要なアウトバウンドルール**：
+- どこへでもTCP 1024-65535を許可（インバウンドリクエストへのレスポンス）
+- どこへでもTCP 443を許可（アウトバウンドHTTPSリクエスト）
+
+エフェメラルポート範囲（1024-65535）は、レスポンスが高番号のポートを使用するため必要です。これはセキュリティグループよりも複雑ですが、追加の制御を提供します。
+
+### NACLを使用するべき場合
+
+NACLは、セキュリティグループにない機能が必要な場合に輝きます：
+
+**明示的な拒否ルール**：セキュリティグループが許可しても、サブネット境界で既知の悪意のあるIPアドレスをブロック。
+
+**サブネットレベルの制御**：個々のセキュリティグループ設定に関係なく、サブネット内のすべてのリソースに一貫したルールを適用。
+
+**多層防御**：追加の保護層を提供。セキュリティグループの設定が間違っていても、NACLがセーフティネットを提供できる。
+
+**コンプライアンス要件**：一部のコンプライアンスフレームワークは、明示的な拒否機能またはサブネットレベルのログを要求。
+
+### セキュリティグループ vs NACL
+
+| 側面 | セキュリティグループ | NACL |
+|------|-------------------|------|
 | レベル | インスタンス/ENI | サブネット |
 | 状態 | ステートフル | ステートレス |
 | ルール | 許可のみ | 許可と拒否 |
-| 評価 | 全ルールを評価 | 順番に評価 |
-| デフォルト | すべてのインバウンドを拒否 | すべてを許可 |
-| 関連付け | インスタンスに複数 | サブネットに1つ |
+| 評価 | すべてのルール、和集合 | 順序付き、最初のマッチ |
+| デフォルト | すべてのインバウンドを拒否、すべてのアウトバウンドを許可 | すべて許可 |
+| 一般的な用途 | 主要なアクセス制御 | 追加のブロッキング、コンプライアンス |
 
-### セキュリティグループ（ステートフル）
+実際には、ほとんどの組織がセキュリティグループを主要な制御として使用し、NACLは追加の多層防御または特定のブロッキング要件に使用します。
 
-```python
-import boto3
+## VPCエンドポイント：AWSトラフィックをプライベートに保つ
 
-ec2 = boto3.client('ec2')
+VPC内のリソースがAWSサービス（S3、DynamoDB、Secrets Manager）にアクセスするとき、デフォルトではそのトラフィックはインターネットを経由します。VPCエンドポイントは、このトラフィックを完全にAWSネットワーク内に保ちます。
 
-# セキュリティグループを作成
-response = ec2.create_security_group(
-    GroupName='web-server-sg',
-    Description='Webサーバーセキュリティグループ',
-    VpcId='vpc-12345678'
-)
+### なぜこれが重要か
 
-sg_id = response['GroupId']
+**セキュリティ**：AWSネットワークを離れないトラフィックは、パブリックインターネットで傍受できません。
 
-# インバウンドルールを追加
-ec2.authorize_security_group_ingress(
-    GroupId=sg_id,
-    IpPermissions=[
-        {
-            'IpProtocol': 'tcp',
-            'FromPort': 443,
-            'ToPort': 443,
-            'IpRanges': [{'CidrIp': '0.0.0.0/0', 'Description': 'どこからでもHTTPS'}]
-        },
-        {
-            'IpProtocol': 'tcp',
-            'FromPort': 80,
-            'ToPort': 80,
-            'IpRanges': [{'CidrIp': '0.0.0.0/0', 'Description': 'どこからでもHTTP'}]
-        }
-    ]
-)
+**コンプライアンス**：一部のコンプライアンスフレームワークは、データがプライベートネットワーク内にとどまることを要求します。
 
-# 別のセキュリティグループを参照
-ec2.authorize_security_group_ingress(
-    GroupId=sg_id,
-    IpPermissions=[
-        {
-            'IpProtocol': 'tcp',
-            'FromPort': 3306,
-            'ToPort': 3306,
-            'UserIdGroupPairs': [
-                {
-                    'GroupId': 'sg-app-servers',
-                    'Description': 'アプリサーバーからMySQL'
-                }
-            ]
-        }
-    ]
-)
+**コスト**：VPCエンドポイント経由のデータ転送は、インターネットエグレスよりも安くなる場合があります。
+
+**信頼性**：AWSサービスに到達するためにインターネット接続に依存しません。
+
+### ゲートウェイエンドポイント vs インターフェースエンドポイント
+
+**ゲートウェイエンドポイント**（S3とDynamoDBのみ）：
+- ルートテーブルエントリとして表示
+- 時間当たりの料金なし
+- S3とDynamoDBに限定
+- エンドポイントポリシーでアクセス制御
+
+**インターフェースエンドポイント**（他のほとんどのAWSサービス）：
+- サブネット内にENIを作成
+- 時間当たりの料金 + データ処理
+- ほとんどのAWSサービスとサードパーティPrivateLinkサービスをサポート
+- セキュリティグループ + エンドポイントポリシーでアクセス制御
+- プライベートDNSをサポート（サービスエンドポイントがプライベートIPに解決）
+
+### エンドポイントポリシー
+
+両方のエンドポイントタイプは、エンドポイントを通じてアクセスできるものを制限するポリシーをサポートします：
+
+- 特定のS3バケットに制限
+- 特定のAPIアクションのみを許可
+- 条件を要求（ソースVPC、IAMプリンシパル）
+
+これにより「このVPC内のリソースは、任意のバケットではなく、当社のS3バケットのみにアクセスできる」というパターンが可能になります。
+
+## AWS Network Firewall：ディープパケットインスペクション
+
+Network Firewallは、VPCレベルでステートフルインスペクション、侵入検知・防止、ドメインフィルタリングを提供します。
+
+### Network Firewallが必要な場合
+
+- **コンプライアンス要件**がIDS/IPS機能を義務付けている
+- **暗号化されたトラフィックを検査**する必要がある（TLSインスペクション付き）
+- **ドメイン名でフィルタリング**したい（*.amazonaws.comのみ許可）
+- 複数のVPCにわたる**集中ネットワークセキュリティ**が必要
+- カスタム検出のための**Suricata互換ルール**が必要
+
+### 仕組み
+
+Network Firewallは、サブネット内に管理されたエンドポイントをデプロイします。ルートテーブルを使用してこれらのエンドポイントを経由するようにトラフィックをルーティングします。ファイアウォールはトラフィックを検査し、ルールを適用します：
+
+**ステートレスルール**：シンプルなパケットフィルタリング（ソース/宛先IPとポート）。最初に評価され、ステートフルルールにトラフィックを渡すか、即座にドロップ/転送できます。
+
+**ステートフルルール**：接続を認識した検査。ドメインリスト、Suricataルール、または標準の5タプルルールを使用できます。
+
+**ドメインフィルタリング**：HTTP Hostヘッダーまたは TLS SNI（Server Name Indication）に基づいてトラフィックを許可またはブロック。
+
+### Network Firewall vs セキュリティグループ/NACL
+
+Network Firewallは、セキュリティグループとNACLにはない機能を提供します：
+
+- **ドメインベースのフィルタリング**：*.amazonaws.comへのトラフィックを許可し、任意のドメインは不可
+- **IDS/IPS**：既知の攻撃パターンを検出してブロック
+- **集中管理**：複数のVPCにわたって一貫したルールを適用
+- **詳細なログ**：承認/拒否だけでなく、完全なトラフィック詳細をログ
+
+コストは大きく（エンドポイントあたり$0.395/時間 + データ処理）、一般的な使用ではなく、コンプライアンス要件や高セキュリティ環境で通常使用されます。
+
+## AWS WAF：アプリケーション層の保護
+
+Web Application Firewall（WAF）はレイヤー7（HTTP/HTTPS）で動作し、一般的なエクスプロイトからWebアプリケーションを保護します。
+
+### WAFが保護するもの
+
+- **SQLインジェクション**：リクエストパラメータ内の悪意のあるSQL
+- **クロスサイトスクリプティング（XSS）**：スクリプトインジェクション攻撃
+- **一般的なエクスプロイト**：一般的なソフトウェアの既知の脆弱性
+- **ボットトラフィック**：自動化された攻撃とスクレイピング
+- **レートベースの攻撃**：単一ソースからの過剰なリクエスト
+
+### AWSマネージドルール
+
+AWSは、AWSセキュリティ研究者によって維持されるマネージドルールセットを提供します：
+
+- **コアルールセット（CRS）**：一般的な脅威に対する一般的な保護
+- **SQLインジェクションルール**：SQLiパターンを検出
+- **既知の悪い入力**：既知の悪意のあるパターンを持つリクエストをブロック
+- **管理者保護**：管理エンドポイントを保護
+- **ボットコントロール**：ボットトラフィックを識別して管理
+
+これらのルールは新しい脅威が出現するとAWSによって更新されます。自分でメンテナンスする必要はありません。
+
+### WAFが適用される場所
+
+WAFは以下を保護します：
+- CloudFrontディストリビューション
+- Application Load Balancer
+- API Gateway REST API
+- AppSync GraphQL API
+- Cognito User Pools
+
+WAFはリソースを直接保護しません。トラフィックがリソースに到達するエントリポイントを保護します。
+
+## AWS Shield：DDoS保護
+
+Shieldは、リソースをトラフィックで圧倒しようとする分散型サービス妨害（DDoS）攻撃から保護します。
+
+### Shield Standard（無料）
+
+すべてのAWSお客様は自動的にShield Standard保護を受けます：
+- 一般的なレイヤー3/4攻撃から保護
+- 常時オンの検出と自動軽減
+- アクションは不要、自動的
+
+### Shield Advanced（月額$3,000 + データ転送）
+
+より強力な保護が必要なアプリケーション向け：
+- より大規模で洗練された攻撃に対する強化された検出と軽減
+- Elastic IP、CloudFront、Route 53、Global Accelerator、ALB、NLBの保護
+- DDoSレスポンスチーム（DRT）への24時間365日アクセス
+- コスト保護（攻撃中のスケーリングコストに対するAWSクレジット）
+- 保護されたリソースに追加コストなしでAWS WAF
+- 詳細な攻撃の可視性と攻撃後の分析
+
+Shield Advancedは、ダウンタイムコストがShield Advancedサブスクリプションを超えるビジネスクリティカルなアプリケーションに適しています。
+
+## VPCフローログ：ネットワークの可視性
+
+フローログは、VPC内のネットワークトラフィックに関するメタデータをキャプチャします。セキュリティ監視、トラブルシューティング、コンプライアンスに不可欠です。
+
+### フローログがキャプチャするもの
+
+各ネットワークフローについて、ログは以下を記録します：
+- ソースおよび宛先IPアドレス
+- ソースおよび宛先ポート
+- プロトコル
+- パケット数とバイト数
+- アクション（ACCEPTまたはREJECT）
+- インターフェース、サブネット、VPC識別子
+
+### フローログがキャプチャしないもの
+
+- パケットペイロード（メタデータのみ）
+- Route 53 ResolverへのDNSクエリ
+- インスタンスメタデータサービスへの/からのトラフィック
+- DHCPトラフィック
+- サブネット内の予約済みIPアドレスへのトラフィック
+
+### セキュリティのためのフローログの使用
+
+**異常を検出**：予期しないトラフィックパターン、既知の悪いIPへの接続、または異常なポート使用を特定。
+
+**インシデントを調査**：セキュリティイベントが発生したとき、フローログは何の通信が行われたかを示します。
+
+**セグメンテーションを検証**：サブネット間のトラフィックが予想されるパターンと一致することを確認。
+
+**コンプライアンスの証拠**：ネットワークコントロールが設計どおりに機能していることを実証。
+
+フローログはCloudWatch Logs（リアルタイム分析用）またはS3（長期保存とAthenaクエリ用）に送信できます。
+
+## 多層防御：レイヤードセキュリティ
+
+効果的なVPCセキュリティは、複数層のコントロールを使用します。各層は、他の層が失敗した場合に保護を提供します：
+
+```
+レイヤー1：エッジ（インターネット向け）
+├── AWS Shield（DDoS保護）
+├── AWS WAF（アプリケーション保護）
+└── CloudFront（セキュリティ機能付きCDN）
+         │
+         ▼
+レイヤー2：VPC境界
+├── インターネットゲートウェイ（エントリポイント）
+├── Network Firewall（ディープインスペクション）
+└── VPCエンドポイント（プライベートAWSアクセス）
+         │
+         ▼
+レイヤー3：サブネット
+├── ネットワークACL（ステートレスフィルタリング）
+└── ルートテーブル（トラフィック制御）
+         │
+         ▼
+レイヤー4：インスタンス
+├── セキュリティグループ（ステートフルフィルタリング）
+└── ホストベースのコントロール（OSファイアウォール）
+         │
+         ▼
+レイヤー5：データ
+├── 転送中の暗号化
+└── アプリケーションレベルのコントロール
 ```
 
-### ネットワークACL（ステートレス）
+### レイヤーが重要な理由
 
-```python
-import boto3
+**単一障害点がない**：セキュリティグループの設定が間違っていても、NACLがまだトラフィックをブロックするかもしれません。
 
-ec2 = boto3.client('ec2')
+**異なる機能**：各レイヤーは他にない機能を提供（例：NACLは拒否でき、WAFはHTTPを理解）。
 
-# NACLを作成
-nacl = ec2.create_network_acl(VpcId='vpc-12345678')
-nacl_id = nacl['NetworkAcl']['NetworkAclId']
+**異なる脅威に対する防御**：エッジでのDDoS保護、アプリケーション層でのSQLインジェクション保護。
 
-# インバウンドルールを追加（両方向を指定する必要あり）
-# ルール100: HTTPSインバウンドを許可
-ec2.create_network_acl_entry(
-    NetworkAclId=nacl_id,
-    RuleNumber=100,
-    Protocol='6',  # TCP
-    RuleAction='allow',
-    Egress=False,
-    CidrBlock='0.0.0.0/0',
-    PortRange={'From': 443, 'To': 443}
-)
-
-# ルール200: 応答用のエフェメラルポートを許可
-ec2.create_network_acl_entry(
-    NetworkAclId=nacl_id,
-    RuleNumber=200,
-    Protocol='6',
-    RuleAction='allow',
-    Egress=False,
-    CidrBlock='0.0.0.0/0',
-    PortRange={'From': 1024, 'To': 65535}
-)
-
-# アウトバウンドルール
-# ルール100: HTTPSアウトバウンドを許可
-ec2.create_network_acl_entry(
-    NetworkAclId=nacl_id,
-    RuleNumber=100,
-    Protocol='6',
-    RuleAction='allow',
-    Egress=True,
-    CidrBlock='0.0.0.0/0',
-    PortRange={'From': 443, 'To': 443}
-)
-
-# ルール200: 応答用のエフェメラルポートを許可
-ec2.create_network_acl_entry(
-    NetworkAclId=nacl_id,
-    RuleNumber=200,
-    Protocol='6',
-    RuleAction='allow',
-    Egress=True,
-    CidrBlock='0.0.0.0/0',
-    PortRange={'From': 1024, 'To': 65535}
-)
-```
-
-### 使い分け
-
-```mermaid
-flowchart LR
-    subgraph NACL["NACLの用途"]
-        A[サブネットレベルのブロック]
-        B[明示的な拒否ルール]
-        C[特定IPのブロック]
-    end
-
-    subgraph SG["セキュリティグループの用途"]
-        D[インスタンスレベルのアクセス]
-        E[アプリケーション層の分離]
-        F[他のSGを参照]
-    end
-
-    style NACL fill:#f59e0b,color:#fff
-    style SG fill:#3b82f6,color:#fff
-```
-
-## VPCエンドポイント
-
-### ゲートウェイエンドポイント（S3、DynamoDB）
-
-```python
-import boto3
-
-ec2 = boto3.client('ec2')
-
-# S3用ゲートウェイエンドポイントを作成
-response = ec2.create_vpc_endpoint(
-    VpcId='vpc-12345678',
-    ServiceName='com.amazonaws.us-east-1.s3',
-    VpcEndpointType='Gateway',
-    RouteTableIds=['rtb-12345678']
-)
-
-endpoint_id = response['VpcEndpoint']['VpcEndpointId']
-```
-
-### ゲートウェイエンドポイントポリシー
-
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "RestrictToSpecificBucket",
-      "Effect": "Allow",
-      "Principal": "*",
-      "Action": [
-        "s3:GetObject",
-        "s3:PutObject"
-      ],
-      "Resource": "arn:aws:s3:::my-private-bucket/*"
-    },
-    {
-      "Sid": "DenyOtherBuckets",
-      "Effect": "Deny",
-      "Principal": "*",
-      "Action": "s3:*",
-      "Resource": "*",
-      "Condition": {
-        "StringNotEquals": {
-          "s3:ResourceAccount": "123456789012"
-        }
-      }
-    }
-  ]
-}
-```
-
-### インターフェースエンドポイント（PrivateLink）
-
-```python
-import boto3
-
-ec2 = boto3.client('ec2')
-
-# Secrets Manager用インターフェースエンドポイントを作成
-response = ec2.create_vpc_endpoint(
-    VpcId='vpc-12345678',
-    ServiceName='com.amazonaws.us-east-1.secretsmanager',
-    VpcEndpointType='Interface',
-    SubnetIds=['subnet-private-1', 'subnet-private-2'],
-    SecurityGroupIds=['sg-endpoint'],
-    PrivateDnsEnabled=True
-)
-```
-
-### エンドポイントセキュリティの比較
-
-| 機能 | ゲートウェイエンドポイント | インターフェースエンドポイント |
-|-----|------------------------|--------------------------|
-| サービス | S3、DynamoDB | ほとんどのAWSサービス |
-| コスト | 無料 | 時間課金 + データ転送 |
-| DNS | ルートテーブルエントリ | プライベートDNS |
-| セキュリティ | エンドポイントポリシー | セキュリティグループ + ポリシー |
-| HA | 組み込み | マルチAZデプロイ |
-
-## AWS Network Firewall
-
-```mermaid
-flowchart LR
-    A[インターネット] --> B[IGW]
-    B --> C[Network Firewall]
-    C --> D{ルール}
-    D -->|許可| E[保護されたサブネット]
-    D -->|ドロップ| F[ブロック]
-    D -->|アラート| G[ログ]
-
-    style C fill:#f59e0b,color:#fff
-```
-
-### ファイアウォール設定
-
-```python
-import boto3
-
-network_firewall = boto3.client('network-firewall')
-
-# ステートレスルールグループを作成
-stateless_rules = network_firewall.create_rule_group(
-    RuleGroupName='block-bad-ips',
-    Type='STATELESS',
-    Capacity=100,
-    RuleGroup={
-        'RulesSource': {
-            'StatelessRulesAndCustomActions': {
-                'StatelessRules': [
-                    {
-                        'RuleDefinition': {
-                            'MatchAttributes': {
-                                'Sources': [
-                                    {'AddressDefinition': '192.0.2.0/24'}
-                                ]
-                            },
-                            'Actions': ['aws:drop']
-                        },
-                        'Priority': 1
-                    }
-                ]
-            }
-        }
-    }
-)
-
-# ドメインフィルタリング付きステートフルルールグループを作成
-stateful_rules = network_firewall.create_rule_group(
-    RuleGroupName='allow-domains',
-    Type='STATEFUL',
-    Capacity=100,
-    RuleGroup={
-        'RulesSource': {
-            'RulesSourceList': {
-                'Targets': [
-                    '.amazonaws.com',
-                    '.github.com'
-                ],
-                'TargetTypes': ['HTTP_HOST', 'TLS_SNI'],
-                'GeneratedRulesType': 'ALLOWLIST'
-            }
-        }
-    }
-)
-```
-
-### Suricataルール
-
-```python
-# Suricataルール付きステートフルルールグループを作成
-suricata_rules = network_firewall.create_rule_group(
-    RuleGroupName='intrusion-detection',
-    Type='STATEFUL',
-    Capacity=100,
-    RuleGroup={
-        'RulesSource': {
-            'RulesString': '''
-# SQLインジェクション試行をブロック
-drop http any any -> any any (msg:"SQL Injection"; content:"SELECT"; nocase; content:"FROM"; nocase; sid:1000001; rev:1;)
-
-# 不審なユーザーエージェントをアラート
-alert http any any -> any any (msg:"Suspicious UA"; http.user_agent; content:"sqlmap"; nocase; sid:1000002; rev:1;)
-'''
-        }
-    }
-)
-```
-
-## AWS WAF
-
-### Web ACL設定
-
-```python
-import boto3
-
-wafv2 = boto3.client('wafv2')
-
-# Web ACLを作成
-response = wafv2.create_web_acl(
-    Name='api-protection',
-    Scope='REGIONAL',  # または 'CLOUDFRONT'
-    DefaultAction={'Allow': {}},
-    Rules=[
-        {
-            'Name': 'AWS-AWSManagedRulesCommonRuleSet',
-            'Priority': 1,
-            'Statement': {
-                'ManagedRuleGroupStatement': {
-                    'VendorName': 'AWS',
-                    'Name': 'AWSManagedRulesCommonRuleSet'
-                }
-            },
-            'OverrideAction': {'None': {}},
-            'VisibilityConfig': {
-                'SampledRequestsEnabled': True,
-                'CloudWatchMetricsEnabled': True,
-                'MetricName': 'CommonRules'
-            }
-        },
-        {
-            'Name': 'AWS-AWSManagedRulesSQLiRuleSet',
-            'Priority': 2,
-            'Statement': {
-                'ManagedRuleGroupStatement': {
-                    'VendorName': 'AWS',
-                    'Name': 'AWSManagedRulesSQLiRuleSet'
-                }
-            },
-            'OverrideAction': {'None': {}},
-            'VisibilityConfig': {
-                'SampledRequestsEnabled': True,
-                'CloudWatchMetricsEnabled': True,
-                'MetricName': 'SQLiRules'
-            }
-        },
-        {
-            'Name': 'RateLimit',
-            'Priority': 3,
-            'Statement': {
-                'RateBasedStatement': {
-                    'Limit': 2000,
-                    'AggregateKeyType': 'IP'
-                }
-            },
-            'Action': {'Block': {}},
-            'VisibilityConfig': {
-                'SampledRequestsEnabled': True,
-                'CloudWatchMetricsEnabled': True,
-                'MetricName': 'RateLimit'
-            }
-        }
-    ],
-    VisibilityConfig={
-        'SampledRequestsEnabled': True,
-        'CloudWatchMetricsEnabled': True,
-        'MetricName': 'api-protection'
-    }
-)
-```
-
-### カスタムルール
-
-```python
-# ジオブロッキングルール
-geo_rule = {
-    'Name': 'GeoBlock',
-    'Priority': 0,
-    'Statement': {
-        'GeoMatchStatement': {
-            'CountryCodes': ['RU', 'CN', 'KP']
-        }
-    },
-    'Action': {'Block': {}},
-    'VisibilityConfig': {
-        'SampledRequestsEnabled': True,
-        'CloudWatchMetricsEnabled': True,
-        'MetricName': 'GeoBlock'
-    }
-}
-
-# IPセットブロッキング
-ip_set = wafv2.create_ip_set(
-    Name='blocked-ips',
-    Scope='REGIONAL',
-    IPAddressVersion='IPV4',
-    Addresses=['192.0.2.0/24', '198.51.100.0/24']
-)
-
-ip_block_rule = {
-    'Name': 'BlockedIPs',
-    'Priority': 1,
-    'Statement': {
-        'IPSetReferenceStatement': {
-            'ARN': ip_set['Summary']['ARN']
-        }
-    },
-    'Action': {'Block': {}},
-    'VisibilityConfig': {
-        'SampledRequestsEnabled': True,
-        'CloudWatchMetricsEnabled': True,
-        'MetricName': 'BlockedIPs'
-    }
-}
-```
-
-## AWS Shield
-
-### Shield Standard vs Advanced
-
-| 機能 | Standard | Advanced |
-|-----|----------|----------|
-| コスト | 無料 | $3,000/月 |
-| 保護 | レイヤー3/4 DDoS | レイヤー3/4/7 DDoS |
-| レスポンスチーム | - | 24/7 DRTアクセス |
-| コスト保護 | - | DDoSコスト保護 |
-| WAF統合 | - | 保護リソースのWAF無料 |
-| 可視性 | CloudWatch | リアルタイムメトリクス |
-
-### Shield Advanced保護
-
-```python
-import boto3
-
-shield = boto3.client('shield')
-
-# リソースの保護を作成
-shield.create_protection(
-    Name='ALB-Protection',
-    ResourceArn='arn:aws:elasticloadbalancing:region:account:loadbalancer/app/my-alb/xxx'
-)
-
-# プロアクティブエンゲージメントを有効化
-shield.enable_proactive_engagement()
-
-# ヘルスチェックを関連付け
-shield.associate_health_check(
-    ProtectionId='protection-id',
-    HealthCheckArn='arn:aws:route53:::healthcheck/xxx'
-)
-```
-
-## VPCフローログ
-
-### フローログを有効化
-
-```python
-import boto3
-
-ec2 = boto3.client('ec2')
-
-# CloudWatchへのフローログを作成
-response = ec2.create_flow_logs(
-    ResourceIds=['vpc-12345678'],
-    ResourceType='VPC',
-    TrafficType='ALL',  # ACCEPT、REJECT、または ALL
-    LogDestinationType='cloud-watch-logs',
-    LogGroupName='/aws/vpc/flow-logs',
-    DeliverLogsPermissionArn='arn:aws:iam::account:role/flow-logs-role',
-    MaxAggregationInterval=60,
-    LogFormat='${version} ${account-id} ${interface-id} ${srcaddr} ${dstaddr} ${srcport} ${dstport} ${protocol} ${packets} ${bytes} ${start} ${end} ${action} ${log-status} ${vpc-id} ${subnet-id} ${instance-id} ${tcp-flags} ${type} ${pkt-srcaddr} ${pkt-dstaddr}'
-)
-
-# S3へのフローログを作成
-response = ec2.create_flow_logs(
-    ResourceIds=['vpc-12345678'],
-    ResourceType='VPC',
-    TrafficType='REJECT',
-    LogDestinationType='s3',
-    LogDestination='arn:aws:s3:::my-flow-logs-bucket/vpc-logs/'
-)
-```
-
-### Athenaでフローログを分析
-
-```sql
--- VPCフローログ用テーブルを作成
-CREATE EXTERNAL TABLE vpc_flow_logs (
-    version INT,
-    account_id STRING,
-    interface_id STRING,
-    srcaddr STRING,
-    dstaddr STRING,
-    srcport INT,
-    dstport INT,
-    protocol INT,
-    packets BIGINT,
-    bytes BIGINT,
-    start_time BIGINT,
-    end_time BIGINT,
-    action STRING,
-    log_status STRING
-)
-PARTITIONED BY (dt STRING)
-ROW FORMAT DELIMITED
-FIELDS TERMINATED BY ' '
-LOCATION 's3://my-flow-logs-bucket/vpc-logs/';
-
--- 拒否されたトラフィックを検索
-SELECT srcaddr, dstaddr, dstport, COUNT(*) as count
-FROM vpc_flow_logs
-WHERE action = 'REJECT'
-GROUP BY srcaddr, dstaddr, dstport
-ORDER BY count DESC
-LIMIT 10;
-
--- トップトーカーを検索
-SELECT srcaddr, SUM(bytes) as total_bytes
-FROM vpc_flow_logs
-WHERE action = 'ACCEPT'
-GROUP BY srcaddr
-ORDER BY total_bytes DESC
-LIMIT 10;
-```
-
-## 多層防御アーキテクチャ
-
-```mermaid
-flowchart TB
-    subgraph Layer1["レイヤー1: エッジ"]
-        A[Route 53]
-        B[CloudFront]
-        C[AWS Shield]
-        D[AWS WAF]
-    end
-
-    subgraph Layer2["レイヤー2: ネットワーク"]
-        E[VPC]
-        F[Network Firewall]
-        G[NACL]
-    end
-
-    subgraph Layer3["レイヤー3: コンピュート"]
-        H[セキュリティグループ]
-        I[EC2/ECS/Lambda]
-        J[ホストファイアウォール]
-    end
-
-    subgraph Layer4["レイヤー4: データ"]
-        K[保存時暗号化]
-        L[転送時暗号化]
-        M[アクセス制御]
-    end
-
-    Layer1 --> Layer2 --> Layer3 --> Layer4
-
-    style Layer1 fill:#ef4444,color:#fff
-    style Layer2 fill:#f59e0b,color:#fff
-    style Layer3 fill:#3b82f6,color:#fff
-    style Layer4 fill:#10b981,color:#fff
-```
-
-## ベストプラクティス
-
-### 1. 最小権限のネットワークアクセス
-
-```python
-# ❌ 悪い例: すべてのトラフィックを許可
-ec2.authorize_security_group_ingress(
-    GroupId=sg_id,
-    IpPermissions=[{
-        'IpProtocol': '-1',
-        'IpRanges': [{'CidrIp': '0.0.0.0/0'}]
-    }]
-)
-
-# ✅ 良い例: 特定のポートとソース
-ec2.authorize_security_group_ingress(
-    GroupId=sg_id,
-    IpPermissions=[{
-        'IpProtocol': 'tcp',
-        'FromPort': 443,
-        'ToPort': 443,
-        'UserIdGroupPairs': [{'GroupId': 'sg-alb'}]
-    }]
-)
-```
-
-### 2. AWSサービスにはVPCエンドポイントを使用
-
-```python
-# トラフィックをAWSネットワーク内に保持
-endpoints = [
-    'com.amazonaws.us-east-1.s3',
-    'com.amazonaws.us-east-1.dynamodb',
-    'com.amazonaws.us-east-1.secretsmanager',
-    'com.amazonaws.us-east-1.kms'
-]
-
-for service in endpoints:
-    ec2.create_vpc_endpoint(
-        VpcId='vpc-12345678',
-        ServiceName=service,
-        VpcEndpointType='Interface' if 'secretsmanager' in service else 'Gateway'
-    )
-```
-
-### 3. すべてのVPCでフローログを有効化
-
-```python
-# すべてのVPCで有効化
-vpcs = ec2.describe_vpcs()
-
-for vpc in vpcs['Vpcs']:
-    ec2.create_flow_logs(
-        ResourceIds=[vpc['VpcId']],
-        ResourceType='VPC',
-        TrafficType='ALL',
-        LogDestinationType='s3',
-        LogDestination='arn:aws:s3:::central-flow-logs/'
-    )
-```
+**コンプライアンス要件**：多くのフレームワークは複数層のネットワークコントロールを要求。
 
 ## まとめ
 
-| コントロール | レベル | ユースケース |
-|------------|-------|------------|
-| セキュリティグループ | インスタンス | アプリケーションレベルのアクセス制御 |
-| NACL | サブネット | サブネットレベルのブロック、明示的拒否 |
+VPCセキュリティとは、ネットワーク境界を作成し、強制することです：
+
+| コントロール | レベル | 目的 |
+|------------|-------|-----|
+| セキュリティグループ | インスタンス | 主要なアクセス制御（ステートフル、許可のみ） |
+| NACL | サブネット | 追加の制御（ステートレス、許可/拒否） |
 | VPCエンドポイント | VPC | プライベートAWSサービスアクセス |
-| Network Firewall | VPC | ディープパケットインスペクション、IDS/IPS |
-| AWS WAF | アプリケーション | レイヤー7保護、OWASPルール |
-| AWS Shield | エッジ | DDoS保護 |
-| VPCフローログ | VPC | トラフィック分析、フォレンジック |
+| Network Firewall | VPC | ディープインスペクション、IDS/IPS |
+| WAF | アプリケーション | HTTP/HTTPS保護 |
+| Shield | エッジ | DDoS保護 |
+| フローログ | VPC | ネットワークの可視性と監査 |
 
-重要なポイント：
+主要な原則：
+- **最小権限**：明示的に必要なトラフィックのみを許可
+- **デフォルトでプライベート**：プライベートサブネット、VPCエンドポイントを使用
+- **多層防御**：複数層のコントロール
+- **可視性**：フローログを有効にし、トラフィックパターンを監視
+- **セグメンテーション**：ティア（Web、アプリ、データベース）を異なるサブネット/セキュリティグループに分離
 
-- ステートフルなインスタンスレベルのアクセス制御にはセキュリティグループを使用
-- ステートレスなサブネットレベルのブロックにはNACLを使用
-- AWSトラフィックをプライベートに保つためにVPCエンドポイントを実装
-- 高度な検査にはNetwork Firewallをデプロイ
-- すべての公開リソースでAWS WAFを有効化
-- 可視性とコンプライアンスのためにVPCフローログを有効化
-- 複数のレイヤーで多層防御を構築
+ネットワークセキュリティは、機能しているときはしばしば見えず、失敗したときは壊滅的に見えます。適切なVPCセキュリティ設計への投資は、インシデントが発生する前に防ぎます。
 
-VPCセキュリティは、AWSセキュリティスペシャリティ試験と本番ワークロードの保護に不可欠です。
+## 参考資料
 
-## 参考文献
-
-- [VPC Security](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Security.html)
-- [AWS Network Firewall](https://docs.aws.amazon.com/network-firewall/)
-- [AWS WAF Developer Guide](https://docs.aws.amazon.com/waf/)
-- Muñoz, Mauricio, et al. *AWS Certified Security Study Guide, 2nd Edition*. Wiley, 2025.
-- Book, Adam, and Stuart Scott. *AWS Certified Security – Specialty (SCS-C02) Exam Guide*. Packt, 2024.
+- [VPCセキュリティ](https://docs.aws.amazon.com/ja_jp/vpc/latest/userguide/VPC_Security.html)
+- [セキュリティグループ](https://docs.aws.amazon.com/ja_jp/vpc/latest/userguide/vpc-security-groups.html)
+- [ネットワークACL](https://docs.aws.amazon.com/ja_jp/vpc/latest/userguide/vpc-network-acls.html)
+- [AWS Network Firewall](https://docs.aws.amazon.com/ja_jp/network-firewall/)
+- Crane, Dylan. *AWS Security*. Manning Publications, 2022.
+- Muñoz, Mauricio, et al. *Mastering AWS Security, 2nd Edition*. Packt, 2024.
