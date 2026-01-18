@@ -23,6 +23,7 @@ export default function BlogPage({ posts, totalPages, currentPage, tags }: BlogP
   const router = useRouter();
   const { locale, locales, asPath } = router;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isTagCloudOpen, setIsTagCloudOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const languageConfig = {
@@ -164,25 +165,37 @@ export default function BlogPage({ posts, totalPages, currentPage, tags }: BlogP
         </header>
 
         <main className="max-w-4xl mx-auto px-4 py-8">
-          {/* Tag Cloud */}
+          {/* Tag Cloud - Collapsible */}
           {tags.length > 0 && (
-            <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <Tag size={20} />
-                {t('blog.tags')}
-              </h2>
-              <div className="flex flex-wrap gap-2">
-                {tags.map(({ tag, count }) => (
-                  <Link
-                    key={tag}
-                    href={`/blog/tag/${encodeURIComponent(tag)}`}
-                    className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors ${getTagSize(count)}`}
-                  >
-                    #{tag}
-                    <span className="text-blue-500 text-xs">({count})</span>
-                  </Link>
-                ))}
-              </div>
+            <div className="bg-white rounded-lg shadow-sm mb-8 overflow-hidden">
+              <button
+                onClick={() => setIsTagCloudOpen(!isTagCloudOpen)}
+                className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
+              >
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <Tag size={20} />
+                  {t('blog.tags')}
+                  <span className="text-sm font-normal text-gray-500">({tags.length})</span>
+                </h2>
+                <ChevronDown
+                  size={20}
+                  className={`text-gray-500 transition-transform duration-200 ${isTagCloudOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
+              {isTagCloudOpen && (
+                <div className="px-6 pb-6 flex flex-wrap gap-2 border-t border-gray-100 pt-4">
+                  {tags.map(({ tag, count }) => (
+                    <Link
+                      key={tag}
+                      href={`/blog/tag/${encodeURIComponent(tag)}`}
+                      className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors ${getTagSize(count)}`}
+                    >
+                      #{tag}
+                      <span className="text-blue-500 text-xs">({count})</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
