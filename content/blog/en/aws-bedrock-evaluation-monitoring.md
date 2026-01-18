@@ -93,7 +93,7 @@ job_arn = response['jobArn']
 
 ### Dataset Format (JSONL)
 
-```jsonl
+```json
 {"prompt": "What is the return policy?", "referenceResponse": "Our return policy allows returns within 30 days of purchase."}
 {"prompt": "How do I track my order?", "referenceResponse": "You can track your order using the tracking link in your confirmation email."}
 {"prompt": "What payment methods are accepted?", "referenceResponse": "We accept credit cards, PayPal, and bank transfers."}

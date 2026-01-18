@@ -38,7 +38,7 @@ flowchart LR
 
 ### ファインチューニング形式（JSONL）
 
-```jsonl
+```json
 {"prompt": "このドキュメントを要約してください:", "completion": "このドキュメントは...について述べています"}
 {"prompt": "フランス語に翻訳:", "completion": "Bonjour, comment allez-vous?"}
 {"prompt": "感情を分類:", "completion": "ポジティブ"}
@@ -46,7 +46,7 @@ flowchart LR
 
 ### 継続事前学習形式
 
-```jsonl
+```json
 {"input": "ドメイン固有のテキストコンテンツ。これはモデルがドメイン用語とパターンを学習するのに役立ちます。"}
 {"input": "ドメイン知識を含む別のドキュメント..."}
 ```

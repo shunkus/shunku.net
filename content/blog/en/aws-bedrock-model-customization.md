@@ -38,7 +38,7 @@ flowchart LR
 
 ### Fine-tuning Format (JSONL)
 
-```jsonl
+```json
 {"prompt": "Summarize this document:", "completion": "The document discusses..."}
 {"prompt": "Translate to French:", "completion": "Bonjour, comment allez-vous?"}
 {"prompt": "Classify sentiment:", "completion": "positive"}
@@ -46,7 +46,7 @@ flowchart LR
 
 ### Continued Pre-training Format
 
-```jsonl
+```json
 {"input": "Domain-specific text content goes here. This helps the model learn domain terminology and patterns."}
 {"input": "Another document with domain knowledge..."}
 ```

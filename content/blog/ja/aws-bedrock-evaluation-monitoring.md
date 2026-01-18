@@ -93,7 +93,7 @@ job_arn = response['jobArn']
 
 ### データセット形式（JSONL）
 
-```jsonl
+```json
 {"prompt": "返品ポリシーは何ですか？", "referenceResponse": "当社の返品ポリシーでは、購入後30日以内の返品が可能です。"}
 {"prompt": "注文を追跡するにはどうすればいいですか？", "referenceResponse": "確認メールに記載されている追跡リンクで注文を追跡できます。"}
 {"prompt": "どのような支払い方法がありますか？", "referenceResponse": "クレジットカード、PayPal、銀行振込を受け付けています。"}
