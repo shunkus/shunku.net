@@ -131,6 +131,37 @@ export function getAllTags(locale: string): string[] {
   return [...new Set(allTags)].sort();
 }
 
+// Get tags with counts for a specific locale
+export function getTagsWithCounts(locale: string): { tag: string; count: number }[] {
+  const posts = getBlogPosts(locale);
+  const tagCounts: { [tag: string]: number } = {};
+
+  posts.forEach((post) => {
+    post.tags?.forEach((tag) => {
+      tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+    });
+  });
+
+  return Object.entries(tagCounts)
+    .map(([tag, count]) => ({ tag, count }))
+    .sort((a, b) => b.count - a.count);
+}
+
+// Get paginated blog posts
+export function getPaginatedBlogPosts(
+  locale: string,
+  page: number,
+  perPage: number
+): { posts: BlogPostMeta[]; totalPages: number; totalPosts: number } {
+  const allPosts = getBlogPosts(locale);
+  const totalPosts = allPosts.length;
+  const totalPages = Math.ceil(totalPosts / perPage);
+  const start = (page - 1) * perPage;
+  const posts = allPosts.slice(start, start + perPage);
+
+  return { posts, totalPages, totalPosts };
+}
+
 // Get posts by tag
 export function getBlogPostsByTag(tag: string, locale: string): BlogPostMeta[] {
   const posts = getBlogPosts(locale);

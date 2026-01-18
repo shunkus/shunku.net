@@ -103,7 +103,11 @@
     "backToBlog": "Back to Blog",
     "readMore": "Read more",
     "noPosts": "No blog posts yet",
-    "noPostsDescription": "Check back soon for new articles and insights!"
+    "noPostsDescription": "Check back soon for new articles and insights!",
+    "tags": "Tags",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page"
   },
   "tagPageTitle": "Posts tagged with \"{{tag}}\"",
   "tagPageDescription": "{{count}} posts tagged with \"{{tag}}\"",

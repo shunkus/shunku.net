@@ -1,4 +1,4 @@
-import { GetStaticProps } from 'next';
+import { GetStaticPaths, GetStaticProps } from 'next';
 import Link from 'next/link';
 import Head from 'next/head';
 import { format } from 'date-fns';
@@ -7,18 +7,18 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useRouter } from 'next/router';
 import { useState, useEffect, useRef } from 'react';
-import { getPaginatedBlogPosts, getTagsWithCounts, BlogPostMeta } from '../../lib/blog';
+import { getPaginatedBlogPosts, getTagsWithCounts, getBlogPosts, BlogPostMeta } from '../../../lib/blog';
 
 const POSTS_PER_PAGE = 10;
 
-interface BlogIndexProps {
+interface BlogPageProps {
   posts: BlogPostMeta[];
   totalPages: number;
   currentPage: number;
   tags: { tag: string; count: number }[];
 }
 
-export default function BlogIndex({ posts, totalPages, currentPage, tags }: BlogIndexProps) {
+export default function BlogPage({ posts, totalPages, currentPage, tags }: BlogPageProps) {
   const { t } = useTranslation('common');
   const router = useRouter();
   const { locale, locales, asPath } = router;
@@ -102,7 +102,7 @@ export default function BlogIndex({ posts, totalPages, currentPage, tags }: Blog
   return (
     <>
       <Head>
-        <title>{`${t('blog.title')} - ${t('name')}`}</title>
+        <title>{`${t('blog.title')} - ${t('blog.page')} ${currentPage} - ${t('name')}`}</title>
         <meta name="description" content={t('blog.description')} />
       </Head>
 
@@ -323,15 +323,57 @@ export default function BlogIndex({ posts, totalPages, currentPage, tags }: Blog
   );
 }
 
-export const getStaticProps: GetStaticProps = async ({ locale }) => {
-  const { posts, totalPages } = getPaginatedBlogPosts(locale || 'en', 1, POSTS_PER_PAGE);
+export const getStaticPaths: GetStaticPaths = async () => {
+  const locales = ['en', 'ja'];
+  const paths: { params: { page: string }; locale: string }[] = [];
+
+  for (const locale of locales) {
+    const allPosts = getBlogPosts(locale);
+    const totalPages = Math.ceil(allPosts.length / POSTS_PER_PAGE);
+
+    // Generate paths for page 2 and onwards (page 1 is handled by /blog)
+    for (let page = 2; page <= totalPages; page++) {
+      paths.push({
+        params: { page: String(page) },
+        locale,
+      });
+    }
+  }
+
+  return {
+    paths,
+    fallback: false,
+  };
+};
+
+export const getStaticProps: GetStaticProps = async ({ params, locale }) => {
+  const page = parseInt(params?.page as string, 10);
+
+  // Redirect page 1 to /blog
+  if (page === 1) {
+    return {
+      redirect: {
+        destination: '/blog',
+        permanent: true,
+      },
+    };
+  }
+
+  const { posts, totalPages } = getPaginatedBlogPosts(locale || 'en', page, POSTS_PER_PAGE);
   const tags = getTagsWithCounts(locale || 'en');
+
+  // If page is out of range, return 404
+  if (page > totalPages || page < 1) {
+    return {
+      notFound: true,
+    };
+  }
 
   return {
     props: {
       posts,
       totalPages,
-      currentPage: 1,
+      currentPage: page,
       tags,
       ...(await serverSideTranslations(locale || 'en', ['common'])),
     },

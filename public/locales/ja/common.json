@@ -103,7 +103,11 @@
     "backToBlog": "ブログに戻る",
     "readMore": "続きを読む",
     "noPosts": "ブログ記事はまだありません",
-    "noPostsDescription": "新しい記事と洞察をお楽しみに！"
+    "noPostsDescription": "新しい記事と洞察をお楽しみに！",
+    "tags": "タグ",
+    "previous": "前へ",
+    "next": "次へ",
+    "page": "ページ"
   },
   "tagPageTitle": "「{{tag}}」タグの記事",
   "tagPageDescription": "「{{tag}}」タグの記事（{{count}}件）",
