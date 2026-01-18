@@ -2,7 +2,7 @@
 title: "AWSサーバーレスパターン：Lambda、API Gateway、Step Functions統合"
 date: "2026-01-04"
 excerpt: "サーバーレスアーキテクチャパターンを徹底解説 - Lambda設計、API Gateway統合、Step Functionsワークフロー、イベント駆動パターンのベストプラクティスを紹介します。"
-tags: ["AWS", "Lambda", "API Gateway", "Step Functions", "サーバーレス", "DevOps"]
+tags: ["AWS", "Lambda", "API Gateway", "Step Functions", "Serverless", "DevOps"]
 author: "Shunku"
 ---
 
@@ -12,7 +12,7 @@ author: "Shunku"
 
 ```mermaid
 flowchart TB
-    subgraph Serverless["サーバーレス"]
+    subgraph Serverless["Serverless"]
         APIGateway["API Gateway"]
         Lambda["Lambda"]
         StepFunctions["Step Functions"]
@@ -433,7 +433,7 @@ ProcessFunction:
 
 ```mermaid
 flowchart TB
-    subgraph BestPractices["ベストプラクティス"]
+    subgraph BestPractices["Best Practices"]
         SinglePurpose["単一責任"]
         Stateless["ステートレス"]
         Timeout["適切なタイムアウト"]

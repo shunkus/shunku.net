@@ -2,7 +2,7 @@
 title: "AWS Direct Connect完全ガイド：専用線接続と冗長性設計"
 date: "2025-12-09"
 excerpt: "AWS Direct Connectによるオンプレミス接続を徹底解説 - 専用接続、ホスト接続、VIF、Direct Connect Gateway、冗長性設計のベストプラクティスを紹介します。"
-tags: ["AWS", "Direct Connect", "ネットワーク", "ハイブリッドクラウド", "専用線"]
+tags: ["AWS", "Direct Connect", "Networking", "Hybrid Cloud", "Dedicated Line"]
 author: "Shunku"
 ---
 
@@ -318,7 +318,7 @@ flowchart LR
         DX["Direct Connect"]
     end
 
-    subgraph Backup["バックアップ"]
+    subgraph Backup["Backup"]
         VPN["Site-to-Site VPN"]
     end
 
@@ -492,7 +492,7 @@ flowchart TB
     Connection --> |"専用/ホスト"| Speed["帯域幅選択"]
     VIF --> |"Private/Public/Transit"| Access["アクセスタイプ"]
     DXGW --> |"マルチVPC/リージョン"| Scale["スケール"]
-    Redundancy --> |"複数ロケーション"| HA["高可用性"]
+    Redundancy --> |"複数ロケーション"| HA["High Availability"]
 
     style DirectConnect fill:#3b82f6,color:#fff
 ```

@@ -2,7 +2,7 @@
 title: "スレッド vs プロセス vs asyncio: Pythonの並行処理を使い分ける"
 date: "2025-12-01"
 excerpt: "Pythonの3つの並行処理モデルを徹底比較 - GILの影響、I/Oバウンド vs CPUバウンド、ThreadPoolExecutor、ProcessPoolExecutorの使い分けを解説します。"
-tags: ["Python", "並行処理", "スレッド", "マルチプロセス", "asyncio"]
+tags: ["Python", "Concurrency", "Threading", "Multiprocessing", "asyncio"]
 author: "Shunku"
 ---
 
@@ -12,13 +12,13 @@ Pythonには3つの主要な並行処理モデルがあります：スレッド�
 
 ```mermaid
 flowchart TB
-    subgraph Threading["スレッド"]
+    subgraph Threading["Threading"]
         T1["1つのプロセス内"]
         T2["メモリ共有"]
         T3["GILの制約あり"]
     end
 
-    subgraph Multiprocessing["マルチプロセス"]
+    subgraph Multiprocessing["Multiprocessing"]
         P1["複数のプロセス"]
         P2["メモリ分離"]
         P3["GILの制約なし"]

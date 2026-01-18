@@ -2,7 +2,7 @@
 title: "AWSトラブルシューティング：障害分析、ログ分析、デプロイ失敗対応"
 date: "2026-01-10"
 excerpt: "AWSトラブルシューティングを徹底解説 - CloudWatch Logs分析、X-Rayトレース、デプロイ失敗診断、ネットワーク問題、パフォーマンス問題の解決パターンを紹介します。"
-tags: ["AWS", "トラブルシューティング", "障害分析", "ログ分析", "DevOps"]
+tags: ["AWS", "Troubleshooting", "Failure Analysis", "Log Analysis", "DevOps"]
 author: "Shunku"
 ---
 
@@ -523,7 +523,7 @@ ORDER BY idx_usage_pct ASC;
 
 ```mermaid
 flowchart TB
-    subgraph BestPractices["ベストプラクティス"]
+    subgraph BestPractices["Best Practices"]
         Observe["可観測性の確保"]
         Playbook["プレイブック整備"]
         Automate["診断の自動化"]

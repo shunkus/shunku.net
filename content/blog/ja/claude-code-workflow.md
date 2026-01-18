@@ -2,7 +2,7 @@
 title: "黄金のワークフロー: Claude Codeで実践する「探索→計画→実装→コミット」"
 date: "2025-11-21"
 excerpt: "Claude Codeの実証済みワークフローをマスター - AI効果を最大化し、手戻りを最小化する「探索→計画→実装→コミット」パターンを解説します。"
-tags: ["Claude Code", "AI", "開発ワークフロー", "ベストプラクティス"]
+tags: ["Claude Code", "AI", "Development Workflow", "Best Practices"]
 author: "Shunku"
 ---
 

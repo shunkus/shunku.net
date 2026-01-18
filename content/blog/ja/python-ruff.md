@@ -2,7 +2,7 @@
 title: "Ruffで高速リント＆フォーマット: Python開発の必須ツール"
 date: "2025-12-04"
 excerpt: "Rust製の超高速リンター・フォーマッターRuffを完全解説 - Flake8、Black、isortを置き換え、設定、ルール選択、CI/CD統合のベストプラクティスを紹介します。"
-tags: ["Python", "Ruff", "リンター", "フォーマッター", "開発ツール"]
+tags: ["Python", "Ruff", "Linter", "Formatter", "Development Tools"]
 author: "Shunku"
 ---
 
@@ -161,7 +161,7 @@ flowchart TB
         I["I: isort"]
     end
 
-    subgraph Security["セキュリティ"]
+    subgraph Security["Security"]
         S["S: bandit"]
     end
 

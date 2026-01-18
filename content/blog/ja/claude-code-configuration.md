@@ -2,7 +2,7 @@
 title: "Claude Code設定ガイド: CLAUDE.mdで最強の開発環境を構築する"
 date: "2025-11-20"
 excerpt: "Claude Codeの設定をマスター - CLAUDE.mdファイル、設定階層、パーミッションを活用して、パワフルでパーソナライズされたAIコーディング環境を構築する方法を解説します。"
-tags: ["Claude Code", "AI", "開発ツール", "設定"]
+tags: ["Claude Code", "AI", "Development Tools", "Configuration"]
 author: "Shunku"
 ---
 

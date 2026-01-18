@@ -2,7 +2,7 @@
 title: "2025年のPythonプロジェクト管理: uv vs Poetry"
 date: "2025-12-03"
 excerpt: "モダンなPythonパッケージ管理を比較 - uvの圧倒的な速度、Poetryの成熟したエコシステム、pyproject.tomlを活用したプロジェクト管理のベストプラクティスを解説します。"
-tags: ["Python", "uv", "Poetry", "パッケージ管理"]
+tags: ["Python", "uv", "Poetry", "Package Management"]
 author: "Shunku"
 ---
 

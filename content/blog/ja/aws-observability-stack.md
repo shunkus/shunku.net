@@ -2,7 +2,7 @@
 title: "AWS統合モニタリング：Grafana、Prometheus、OpenSearch連携"
 date: "2026-01-07"
 excerpt: "AWSの統合可観測性スタックを徹底解説 - Amazon Managed Grafana、Prometheus、OpenSearch Service、Container Insightsの設定とベストプラクティスを紹介します。"
-tags: ["AWS", "Grafana", "Prometheus", "OpenSearch", "可観測性", "DevOps"]
+tags: ["AWS", "Grafana", "Prometheus", "OpenSearch", "Observability", "DevOps"]
 author: "Shunku"
 ---
 
@@ -584,7 +584,7 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    subgraph BestPractices["ベストプラクティス"]
+    subgraph BestPractices["Best Practices"]
         ADOT["ADOTで統一収集"]
         Retention["適切なリテンション設定"]
         Alerts["段階的なアラート"]

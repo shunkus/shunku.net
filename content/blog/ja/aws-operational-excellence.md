@@ -2,7 +2,7 @@
 title: "AWSオペレーショナルエクセレンス：Observability、自動化、Runbooks"
 date: "2025-12-23"
 excerpt: "AWSにおけるオペレーショナルエクセレンスを徹底解説 - Observability、自動化、Runbooks、インシデント管理のベストプラクティスを紹介します。"
-tags: ["AWS", "運用", "Observability", "自動化", "Well-Architected"]
+tags: ["AWS", "Operations", "Observability", "Automation", "Well-Architected"]
 author: "Shunku"
 ---
 
@@ -226,13 +226,13 @@ flowchart TB
 ```mermaid
 flowchart TB
     subgraph SSM["Systems Manager"]
-        subgraph Automation["自動化"]
+        subgraph Automation["Automation"]
             RunCommand["Run Command"]
             Automation2["Automation"]
             StateManager["State Manager"]
         end
 
-        subgraph Operations["運用"]
+        subgraph Operations["Operations"]
             PatchManager["Patch Manager"]
             Maintenance["Maintenance Windows"]
             OpsCenter["OpsCenter"]
@@ -498,7 +498,7 @@ flowchart TB
     subgraph Config["AWS Config"]
         Recorder["Configuration Recorder"]
         Rules["Config Rules"]
-        Remediation["自動修復"]
+        Remediation["Auto-Remediation"]
     end
 
     Resources["AWSリソース"] --> Recorder

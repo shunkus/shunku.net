@@ -2,7 +2,7 @@
 title: "CI/CDパイプラインにClaude Codeを組み込む: ヘッドレスモードで開発を自動化"
 date: "2025-11-24"
 excerpt: "ヘッドレスモードを使用してClaude CodeをCI/CDパイプラインに統合 - コードレビュー、リントエラー修正、ドキュメント生成、Issue分類を人間の介入なしで自動化する方法を解説します。"
-tags: ["Claude Code", "AI", "CI/CD", "自動化", "DevOps"]
+tags: ["Claude Code", "AI", "CI/CD", "Automation", "DevOps"]
 author: "Shunku"
 ---
 

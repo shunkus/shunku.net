@@ -2,7 +2,7 @@
 title: "Amazon CloudWatch深掘り：カスタムメトリクス、Logs Insights、異常検出"
 date: "2026-01-05"
 excerpt: "CloudWatchの高度な機能を徹底解説 - Embedded Metric Format、Contributor Insights、異常検出、Logs Insights、ダッシュボード設計のベストプラクティスを紹介します。"
-tags: ["AWS", "CloudWatch", "モニタリング", "可観測性", "DevOps"]
+tags: ["AWS", "CloudWatch", "Monitoring", "Observability", "DevOps"]
 author: "Shunku"
 ---
 
@@ -614,7 +614,7 @@ DeliveryStream:
 
 ```mermaid
 flowchart TB
-    subgraph BestPractices["ベストプラクティス"]
+    subgraph BestPractices["Best Practices"]
         EMF["EMFで効率的なメトリクス収集"]
         Anomaly["異常検出で動的しきい値"]
         Composite["複合アラームで精度向上"]

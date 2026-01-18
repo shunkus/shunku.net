@@ -2,7 +2,7 @@
 title: "AWSアーティファクト管理：ECR、CodeArtifact、イメージビルド戦略"
 date: "2025-12-28"
 excerpt: "AWSでのアーティファクト管理を徹底解説 - ECR、CodeArtifact、EC2 Image Builder、S3アーティファクト、ライフサイクル管理のベストプラクティスを紹介します。"
-tags: ["AWS", "ECR", "CodeArtifact", "DevOps", "コンテナ"]
+tags: ["AWS", "ECR", "CodeArtifact", "DevOps", "Containers"]
 author: "Shunku"
 ---
 
@@ -310,9 +310,9 @@ flowchart TB
         Pipeline["パイプライン"]
     end
 
-    Recipe --> |"コンポーネント"| Build["ビルド"]
+    Recipe --> |"コンポーネント"| Build["Build"]
     Infra --> |"インスタンス設定"| Build
-    Build --> |"テスト"| Test["検証"]
+    Build --> |"Testing"| Test["検証"]
     Test --> Dist
     Dist --> |"AMI配布"| Regions["複数リージョン"]
 
@@ -508,7 +508,7 @@ s3://my-artifacts/
 ```mermaid
 flowchart LR
     subgraph Signing["イメージ署名"]
-        Build["ビルド"]
+        Build["Build"]
         Sign["署名"]
         Push["プッシュ"]
         Verify["検証"]

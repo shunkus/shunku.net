@@ -2,7 +2,7 @@
 title: "Pythonのmatch文でパターンマッチングをマスターする"
 date: "2025-11-27"
 excerpt: "Python 3.10で導入された構造的パターンマッチングを完全解説 - リテラル、シーケンス、マッピング、クラスパターンからガード条件まで、実践的な使い方を紹介します。"
-tags: ["Python", "パターンマッチング", "match文", "Python 3.10"]
+tags: ["Python", "Pattern Matching", "Match Statement", "Python 3.10"]
 author: "Shunku"
 ---
 
@@ -393,7 +393,7 @@ flowchart TD
     Q2{"複数の値を<br/>同時にチェック？"}
     Q3{"ネストした<br/>構造？"}
 
-    Q1 -->|Yes| Match["match文"]
+    Q1 -->|Yes| Match["Match Statement"]
     Q1 -->|No| Q2
     Q2 -->|Yes| Match
     Q2 -->|No| Q3

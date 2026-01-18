@@ -2,7 +2,7 @@
 title: "AWS Control Tower：ランディングゾーンとガードレールによるガバナンス"
 date: "2025-12-07"
 excerpt: "AWS Control Towerでマルチアカウント環境を自動構築 - ランディングゾーン、ガードレール、Account Factory、AFT（Account Factory for Terraform）を解説します。"
-tags: ["AWS", "Control Tower", "ランディングゾーン", "ガバナンス", "マルチアカウント"]
+tags: ["AWS", "Control Tower", "Landing Zone", "Governance", "Multi-Account"]
 author: "Shunku"
 ---
 
@@ -30,7 +30,7 @@ AWS Organizationsは強力ですが、すべてを手動で設定する必要が
 
 ```mermaid
 flowchart TB
-    subgraph LandingZone["ランディングゾーン"]
+    subgraph LandingZone["Landing Zone"]
         subgraph Core["コアアカウント"]
             Mgmt["Management Account"]
             Log["Log Archive Account"]
@@ -371,13 +371,13 @@ flowchart TD
 ```mermaid
 flowchart LR
     subgraph ControlTower["Control Tower"]
-        LZ["ランディングゾーン"]
+        LZ["Landing Zone"]
         GR["ガードレール"]
         AF["Account Factory"]
     end
 
     LZ --> |"環境構築"| Foundation["基盤"]
-    GR --> |"ポリシー適用"| Governance["ガバナンス"]
+    GR --> |"ポリシー適用"| Governance["Governance"]
     AF --> |"アカウント作成"| Scale["スケール"]
 
     style ControlTower fill:#3b82f6,color:#fff

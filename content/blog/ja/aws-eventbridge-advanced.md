@@ -2,7 +2,7 @@
 title: "Amazon EventBridge応用：イベントパターン、Scheduler、Pipes"
 date: "2026-01-08"
 excerpt: "EventBridgeの高度な機能を徹底解説 - イベントパターンマッチング、EventBridge Scheduler、Pipes、Schema Registry、アーカイブ/リプレイのベストプラクティスを紹介します。"
-tags: ["AWS", "EventBridge", "イベント駆動", "サーバーレス", "DevOps"]
+tags: ["AWS", "EventBridge", "Event-Driven", "Serverless", "DevOps"]
 author: "Shunku"
 ---
 
@@ -626,7 +626,7 @@ CentralEventBusPolicy:
 
 ```mermaid
 flowchart TB
-    subgraph BestPractices["ベストプラクティス"]
+    subgraph BestPractices["Best Practices"]
         Schema["スキーマ定義でイベント契約"]
         Archive["重要イベントのアーカイブ"]
         DLQ["DLQで失敗イベント捕捉"]

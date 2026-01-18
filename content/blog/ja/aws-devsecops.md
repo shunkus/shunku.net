@@ -2,7 +2,7 @@
 title: "AWSでのDevSecOps：シークレット管理、脆弱性スキャン、コンプライアンス自動化"
 date: "2026-01-11"
 excerpt: "DevSecOpsを徹底解説 - シークレット管理、SAST/DAST、コンテナスキャン、IaC検証、コンプライアンスの自動化のベストプラクティスを紹介します。"
-tags: ["AWS", "DevSecOps", "セキュリティ", "CI/CD", "コンプライアンス", "DevOps"]
+tags: ["AWS", "DevSecOps", "Security", "CI/CD", "Compliance", "DevOps"]
 author: "Shunku"
 ---
 
@@ -15,9 +15,9 @@ flowchart LR
     subgraph ShiftLeft["シフトレフト"]
         Plan["計画"]
         Code["コード"]
-        Build["ビルド"]
-        Test["テスト"]
-        Deploy["デプロイ"]
+        Build["Build"]
+        Test["Testing"]
+        Deploy["Deployment"]
         Monitor["監視"]
     end
 
@@ -26,7 +26,7 @@ flowchart LR
         SAST["SAST"]
         SCA["SCA"]
         DAST["DAST"]
-        Compliance["コンプライアンス"]
+        Compliance["Compliance"]
     end
 
     Plan --> ThreatModel
@@ -544,10 +544,10 @@ flowchart TB
         SAST["SAST<br/>Bandit/Semgrep"]
         SCA["SCA<br/>Safety/Trivy"]
         IaC["IaCスキャン<br/>cfn-guard/Checkov"]
-        Build["ビルド"]
+        Build["Build"]
         ContainerScan["コンテナスキャン<br/>Inspector/Trivy"]
         DAST["DAST<br/>ZAP"]
-        Deploy["デプロイ"]
+        Deploy["Deployment"]
     end
 
     Source --> SAST
@@ -565,7 +565,7 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    subgraph BestPractices["ベストプラクティス"]
+    subgraph BestPractices["Best Practices"]
         ShiftLeft["シフトレフト<br/>早期発見"]
         Automate["スキャン自動化"]
         Secrets["シークレット管理"]

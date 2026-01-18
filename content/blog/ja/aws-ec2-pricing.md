@@ -2,7 +2,7 @@
 title: "EC2購入オプション完全ガイド：On-Demand、Reserved、Savings Plans、Spot"
 date: "2025-12-18"
 excerpt: "EC2の購入オプションを徹底比較 - On-Demand、Reserved Instances、Savings Plans、Spot Instancesの特徴と使い分け、コスト最適化戦略を解説します。"
-tags: ["AWS", "EC2", "コスト最適化", "Reserved Instances", "Spot"]
+tags: ["AWS", "EC2", "Cost Optimization", "Reserved Instances", "Spot"]
 author: "Shunku"
 ---
 

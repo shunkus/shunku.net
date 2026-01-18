@@ -2,7 +2,7 @@
 title: "AWS CodeDeploy応用：appspec、ライフサイクルフック、高度なデプロイ設定"
 date: "2025-12-26"
 excerpt: "CodeDeployの高度な使い方を徹底解説 - appspec.yml詳細、ライフサイクルフック、デプロイグループ設定、トラフィック制御、ロールバック戦略を紹介します。"
-tags: ["AWS", "CodeDeploy", "CI/CD", "DevOps", "デプロイ"]
+tags: ["AWS", "CodeDeploy", "CI/CD", "DevOps", "Deployment"]
 author: "Shunku"
 ---
 
@@ -697,7 +697,7 @@ aws deploy list-deployment-targets --deployment-id d-XXXXXXXXX
 
 ```mermaid
 flowchart TB
-    subgraph BestPractices["ベストプラクティス"]
+    subgraph BestPractices["Best Practices"]
         Hooks["フックの冪等性"]
         Rollback["自動ロールバック"]
         Health["ヘルスチェック"]

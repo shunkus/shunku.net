@@ -2,7 +2,7 @@
 title: "Pythonのイテレータとジェネレータを使いこなす"
 date: "2025-11-29"
 excerpt: "イテレータとジェネレータでメモリ効率の良いプログラムを書く - yield、yield from、ジェネレータ式からitertoolsまで、遅延評価の力を解説します。"
-tags: ["Python", "イテレータ", "ジェネレータ", "パフォーマンス"]
+tags: ["Python", "Iterators", "Generators", "Performance"]
 author: "Shunku"
 ---
 

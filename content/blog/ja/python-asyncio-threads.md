@@ -2,7 +2,7 @@
 title: "asyncioとスレッドを組み合わせる: レガシーコードの非同期化"
 date: "2025-12-02"
 excerpt: "ブロッキングライブラリをasyncioで使う方法 - run_in_executor、to_thread、レガシーコードの段階的移行パターンを解説します。"
-tags: ["Python", "asyncio", "スレッド", "マイグレーション"]
+tags: ["Python", "asyncio", "Threading", "Migration"]
 author: "Shunku"
 ---
 

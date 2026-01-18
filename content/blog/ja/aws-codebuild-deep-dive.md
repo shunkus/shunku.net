@@ -2,7 +2,7 @@
 title: "AWS CodeBuild深掘り：buildspec、キャッシング、カスタム環境"
 date: "2025-12-25"
 excerpt: "CodeBuildの高度な使い方を徹底解説 - buildspec.yml詳細、キャッシング戦略、カスタムビルド環境、VPC統合、バッチビルドのベストプラクティスを紹介します。"
-tags: ["AWS", "CodeBuild", "CI/CD", "DevOps", "ビルド"]
+tags: ["AWS", "CodeBuild", "CI/CD", "DevOps", "Build"]
 author: "Shunku"
 ---
 
@@ -616,7 +616,7 @@ phases:
 
 ```mermaid
 flowchart TB
-    subgraph BestPractices["ベストプラクティス"]
+    subgraph BestPractices["Best Practices"]
         Cache["キャッシュ活用"]
         Secrets["シークレット管理"]
         Reports["テストレポート"]

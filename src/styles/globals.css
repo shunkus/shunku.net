@@ -131,8 +131,21 @@
   @apply italic;
 }
 
+/* Table wrapper for mobile responsiveness */
+.table-wrapper {
+  @apply w-full overflow-x-auto my-6 -mx-4 px-4;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 640px) {
+  .table-wrapper {
+    @apply mx-0 px-0;
+  }
+}
+
 .prose table {
-  @apply w-full border-collapse my-6 shadow-sm rounded-lg overflow-hidden;
+  @apply w-full border-collapse shadow-sm rounded-lg overflow-hidden;
+  min-width: 100%;
 }
 
 .prose thead {

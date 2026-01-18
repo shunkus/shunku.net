@@ -2,7 +2,7 @@
 title: "AWSコスト管理ツール完全ガイド：Cost Explorer、Budgets、CUR"
 date: "2025-12-19"
 excerpt: "AWSのコスト管理ツールを徹底解説 - Cost Explorer、AWS Budgets、Cost and Usage Report、Trusted Advisor、Compute Optimizerの活用方法を紹介します。"
-tags: ["AWS", "コスト管理", "Cost Explorer", "Budgets", "FinOps"]
+tags: ["AWS", "Cost Management", "Cost Explorer", "Budgets", "FinOps"]
 author: "Shunku"
 ---
 
@@ -15,7 +15,7 @@ flowchart TB
     subgraph Tools["コスト管理ツール"]
         Visibility["可視化"]
         Budget["予算管理"]
-        Optimize["最適化"]
+        Optimize["Optimization"]
         Report["レポート"]
     end
 
@@ -270,9 +270,9 @@ AWSのベストプラクティスに基づいたチェックを提供します�
 ```mermaid
 flowchart TB
     subgraph TA["Trusted Advisor"]
-        Cost["コスト最適化"]
-        Performance["パフォーマンス"]
-        Security["セキュリティ"]
+        Cost["Cost Optimization"]
+        Performance["Performance"]
+        Security["Security"]
         FT["耐障害性"]
         Limits["サービス制限"]
     end
@@ -472,7 +472,7 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    subgraph CostManagement["コスト管理"]
+    subgraph CostManagement["Cost Management"]
         CE["Cost Explorer<br/>（分析）"]
         Budgets["Budgets<br/>（予算）"]
         CUR["CUR<br/>（詳細レポート）"]

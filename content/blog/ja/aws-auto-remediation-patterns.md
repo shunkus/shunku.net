@@ -2,7 +2,7 @@
 title: "AWS自動修復パターン：Config修復、Lambda自動化、Step Functions"
 date: "2026-01-09"
 excerpt: "AWS自動修復パターンを徹底解説 - AWS Config修復、SSM Automation、Lambda自動化、Step Functionsオーケストレーション、EventBridgeトリガーのベストプラクティスを紹介します。"
-tags: ["AWS", "自動修復", "Config", "Systems Manager", "Step Functions", "DevOps"]
+tags: ["AWS", "Auto-Remediation", "Config", "Systems Manager", "Step Functions", "DevOps"]
 author: "Shunku"
 ---
 
@@ -318,7 +318,7 @@ flowchart TB
         Start["開始"]
         Analyze["分析"]
         CanAutoFix{"自動修復<br/>可能?"}
-        AutoRemediate["自動修復"]
+        AutoRemediate["Auto-Remediation"]
         CreateTicket["チケット作成"]
         Verify["検証"]
         Success["成功"]
@@ -648,7 +648,7 @@ def disable_iam_credentials(resource):
 
 ```mermaid
 flowchart TB
-    subgraph BestPractices["ベストプラクティス"]
+    subgraph BestPractices["Best Practices"]
         Safe["安全な修復アクション"]
         Verify["修復後の検証"]
         Rollback["ロールバック計画"]

@@ -2,7 +2,7 @@
 title: "AWS CloudFormation応用：カスタムリソース、マクロ、スタックセット詳細"
 date: "2025-12-29"
 excerpt: "CloudFormationの高度な機能を徹底解説 - カスタムリソース、マクロ、StackSets、ドリフト検出、変更セット、インポート機能のベストプラクティスを紹介します。"
-tags: ["AWS", "CloudFormation", "IaC", "DevOps", "自動化"]
+tags: ["AWS", "CloudFormation", "IaC", "DevOps", "Automation"]
 author: "Shunku"
 ---
 
@@ -621,7 +621,7 @@ Resources:
 
 ```mermaid
 flowchart TB
-    subgraph BestPractices["ベストプラクティス"]
+    subgraph BestPractices["Best Practices"]
         Modular["モジュール化"]
         DeletionPolicy["削除保護"]
         ChangeSet["変更セット活用"]

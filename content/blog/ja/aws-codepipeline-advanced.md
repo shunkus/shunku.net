@@ -2,7 +2,7 @@
 title: "AWS CodePipeline深掘り：マルチアカウント、承認フロー、高度なパイプライン設計"
 date: "2025-12-24"
 excerpt: "CodePipelineの高度な使い方を徹底解説 - マルチアカウントパイプライン、手動承認、並列実行、トリガー設定、トラブルシューティングのベストプラクティスを紹介します。"
-tags: ["AWS", "CodePipeline", "CI/CD", "DevOps", "自動化"]
+tags: ["AWS", "CodePipeline", "CI/CD", "DevOps", "Automation"]
 author: "Shunku"
 ---
 
@@ -545,7 +545,7 @@ aws codepipeline list-action-executions \
 
 ```mermaid
 flowchart TB
-    subgraph BestPractices["ベストプラクティス"]
+    subgraph BestPractices["Best Practices"]
         Single["単一責任のステージ"]
         Idempotent["冪等性の確保"]
         Fast["高速フィードバック"]
@@ -571,14 +571,14 @@ flowchart TB
 ```mermaid
 flowchart TB
     subgraph CodePipeline["CodePipeline高度な機能"]
-        MultiAccount["マルチアカウント"]
+        MultiAccount["Multi-Account"]
         Triggers["高度なトリガー"]
         Variables["パイプライン変数"]
         Lambda["Lambda統合"]
     end
 
     MultiAccount --> Enterprise["エンタープライズCI/CD"]
-    Triggers --> Automation["自動化"]
+    Triggers --> Automation["Automation"]
     Variables --> Flexibility["柔軟性"]
     Lambda --> Custom["カスタム処理"]
 

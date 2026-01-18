@@ -2,7 +2,7 @@
 title: "AWS X-Ray分散トレーシング：計装、サービスマップ、パフォーマンス分析"
 date: "2026-01-06"
 excerpt: "X-Rayによる分散トレーシングを徹底解説 - SDK計装、サービスマップ、セグメント/サブセグメント、サンプリング、インサイトのベストプラクティスを紹介します。"
-tags: ["AWS", "X-Ray", "分散トレーシング", "可観測性", "DevOps"]
+tags: ["AWS", "X-Ray", "Distributed Tracing", "Observability", "DevOps"]
 author: "Shunku"
 ---
 
@@ -552,7 +552,7 @@ Stage:
 
 ```mermaid
 flowchart TB
-    subgraph BestPractices["ベストプラクティス"]
+    subgraph BestPractices["Best Practices"]
         Annotation["意味のあるアノテーション"]
         Sampling["適切なサンプリング"]
         Groups["グループで整理"]

@@ -2,7 +2,7 @@
 title: "pytestで効果的なテストを書く: fixture、parametrize、モック"
 date: "2025-12-05"
 excerpt: "pytestをマスター - fixture、parametrize、conftest.py、モック、非同期テスト、カバレッジまで、Pythonテストのベストプラクティスを解説します。"
-tags: ["Python", "pytest", "テスト", "TDD"]
+tags: ["Python", "pytest", "Testing", "TDD"]
 author: "Shunku"
 ---
 

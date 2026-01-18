@@ -159,7 +159,7 @@ flowchart LR
     end
 
     subgraph 実行
-        F["gen()"] --> G["イテレータ"]
+        F["gen()"] --> G["Iterators"]
         G -->|"next()"| H["1"]
         G -->|"next()"| I["2"]
         G -->|"next()"| J["3"]

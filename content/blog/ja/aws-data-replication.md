@@ -2,7 +2,7 @@
 title: "AWSデータ複製戦略：RDS、Aurora、S3、DynamoDBのレプリケーション"
 date: "2025-12-14"
 excerpt: "AWSの各種データストアのレプリケーションを徹底解説 - RDS Multi-AZ、Aurora Global Database、S3クロスリージョンレプリケーション、DynamoDB Global Tablesの設計と使い分けを紹介します。"
-tags: ["AWS", "レプリケーション", "RDS", "Aurora", "S3", "DynamoDB"]
+tags: ["AWS", "Replication", "RDS", "Aurora", "S3", "DynamoDB"]
 author: "Shunku"
 ---
 
@@ -416,7 +416,7 @@ flowchart TD
 
 ```mermaid
 flowchart TB
-    subgraph Best["ベストプラクティス"]
+    subgraph Best["Best Practices"]
         B1["本番は必ずMulti-AZ"]
         B2["読み取りスケーリングにリードレプリカ"]
         B3["DRにはAurora Global Database"]

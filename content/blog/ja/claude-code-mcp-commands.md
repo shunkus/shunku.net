@@ -2,7 +2,7 @@
 title: "Claude Codeを拡張する: カスタムコマンドとMCP連携"
 date: "2025-11-23"
 excerpt: "カスタムスラッシュコマンドとModel Context Protocol（MCP）連携でClaude Codeを強化 - データベース、API、外部ツールに接続して開発ワークフローを拡張する方法を解説します。"
-tags: ["Claude Code", "AI", "MCP", "拡張性", "統合"]
+tags: ["Claude Code", "AI", "MCP", "Extensibility", "Integration"]
 author: "Shunku"
 ---
 

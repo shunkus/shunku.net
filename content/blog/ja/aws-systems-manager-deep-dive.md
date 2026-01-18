@@ -2,7 +2,7 @@
 title: "AWS Systems Manager深掘り：Run Command、State Manager、Automation"
 date: "2025-12-31"
 excerpt: "Systems Managerの高度な機能を徹底解説 - Run Command、State Manager、Automation Documents、Patch Manager、Inventoryのベストプラクティスを紹介します。"
-tags: ["AWS", "Systems Manager", "運用", "自動化", "DevOps"]
+tags: ["AWS", "Systems Manager", "Operations", "Automation", "DevOps"]
 author: "Shunku"
 ---
 
@@ -144,7 +144,7 @@ flowchart TB
     subgraph StateManager["State Manager"]
         Association["アソシエーション"]
         Schedule["スケジュール"]
-        Compliance["コンプライアンス"]
+        Compliance["Compliance"]
     end
 
     Association --> |"定期実行"| Targets["ターゲット"]
@@ -372,7 +372,7 @@ flowchart TB
         Baseline["パッチベースライン"]
         Group["パッチグループ"]
         Window["メンテナンスウィンドウ"]
-        Compliance["コンプライアンス"]
+        Compliance["Compliance"]
     end
 
     Baseline --> Group
@@ -559,7 +559,7 @@ flowchart TD
 
 ```mermaid
 flowchart TB
-    subgraph BestPractices["ベストプラクティス"]
+    subgraph BestPractices["Best Practices"]
         Tags["タグベースのターゲティング"]
         Docs["カスタムドキュメント"]
         Window["メンテナンスウィンドウ"]

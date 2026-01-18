@@ -58,14 +58,23 @@ export default function BlogPostPage({ post }: BlogPostPageProps) {
       securityLevel: 'loose',
     });
 
-    const processMermaid = async () => {
+    const processContent = async () => {
       // Create a temporary container to process the HTML
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = post.content;
 
+      // Wrap tables in scrollable containers for mobile responsiveness
+      const tables = tempDiv.querySelectorAll('table');
+      tables.forEach((table) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'table-wrapper';
+        table.parentNode?.insertBefore(wrapper, table);
+        wrapper.appendChild(table);
+      });
+
       const mermaidBlocks = tempDiv.querySelectorAll('pre > code.language-mermaid');
       if (mermaidBlocks.length === 0) {
-        setProcessedContent(post.content);
+        setProcessedContent(tempDiv.innerHTML);
         return;
       }
 
@@ -105,7 +114,7 @@ export default function BlogPostPage({ post }: BlogPostPageProps) {
       setProcessedContent(tempDiv.innerHTML);
     };
 
-    processMermaid();
+    processContent();
   }, [post.content, processedContent]);
 
   // Reset processed content when post changes

@@ -2,7 +2,7 @@
 title: "AWS CI/CDテスト戦略：ユニット、統合、E2Eテストと品質ゲート"
 date: "2025-12-27"
 excerpt: "AWSでのCI/CDテスト戦略を徹底解説 - テストピラミッド、CodeBuildでのテスト実行、テストレポート、品質ゲート、負荷テストのベストプラクティスを紹介します。"
-tags: ["AWS", "CI/CD", "テスト", "DevOps", "品質管理"]
+tags: ["AWS", "CI/CD", "Testing", "DevOps", "Quality Assurance"]
 author: "Shunku"
 ---
 
@@ -46,7 +46,7 @@ flowchart LR
     subgraph Build["ビルドステージ"]
         Compile["コンパイル"]
         Unit["ユニットテスト"]
-        SAST["静的解析"]
+        SAST["Static Analysis"]
     end
 
     subgraph Test["テストステージ"]
@@ -615,7 +615,7 @@ TestDashboard:
 
 ```mermaid
 flowchart TB
-    subgraph BestPractices["ベストプラクティス"]
+    subgraph BestPractices["Best Practices"]
         Fast["高速フィードバック"]
         Isolated["テストの独立性"]
         Deterministic["決定論的テスト"]

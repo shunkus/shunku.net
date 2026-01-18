@@ -2,7 +2,7 @@
 title: "AWS Auto Scaling応用：予測スケーリング、ターゲット追跡、ウォームプール"
 date: "2026-01-02"
 excerpt: "Auto Scalingの高度な機能を徹底解説 - 予測スケーリング、ターゲット追跡ポリシー、ウォームプール、インスタンスリフレッシュのベストプラクティスを紹介します。"
-tags: ["AWS", "Auto Scaling", "EC2", "スケーリング", "DevOps"]
+tags: ["AWS", "Auto Scaling", "EC2", "Scaling", "DevOps"]
 author: "Shunku"
 ---
 
@@ -107,7 +107,7 @@ flowchart LR
         History["履歴データ"]
         ML["機械学習"]
         Forecast["予測"]
-        Scale["スケーリング"]
+        Scale["Scaling"]
     end
 
     History --> ML
@@ -359,7 +359,7 @@ AutoScalingGroup:
 
 ```mermaid
 flowchart TB
-    subgraph BestPractices["ベストプラクティス"]
+    subgraph BestPractices["Best Practices"]
         Target["ターゲット追跡を基本に"]
         Predictive["予測スケーリング併用"]
         Warmup["適切なウォームアップ"]

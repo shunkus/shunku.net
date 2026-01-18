@@ -2,7 +2,7 @@
 title: "f-stringの進化: Python 3.12+の新機能"
 date: "2025-11-28"
 excerpt: "Pythonのf-stringは進化を続けています - デバッグ用=構文、ネストした式、そしてPython 3.14のt-stringまで、最新の文字列フォーマット機能を解説します。"
-tags: ["Python", "f-string", "文字列フォーマット", "Python 3.12"]
+tags: ["Python", "f-string", "String Formatting", "Python 3.12"]
 author: "Shunku"
 ---
 

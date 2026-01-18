@@ -412,7 +412,7 @@ flowchart LR
         Source["ソース"]
         Synth["Synth"]
         SelfMutate["セルフミューテーション"]
-        Deploy["デプロイ"]
+        Deploy["Deployment"]
     end
 
     Source --> Synth
@@ -577,7 +577,7 @@ new MyStack(app, `MyStack-${stage}`, config);
 
 ```mermaid
 flowchart TB
-    subgraph BestPractices["ベストプラクティス"]
+    subgraph BestPractices["Best Practices"]
         L2["L2 Constructを優先"]
         Test["テストを書く"]
         Aspect["Aspectsで横断的関心事"]

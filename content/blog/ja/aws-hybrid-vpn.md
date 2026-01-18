@@ -2,7 +2,7 @@
 title: "AWSハイブリッドVPN設計：Site-to-Site VPN、CloudHub、冗長構成"
 date: "2025-12-11"
 excerpt: "AWS Site-to-Site VPNによるハイブリッド接続を徹底解説 - VPN CloudHub、Accelerated VPN、Direct Connectとの併用、冗長構成のベストプラクティスを紹介します。"
-tags: ["AWS", "VPN", "ネットワーク", "ハイブリッドクラウド", "セキュリティ"]
+tags: ["AWS", "VPN", "Networking", "Hybrid Cloud", "Security"]
 author: "Shunku"
 ---
 
@@ -324,7 +324,7 @@ flowchart TB
         DX["Direct Connect"]
     end
 
-    subgraph Backup["バックアップ"]
+    subgraph Backup["Backup"]
         VPN["Site-to-Site VPN"]
     end
 
@@ -370,7 +370,7 @@ flowchart LR
     end
 
     subgraph DX["Direct Connect"]
-        Connection["専用線"]
+        Connection["Dedicated Line"]
     end
 
     subgraph AWS["AWS"]
@@ -433,13 +433,13 @@ flowchart TB
         D3["冗長CGWを検討"]
     end
 
-    subgraph Security["セキュリティ"]
+    subgraph Security["Security"]
         S1["強力な事前共有キー"]
         S2["IKEv2を使用"]
         S3["AES-256暗号化"]
     end
 
-    subgraph Operations["運用"]
+    subgraph Operations["Operations"]
         O1["CloudWatch監視"]
         O2["フェイルオーバーテスト"]
         O3["設定のバックアップ"]
@@ -471,7 +471,7 @@ flowchart TB
 
     Basic --> |"単一VPC接続"| Simple["シンプルな構成"]
     CloudHub --> |"拠点間接続"| Multi["マルチサイト"]
-    Accelerated --> |"高速化"| Performance["パフォーマンス"]
+    Accelerated --> |"高速化"| Performance["Performance"]
 
     style VPN fill:#3b82f6,color:#fff
 ```

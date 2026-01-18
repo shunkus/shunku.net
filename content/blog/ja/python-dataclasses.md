@@ -2,7 +2,7 @@
 title: "Pythonのdataclassesで軽量クラスを定義する"
 date: "2025-11-26"
 excerpt: "dataclassesモジュールで定型コードを削減 - __init__、__repr__、比較メソッドを自動生成し、イミュータブルなデータ構造を簡潔に定義する方法を解説します。"
-tags: ["Python", "dataclasses", "データ構造", "ベストプラクティス"]
+tags: ["Python", "dataclasses", "Data Structures", "Best Practices"]
 author: "Shunku"
 ---
 

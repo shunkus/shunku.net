@@ -178,7 +178,7 @@ flowchart LR
 
     Code --> Synth
     Synth --> CFn
-    CFn --> |"デプロイ"| AWS["AWSリソース"]
+    CFn --> |"Deployment"| AWS["AWSリソース"]
 
     style CDK fill:#3b82f6,color:#fff
 ```
@@ -571,7 +571,7 @@ flowchart TD
 
 ```mermaid
 flowchart TB
-    subgraph BestPractices["ベストプラクティス"]
+    subgraph BestPractices["Best Practices"]
         VCS["バージョン管理"]
         Module["モジュール化"]
         Env["環境分離"]

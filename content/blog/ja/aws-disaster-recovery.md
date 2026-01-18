@@ -2,7 +2,7 @@
 title: "AWS災害復旧（DR）戦略：RTO/RPOから選ぶ4つのアプローチ"
 date: "2025-12-12"
 excerpt: "AWSの災害復旧戦略を徹底解説 - Backup/Restore、Pilot Light、Warm Standby、Active-Activeの4つのアプローチ、RTO/RPOに基づく選択基準を紹介します。"
-tags: ["AWS", "災害復旧", "DR", "高可用性", "バックアップ"]
+tags: ["AWS", "Disaster Recovery", "DR", "High Availability", "Backup"]
 author: "Shunku"
 ---
 
@@ -95,7 +95,7 @@ flowchart TB
 
     App --> |"AMI"| S3DR
     DB --> |"スナップショット"| S3DR
-    Storage --> |"レプリケーション"| S3DR
+    Storage --> |"Replication"| S3DR
 
     style Primary fill:#3b82f6,color:#fff
     style DR fill:#22c55e,color:#fff
@@ -236,7 +236,7 @@ flowchart TB
 
     ALB1 --> ASG1
     ASG1 --> DB1
-    DB1 --> |"レプリケーション"| DB2
+    DB1 --> |"Replication"| DB2
     ALB2 --> ASG2
     ASG2 --> DB2
 
@@ -310,7 +310,7 @@ flowchart TB
     ALB2 --> App2
     App1 --> DB1
     App2 --> DB2
-    DB1 <--> |"レプリケーション"| DB2
+    DB1 <--> |"Replication"| DB2
 
     style Region1 fill:#3b82f6,color:#fff
     style Region2 fill:#22c55e,color:#fff
@@ -389,10 +389,10 @@ flowchart TD
 ```mermaid
 flowchart LR
     subgraph Automation["自動化すべき項目"]
-        Backup["バックアップ"]
-        Replication["レプリケーション"]
+        Backup["Backup"]
+        Replication["Replication"]
         Failover["フェイルオーバー"]
-        Testing["テスト"]
+        Testing["Testing"]
     end
 
     subgraph Tools["使用ツール"]
@@ -442,7 +442,7 @@ flowchart TB
 
     BR --> |"低コスト"| LowCost["開発/テスト"]
     PL --> |"バランス"| Balance["一般業務"]
-    WS --> |"高可用性"| HighAvail["重要システム"]
+    WS --> |"High Availability"| HighAvail["重要システム"]
     AA --> |"最高可用性"| Critical["ミッションクリティカル"]
 
     style DRStrategy fill:#3b82f6,color:#fff

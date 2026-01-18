@@ -2,7 +2,7 @@
 title: "Route 53とGlobal Accelerator：グローバルトラフィック管理とフェイルオーバー"
 date: "2025-12-13"
 excerpt: "AWSのグローバルトラフィック管理を徹底解説 - Route 53のルーティングポリシー、ヘルスチェック、Global Acceleratorによるアクセラレーション、フェイルオーバー設計を紹介します。"
-tags: ["AWS", "Route 53", "Global Accelerator", "DNS", "ネットワーク"]
+tags: ["AWS", "Route 53", "Global Accelerator", "DNS", "Networking"]
 author: "Shunku"
 ---
 
@@ -459,7 +459,7 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    subgraph Best["ベストプラクティス"]
+    subgraph Best["Best Practices"]
         B1["低いTTLで迅速なフェイルオーバー"]
         B2["ヘルスチェックを必ず設定"]
         B3["エイリアスレコードを活用"]

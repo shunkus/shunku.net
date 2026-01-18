@@ -2,7 +2,7 @@
 title: "Python型ヒント完全ガイド: 基礎から実践まで"
 date: "2025-11-25"
 excerpt: "Pythonの型ヒントをマスター - 基本的な型アノテーションからジェネリクス、Protocol、mypyとの連携まで、静的型付けのメリットを最大限に活用する方法を解説します。"
-tags: ["Python", "型ヒント", "mypy", "静的解析"]
+tags: ["Python", "Type Hints", "mypy", "Static Analysis"]
 author: "Shunku"
 ---
 

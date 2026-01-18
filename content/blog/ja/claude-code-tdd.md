@@ -2,7 +2,7 @@
 title: "Claude Codeでテスト駆動開発: テストを先に書いて、AIに実装させる"
 date: "2025-11-22"
 excerpt: "Claude CodeでTDDをマスター - テストを先に書くことで、Claudeが正確に実装できる明確な仕様を作成し、バグと手戻りを削減する方法を解説します。"
-tags: ["Claude Code", "AI", "TDD", "テスト", "ベストプラクティス"]
+tags: ["Claude Code", "AI", "TDD", "Testing", "Best Practices"]
 author: "Shunku"
 ---
 

@@ -2,7 +2,7 @@
 title: "AWSデプロイ戦略：Blue/Green、Canary、Rolling、CodeDeploy"
 date: "2025-12-21"
 excerpt: "AWSでのデプロイ戦略を徹底解説 - Blue/Green、Canary、Rollingデプロイメント、CodeDeploy、ECS/EKSでのデプロイベストプラクティスを紹介します。"
-tags: ["AWS", "デプロイ", "CI/CD", "CodeDeploy", "DevOps"]
+tags: ["AWS", "Deployment", "CI/CD", "CodeDeploy", "DevOps"]
 author: "Shunku"
 ---
 
@@ -475,7 +475,7 @@ flowchart TB
     Strategy --> |"リスク許容度"| Risk["リスク評価"]
     Tool --> |"CodeDeploy/ECS/Lambda"| Service["サービス選択"]
     Monitor --> |"CloudWatch"| Metrics["メトリクス"]
-    Rollback --> |"自動化"| Safety["安全性"]
+    Rollback --> |"Automation"| Safety["安全性"]
 
     style Deployment fill:#3b82f6,color:#fff
 ```

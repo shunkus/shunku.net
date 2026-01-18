@@ -2,7 +2,7 @@
 title: "AWS Organizations完全ガイド：マルチアカウント戦略の設計"
 date: "2025-12-06"
 excerpt: "AWS Organizationsによるマルチアカウント管理を徹底解説 - OU設計、SCP（サービスコントロールポリシー）、一括請求、アカウント階層のベストプラクティスを学びます。"
-tags: ["AWS", "Organizations", "マルチアカウント", "SCP", "ガバナンス"]
+tags: ["AWS", "Organizations", "Multi-Account", "SCP", "Governance"]
 author: "Shunku"
 ---
 
@@ -440,9 +440,9 @@ flowchart LR
         Delegate["委任管理者"]
     end
 
-    OU --> |"アカウント整理"| Governance["ガバナンス"]
-    SCP --> |"権限制限"| Security["セキュリティ"]
-    Billing --> |"コスト集約"| Cost["コスト管理"]
+    OU --> |"アカウント整理"| Governance["Governance"]
+    SCP --> |"権限制限"| Security["Security"]
+    Billing --> |"コスト集約"| Cost["Cost Management"]
     Delegate --> |"権限分散"| Operations["運用効率"]
 
     style Organizations fill:#3b82f6,color:#fff

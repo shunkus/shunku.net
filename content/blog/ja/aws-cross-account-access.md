@@ -2,7 +2,7 @@
 title: "AWSクロスアカウントアクセス：IAMロール、RAM、Organizations連携"
 date: "2025-12-08"
 excerpt: "AWSアカウント間のリソース共有とアクセス制御を徹底解説 - IAMロールのAssumeRole、Resource Access Manager（RAM）、Organizations連携のベストプラクティスを紹介します。"
-tags: ["AWS", "IAM", "クロスアカウント", "RAM", "セキュリティ"]
+tags: ["AWS", "IAM", "Cross-Account", "RAM", "Security"]
 author: "Shunku"
 ---
 

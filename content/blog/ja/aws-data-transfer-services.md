@@ -2,7 +2,7 @@
 title: "AWSデータ転送サービス完全ガイド：DataSync、Transfer Family、Snow Family"
 date: "2025-12-16"
 excerpt: "AWSへのデータ転送サービスを徹底比較 - DataSync、Transfer Family、Snow Family、Storage Gatewayの選択基準と使い分けを解説します。"
-tags: ["AWS", "データ転送", "DataSync", "Snow Family", "マイグレーション"]
+tags: ["AWS", "Data Transfer", "DataSync", "Snow Family", "Migration"]
 author: "Shunku"
 ---
 

@@ -2,7 +2,7 @@
 title: "AWSコンテナオーケストレーション：ECS/EKSデプロイとサービスメッシュ"
 date: "2026-01-03"
 excerpt: "ECSとEKSのデプロイ戦略を徹底解説 - タスク定義、サービス設定、Blue/Green、App Mesh、Copilotのベストプラクティスを紹介します。"
-tags: ["AWS", "ECS", "EKS", "コンテナ", "Kubernetes", "DevOps"]
+tags: ["AWS", "ECS", "EKS", "Containers", "Kubernetes", "DevOps"]
 author: "Shunku"
 ---
 
@@ -432,11 +432,11 @@ observability:
 
 ```mermaid
 flowchart TB
-    subgraph BestPractices["ベストプラクティス"]
+    subgraph BestPractices["Best Practices"]
         Immutable["イミュータブルデプロイ"]
         Health["ヘルスチェック設定"]
         Resource["リソース制限"]
-        Observability["可観測性"]
+        Observability["Observability"]
     end
 
     style BestPractices fill:#22c55e,color:#fff

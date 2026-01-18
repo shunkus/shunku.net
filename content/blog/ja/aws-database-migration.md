@@ -2,7 +2,7 @@
 title: "AWSデータベース移行：DMS、SCT、ダウンタイム最小化戦略"
 date: "2025-12-17"
 excerpt: "AWSへのデータベース移行を徹底解説 - Database Migration Service（DMS）、Schema Conversion Tool（SCT）、異種間移行、ダウンタイム最小化のベストプラクティスを紹介します。"
-tags: ["AWS", "DMS", "データベース移行", "SCT", "マイグレーション"]
+tags: ["AWS", "DMS", "Database Migration", "SCT", "Migration"]
 author: "Shunku"
 ---
 
@@ -448,7 +448,7 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    subgraph Migration["データベース移行"]
+    subgraph Migration["Database Migration"]
         DMS["AWS DMS"]
         SCT["AWS SCT"]
     end

@@ -2,7 +2,7 @@
 title: "7つのR：AWSマイグレーション戦略の選択基準"
 date: "2025-12-15"
 excerpt: "AWSへの移行戦略を徹底解説 - Rehost、Replatform、Refactor、Repurchase、Retain、Retire、Relocateの7つのRと、ワークロードに応じた選択基準を紹介します。"
-tags: ["AWS", "マイグレーション", "クラウド移行", "7R", "アーキテクチャ"]
+tags: ["AWS", "Migration", "Cloud Migration", "7R", "Architecture"]
 author: "Shunku"
 ---
 

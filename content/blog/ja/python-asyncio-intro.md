@@ -2,7 +2,7 @@
 title: "asyncio入門: コルーチンで並行I/O処理をマスター"
 date: "2025-11-30"
 excerpt: "Pythonのasyncioで効率的な非同期プログラミング - async/await、Task、gather、イベントループの基本から実践的なパターンまで解説します。"
-tags: ["Python", "asyncio", "非同期処理", "並行処理"]
+tags: ["Python", "asyncio", "Async", "Concurrency"]
 author: "Shunku"
 ---
 

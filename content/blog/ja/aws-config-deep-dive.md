@@ -2,7 +2,7 @@
 title: "AWS Config深掘り：カスタムルール、適合パック、自動修復"
 date: "2026-01-01"
 excerpt: "AWS Configの高度な機能を徹底解説 - カスタムルール、適合パック、組織ルール、自動修復、高度なクエリのベストプラクティスを紹介します。"
-tags: ["AWS", "Config", "コンプライアンス", "ガバナンス", "DevOps"]
+tags: ["AWS", "Config", "Compliance", "Governance", "DevOps"]
 author: "Shunku"
 ---
 
@@ -261,7 +261,7 @@ OrganizationConformancePack:
 
 ```mermaid
 flowchart LR
-    subgraph Remediation["自動修復"]
+    subgraph Remediation["Auto-Remediation"]
         Rule["Config Rule"]
         Detect["非準拠検出"]
         SSM["SSM Automation"]
@@ -442,7 +442,7 @@ ConfigComplianceRule:
 
 ```mermaid
 flowchart TB
-    subgraph BestPractices["ベストプラクティス"]
+    subgraph BestPractices["Best Practices"]
         Pack["適合パックで一括管理"]
         Auto["自動修復の活用"]
         Aggregate["マルチアカウント集約"]

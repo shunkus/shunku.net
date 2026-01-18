@@ -2,7 +2,7 @@
 title: "AWS Transit Gateway：大規模VPCネットワークのハブ&スポーク設計"
 date: "2025-12-10"
 excerpt: "AWS Transit Gatewayによる大規模ネットワーク設計を徹底解説 - ルートテーブル、アタッチメント、マルチリージョン接続、Network Managerの活用方法を紹介します。"
-tags: ["AWS", "Transit Gateway", "ネットワーク", "VPC", "ハイブリッドクラウド"]
+tags: ["AWS", "Transit Gateway", "Networking", "VPC", "Hybrid Cloud"]
 author: "Shunku"
 ---
 
@@ -428,13 +428,13 @@ flowchart TB
         D4["将来の拡張を考慮"]
     end
 
-    subgraph Security["セキュリティ"]
+    subgraph Security["Security"]
         S1["セグメント化を検討"]
         S2["Inspection VPCの導入"]
         S3["フローログの有効化"]
     end
 
-    subgraph Operations["運用"]
+    subgraph Operations["Operations"]
         O1["Network Managerで監視"]
         O2["タグ付けの統一"]
         O3["ドキュメント化"]

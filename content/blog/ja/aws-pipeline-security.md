@@ -2,7 +2,7 @@
 title: "AWSパイプラインセキュリティ：IAM、暗号化、クロスアカウント、監査"
 date: "2026-01-12"
 excerpt: "CI/CDパイプラインのセキュリティを徹底解説 - 最小権限IAM、アーティファクト暗号化、クロスアカウントデプロイ、監査ログ、承認フローのベストプラクティスを紹介します。"
-tags: ["AWS", "CodePipeline", "セキュリティ", "IAM", "CI/CD", "DevOps"]
+tags: ["AWS", "CodePipeline", "Security", "IAM", "CI/CD", "DevOps"]
 author: "Shunku"
 ---
 
@@ -22,9 +22,9 @@ flowchart TB
 
     subgraph Pipeline["CI/CDパイプライン"]
         Source["ソース"]
-        Build["ビルド"]
-        Test["テスト"]
-        Deploy["デプロイ"]
+        Build["Build"]
+        Test["Testing"]
+        Deploy["Deployment"]
     end
 
     Security --> Pipeline
@@ -654,7 +654,7 @@ ApprovalWorkflow:
 
 ```mermaid
 flowchart TB
-    subgraph BestPractices["ベストプラクティス"]
+    subgraph BestPractices["Best Practices"]
         LeastPrivilege["最小権限の原則"]
         Encryption["全てを暗号化"]
         Separation["環境の分離"]

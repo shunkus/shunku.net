@@ -2,7 +2,7 @@
 title: "AWSパフォーマンス設計：コンピュート、ストレージ、データベースの選択"
 date: "2025-12-20"
 excerpt: "AWSでのパフォーマンス最適化を徹底解説 - コンピュート、ストレージ、データベースの選択基準、キャッシング戦略、グローバル配信のベストプラクティスを紹介します。"
-tags: ["AWS", "パフォーマンス", "アーキテクチャ", "Well-Architected", "最適化"]
+tags: ["AWS", "Performance", "Architecture", "Well-Architected", "Optimization"]
 author: "Shunku"
 ---
 
@@ -260,7 +260,7 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    subgraph Monitoring["モニタリング"]
+    subgraph Monitoring["Monitoring"]
         CW["CloudWatch"]
         XRay["X-Ray"]
         Insights["Container Insights"]
@@ -268,7 +268,7 @@ flowchart TB
 
     CW --> |"メトリクス"| Analysis["分析"]
     XRay --> |"トレース"| Bottleneck["ボトルネック特定"]
-    Insights --> |"コンテナ"| Container["コンテナ分析"]
+    Insights --> |"Containers"| Container["コンテナ分析"]
 
     style Monitoring fill:#3b82f6,color:#fff
 ```
