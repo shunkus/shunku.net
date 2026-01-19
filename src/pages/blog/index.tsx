@@ -2,7 +2,7 @@ import { GetStaticProps } from 'next';
 import Link from 'next/link';
 import Head from 'next/head';
 import { format } from 'date-fns';
-import { CalendarDays, Tag, User, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CalendarDays, Tag, User, ChevronDown, ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useRouter } from 'next/router';
@@ -24,7 +24,13 @@ export default function BlogIndex({ posts, totalPages, currentPage, tags }: Blog
   const { locale, locales, asPath } = router;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isTagCloudOpen, setIsTagCloudOpen] = useState(false);
+  const [tagFilter, setTagFilter] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Filter tags based on search input
+  const filteredTags = tags.filter(({ tag }) =>
+    tag.toLowerCase().includes(tagFilter.toLowerCase())
+  );
 
   const languageConfig = {
     en: { name: 'English', flag: '🇺🇸' },
@@ -183,17 +189,46 @@ export default function BlogIndex({ posts, totalPages, currentPage, tags }: Blog
                 />
               </button>
               {isTagCloudOpen && (
-                <div className="px-6 pb-6 flex flex-wrap gap-2 border-t border-gray-100 pt-4">
-                  {tags.map(({ tag, count }) => (
-                    <Link
-                      key={tag}
-                      href={`/blog/tag/${encodeURIComponent(tag)}`}
-                      className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors ${getTagSize(count)}`}
-                    >
-                      #{tag}
-                      <span className="text-blue-500 text-xs">({count})</span>
-                    </Link>
-                  ))}
+                <div className="border-t border-gray-100">
+                  {/* Search input */}
+                  <div className="px-6 pt-4">
+                    <div className="relative">
+                      <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="text"
+                        value={tagFilter}
+                        onChange={(e) => setTagFilter(e.target.value)}
+                        placeholder={t('blog.filterTags')}
+                        className="w-full pl-9 pr-9 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                      {tagFilter && (
+                        <button
+                          onClick={() => setTagFilter('')}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                          <X size={16} />
+                        </button>
+                      )}
+                    </div>
+                    {tagFilter && (
+                      <p className="text-sm text-gray-500 mt-2">
+                        {t('blog.showingTags', { count: filteredTags.length, total: tags.length })}
+                      </p>
+                    )}
+                  </div>
+                  {/* Tags list */}
+                  <div className="px-6 pb-6 pt-4 flex flex-wrap gap-2">
+                    {filteredTags.map(({ tag, count }) => (
+                      <Link
+                        key={tag}
+                        href={`/blog/tag/${encodeURIComponent(tag)}`}
+                        className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors ${getTagSize(count)}`}
+                      >
+                        #{tag}
+                        <span className="text-blue-500 text-xs">({count})</span>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

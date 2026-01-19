@@ -105,6 +105,8 @@
     "noPosts": "ブログ記事はまだありません",
     "noPostsDescription": "新しい記事と洞察をお楽しみに！",
     "tags": "タグ",
+    "filterTags": "タグを絞り込む...",
+    "showingTags": "{{total}}件中{{count}}件を表示",
     "previous": "前へ",
     "next": "次へ",
     "page": "ページ"

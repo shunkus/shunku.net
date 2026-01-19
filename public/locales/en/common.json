@@ -105,6 +105,8 @@
     "noPosts": "No blog posts yet",
     "noPostsDescription": "Check back soon for new articles and insights!",
     "tags": "Tags",
+    "filterTags": "Filter tags...",
+    "showingTags": "Showing {{count}} of {{total}} tags",
     "previous": "Previous",
     "next": "Next",
     "page": "Page"
