@@ -1,0 +1,10 @@
+{
+  "id": "learn-javascript-in-10-days",
+  "title": "10日で覚えるJavaScript",
+  "subtitle": "初心者からWebアプリ開発者へ",
+  "author": "Shun Kushigami",
+  "publishedDate": "2026-01-20",
+  "description": "プログラミング初心者でも安心。1日1章のペースで、JavaScriptの基礎から実践的なWebアプリ開発まで学べる入門書です。最終日には実際にTodoアプリを作成し、学んだ知識を総動員します。",
+  "coverImage": null,
+  "tags": ["JavaScript", "Programming", "Web Development", "Beginner"]
+}

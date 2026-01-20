@@ -1,0 +1,10 @@
+{
+  "id": "learn-javascript-in-10-days",
+  "title": "Learn JavaScript in 10 Days",
+  "subtitle": "From Beginner to Web App Developer",
+  "author": "Shun Kushigami",
+  "publishedDate": "2026-01-20",
+  "description": "A beginner-friendly guide to JavaScript. Learn at your own pace with one chapter per day, covering everything from fundamentals to practical web app development. Build a real Todo app on the final day using all the skills you've learned.",
+  "coverImage": null,
+  "tags": ["JavaScript", "Programming", "Web Development", "Beginner"]
+}
