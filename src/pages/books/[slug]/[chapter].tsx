@@ -5,16 +5,17 @@ import { useRouter } from 'next/router';
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { 
-  BookOpen, ChevronDown, ChevronLeft, ChevronRight, 
+import mermaid from 'mermaid';
+import {
+  BookOpen, ChevronDown, ChevronLeft, ChevronRight,
   Home, Menu, X, FileText
 } from 'lucide-react';
-import { 
-  getBook, 
-  getBookChapter, 
-  getAllBookChapterSlugs, 
-  Book, 
-  BookChapter 
+import {
+  getBook,
+  getBookChapter,
+  getAllBookChapterSlugs,
+  Book,
+  BookChapter
 } from '../../../lib/books';
 
 interface BookChapterPageProps {
@@ -29,7 +30,10 @@ export default function BookChapterPage({ book, chapter, currentChapterIndex }: 
   const { locale, locales, asPath } = router;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [processedContent, setProcessedContent] = useState<string | null>(null);
+  const [expandedDiagram, setExpandedDiagram] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const languageConfig = {
     en: { name: 'English', flag: '🇺🇸' },
@@ -58,6 +62,116 @@ export default function BookChapterPage({ book, chapter, currentChapterIndex }: 
   useEffect(() => {
     setIsSidebarOpen(false);
   }, [router.asPath]);
+
+  // Process mermaid diagrams in content
+  useEffect(() => {
+    if (!chapter?.content || processedContent !== null) return;
+
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'default',
+      securityLevel: 'loose',
+    });
+
+    const processContent = async () => {
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = chapter.content || '';
+
+      // Wrap tables in scrollable containers for mobile responsiveness
+      const tables = tempDiv.querySelectorAll('table');
+      tables.forEach((table) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'table-wrapper';
+        table.parentNode?.insertBefore(wrapper, table);
+        wrapper.appendChild(table);
+      });
+
+      const mermaidBlocks = tempDiv.querySelectorAll('pre > code.language-mermaid');
+      if (mermaidBlocks.length === 0) {
+        setProcessedContent(tempDiv.innerHTML);
+        return;
+      }
+
+      const svgMap: Record<number, string> = {};
+
+      for (let i = 0; i < mermaidBlocks.length; i++) {
+        const block = mermaidBlocks[i];
+        const code = block.textContent || '';
+        const id = `mermaid-${Date.now()}-${i}`;
+
+        try {
+          const { svg } = await mermaid.render(id, code);
+          svgMap[i] = svg;
+        } catch (error) {
+          console.error('Mermaid rendering error:', error);
+        }
+      }
+
+      // Replace code blocks with rendered SVGs
+      const mermaidBlocksAgain = tempDiv.querySelectorAll('pre > code.language-mermaid');
+      mermaidBlocksAgain.forEach((block, i) => {
+        const pre = block.parentElement;
+        if (!pre || !svgMap[i]) return;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'mermaid-diagram-wrapper';
+        wrapper.setAttribute('data-diagram-index', String(i));
+        wrapper.innerHTML = `
+          <div class="mermaid-diagram">${svgMap[i]}</div>
+          <button class="mermaid-expand-btn" data-diagram-index="${i}" title="Expand diagram">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+          </button>
+        `;
+        pre.replaceWith(wrapper);
+      });
+
+      setProcessedContent(tempDiv.innerHTML);
+    };
+
+    processContent();
+  }, [chapter?.content, processedContent]);
+
+  // Reset processed content when chapter changes
+  useEffect(() => {
+    setProcessedContent(null);
+  }, [chapter?.slug]);
+
+  // Handle click on expand buttons
+  useEffect(() => {
+    const container = contentRef.current;
+    if (!container || !processedContent) return;
+
+    const handleClick = (e: Event) => {
+      const target = e.target as HTMLElement;
+      const btn = target.closest('.mermaid-expand-btn') as HTMLElement;
+      if (!btn) return;
+
+      const wrapper = btn.closest('.mermaid-diagram-wrapper');
+      if (!wrapper) return;
+
+      const svg = wrapper.querySelector('.mermaid-diagram svg');
+      if (svg) {
+        setExpandedDiagram(svg.outerHTML);
+      }
+    };
+
+    container.addEventListener('click', handleClick);
+    return () => container.removeEventListener('click', handleClick);
+  }, [processedContent]);
+
+  // Close modal on ESC key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setExpandedDiagram(null);
+      }
+    };
+
+    if (expandedDiagram) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [expandedDiagram]);
 
   if (!book || !chapter) {
     return (
@@ -268,9 +382,10 @@ export default function BookChapterPage({ book, chapter, currentChapterIndex }: 
               </header>
 
               {/* Chapter Content */}
-              <div 
+              <div
+                ref={contentRef}
                 className="prose prose-lg max-w-none [&>h1:first-child]:hidden"
-                dangerouslySetInnerHTML={{ __html: chapter.content || '' }}
+                dangerouslySetInnerHTML={{ __html: processedContent || chapter.content || '' }}
               />
 
               {/* Navigation Footer */}
@@ -318,6 +433,35 @@ export default function BookChapterPage({ book, chapter, currentChapterIndex }: 
           </main>
         </div>
       </div>
+
+      {/* Mermaid Diagram Modal */}
+      {expandedDiagram && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4"
+          onClick={() => setExpandedDiagram(null)}
+        >
+          <div
+            className="bg-white rounded-lg max-w-[95vw] max-h-[95vh] w-full h-full flex flex-col"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex justify-end p-4 border-b">
+              <button
+                onClick={() => setExpandedDiagram(null)}
+                className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                aria-label="Close"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-auto p-6">
+              <div
+                className="mermaid-modal-content w-full h-full flex items-center justify-center"
+                dangerouslySetInnerHTML={{ __html: expandedDiagram }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
