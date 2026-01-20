@@ -24,7 +24,7 @@ export interface Book {
   subtitle?: string;
   author: string;
   publishedDate: string;
-  updatedDate?: string;
+  updatedDate: string | null;
   description: string;
   coverImage: string | null;
   tags?: string[];
@@ -39,7 +39,7 @@ export interface BookMeta {
   subtitle?: string;
   author: string;
   publishedDate: string;
-  updatedDate?: string;
+  updatedDate: string | null;
   description: string;
   coverImage: string | null;
   tags?: string[];
@@ -84,7 +84,7 @@ export function getBooks(locale: string): BookMeta[] {
       subtitle: metadata.subtitle,
       author: metadata.author,
       publishedDate: metadata.publishedDate,
-      updatedDate: metadata.updatedDate,
+      updatedDate: metadata.updatedDate || null,
       description: metadata.description,
       coverImage: metadata.coverImage || null,
       tags: metadata.tags || [],
@@ -144,7 +144,7 @@ export async function getBook(slug: string, locale: string): Promise<Book | null
     subtitle: metadata.subtitle,
     author: metadata.author,
     publishedDate: metadata.publishedDate,
-    updatedDate: metadata.updatedDate,
+    updatedDate: metadata.updatedDate || null,
     description: metadata.description,
     coverImage: metadata.coverImage || null,
     tags: metadata.tags || [],
