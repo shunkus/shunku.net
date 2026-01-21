@@ -495,7 +495,7 @@ docker compose -f compose.yaml -f compose.prod.yaml up
 ### .env File
 
 **`.env`**
-```env
+```bash
 POSTGRES_USER=app
 POSTGRES_PASSWORD=secret
 POSTGRES_DB=myapp
