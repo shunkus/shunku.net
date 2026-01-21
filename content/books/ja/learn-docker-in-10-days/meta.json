@@ -1,0 +1,10 @@
+{
+  "id": "learn-docker-in-10-days",
+  "title": "10日で覚えるDocker",
+  "subtitle": "コンテナ技術を基礎から実践まで",
+  "author": "Shun Kushigami",
+  "publishedDate": "2026-01-21",
+  "description": "Dockerを初めて学ぶエンジニア向けの入門書です。コンテナの基本概念から、Dockerfile、Docker Compose、ネットワーキング、データ永続化まで、10日間で段階的に学習できます。豊富な図解と実践的な例を通じて、現代のアプリケーション開発に欠かせないコンテナ技術を習得しましょう。",
+  "coverImage": null,
+  "tags": ["Docker", "コンテナ", "DevOps", "インフラ", "入門"]
+}

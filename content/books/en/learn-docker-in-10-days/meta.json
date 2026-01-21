@@ -1,0 +1,10 @@
+{
+  "id": "learn-docker-in-10-days",
+  "title": "Learn Docker in 10 Days",
+  "subtitle": "From Container Basics to Production Practices",
+  "author": "Shun Kushigami",
+  "publishedDate": "2026-01-21",
+  "description": "A beginner-friendly guide to Docker for engineers new to container technology. Over 10 days, you'll progressively learn from basic container concepts to Dockerfiles, Docker Compose, networking, and data persistence. Master the essential container skills for modern application development through rich diagrams and practical examples.",
+  "coverImage": null,
+  "tags": ["Docker", "Containers", "DevOps", "Infrastructure", "Tutorial"]
+}
