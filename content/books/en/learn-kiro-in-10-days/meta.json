@@ -1,0 +1,10 @@
+{
+  "id": "learn-kiro-in-10-days",
+  "title": "Learn Kiro in 10 Days",
+  "subtitle": "The New Standard for AI-Driven Development",
+  "author": "Shun Kushigami",
+  "publishedDate": "2026-01-22",
+  "description": "A practical guide to mastering Kiro, the agentic IDE, in 10 days. Learn spec-driven development, steering files, hooks, MCP integration, and Powers to build a next-generation development workflow powered by AI.",
+  "coverImage": null,
+  "tags": ["Kiro", "AI", "IDE", "Development Tools", "Spec-Driven Development", "Tutorial"]
+}

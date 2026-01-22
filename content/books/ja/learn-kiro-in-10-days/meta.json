@@ -1,0 +1,10 @@
+{
+  "id": "learn-kiro-in-10-days",
+  "title": "10日で覚えるKiro",
+  "subtitle": "AI駆動開発の新しいスタンダード",
+  "author": "Shun Kushigami",
+  "publishedDate": "2026-01-22",
+  "description": "AWSが提供するエージェント型IDE「Kiro」を10日間で習得する実践的な入門書です。Spec駆動開発、ステアリングファイル、Hooks、MCP連携、Powersまで、AIと協調した次世代の開発ワークフローを段階的に学習できます。",
+  "coverImage": null,
+  "tags": ["Kiro", "AI", "IDE", "開発ツール", "Spec駆動開発", "入門"]
+}
