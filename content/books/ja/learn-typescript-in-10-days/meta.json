@@ -5,6 +5,6 @@
   "author": "Shun Kushigami",
   "publishedDate": "2026-01-20",
   "description": "JavaScriptの知識を活かしながら、10日間でTypeScriptの基礎から実践的なパターンまでを習得できる入門書です。型システムの考え方、インターフェース、ジェネリクス、高度な型操作まで、毎日のテーマに沿って段階的に学習できます。",
-  "coverImage": "/images/books/learn-typescript-in-10-days.png",
+  "coverImage": null,
   "tags": ["TypeScript", "JavaScript", "プログラミング", "Web開発", "入門"]
 }
