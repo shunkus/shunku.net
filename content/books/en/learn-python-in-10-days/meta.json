@@ -1,0 +1,10 @@
+{
+  "id": "learn-python-in-10-days",
+  "title": "Learn Python in 10 Days",
+  "subtitle": "A Practical Guide for Programming Beginners",
+  "author": "Shun Kushigami",
+  "publishedDate": "2026-01-22",
+  "description": "A beginner-friendly Python tutorial that covers the fundamentals in 10 days. Learn variables, data structures, functions, object-oriented programming, file handling, and more through hands-on projects. Includes visual diagrams and practice exercises to build solid programming skills.",
+  "coverImage": null,
+  "tags": ["Python", "Programming Basics", "Beginner"]
+}
