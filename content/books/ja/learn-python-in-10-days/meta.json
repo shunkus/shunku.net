@@ -5,6 +5,6 @@
   "author": "Shun Kushigami",
   "publishedDate": "2026-01-22",
   "description": "プログラミング初心者向けのPython入門書です。10日間で変数、データ構造、関数、オブジェクト指向、ファイル操作など、Pythonの基礎から実践的なプロジェクトまでを学びます。豊富な図解と練習問題で、着実にスキルを身につけることができます。",
-  "coverImage": null,
+  "coverImage": "/images/books/learn-python-in-10-days.png",
   "tags": ["Python", "プログラミング入門", "初心者向け"]
 }

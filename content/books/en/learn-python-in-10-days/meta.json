@@ -5,6 +5,6 @@
   "author": "Shun Kushigami",
   "publishedDate": "2026-01-22",
   "description": "A beginner-friendly Python tutorial that covers the fundamentals in 10 days. Learn variables, data structures, functions, object-oriented programming, file handling, and more through hands-on projects. Includes visual diagrams and practice exercises to build solid programming skills.",
-  "coverImage": null,
+  "coverImage": "/images/books/learn-python-in-10-days.png",
   "tags": ["Python", "Programming Basics", "Beginner"]
 }

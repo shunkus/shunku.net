@@ -5,6 +5,6 @@
   "author": "Shun Kushigami",
   "publishedDate": "2026-01-20",
   "description": "Master TypeScript fundamentals in 10 days with this practical guide for JavaScript developers. Learn the type system, interfaces, generics, and advanced type patterns through daily lessons with exercises.",
-  "coverImage": null,
+  "coverImage": "/images/books/learn-typescript-in-10-days.png",
   "tags": ["TypeScript", "JavaScript", "Programming", "Web Development", "Tutorial"]
 }

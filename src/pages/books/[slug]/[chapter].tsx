@@ -1,6 +1,7 @@
 import { GetStaticProps, GetStaticPaths } from 'next';
 import Link from 'next/link';
 import Head from 'next/head';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'next-i18next';
@@ -17,6 +18,7 @@ import {
   Book,
   BookChapter
 } from '../../../lib/books';
+import { generateGradientDataURL, generateBookSeed } from '../../../lib/gradient-generator';
 
 interface BookChapterPageProps {
   book: Book | null;
@@ -316,7 +318,7 @@ export default function BookChapterPage({ book, chapter, currentChapterIndex }: 
               </div>
               
               <div className="mb-4">
-                <Link 
+                <Link
                   href="/books"
                   className="text-sm text-blue-600 hover:text-blue-800 transition-colors mb-2 inline-block"
                 >
@@ -326,6 +328,21 @@ export default function BookChapterPage({ book, chapter, currentChapterIndex }: 
                   <h2 className="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors">
                     {book.title}
                   </h2>
+                </Link>
+                {/* Book cover - mobile only */}
+                <Link href={`/books/${book.slug}`} className="block mt-3 lg:hidden">
+                  <div className="relative w-20 aspect-[3/4] rounded-md overflow-hidden shadow-sm">
+                    <Image
+                      src={book.coverImage ?? generateGradientDataURL({
+                        seed: generateBookSeed(book.title, book.author),
+                        width: 120,
+                        height: 160
+                      })}
+                      alt={book.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
                 </Link>
               </div>
               

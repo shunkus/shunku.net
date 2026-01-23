@@ -141,66 +141,73 @@ export default function BookDetail({ book }: BookDetailProps) {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Book Info Section */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-lg shadow-sm p-6 sticky top-4">
-                {/* Book Cover */}
-                <div className="relative h-80 mb-6 rounded-lg overflow-hidden">
-                  <Image
-                    src={book.coverImage ?? generateGradientDataURL({
-                      seed: generateBookSeed(book.title, book.author),
-                      width: 320,
-                      height: 480
-                    })}
-                    alt={book.title}
-                    fill
-                    className="object-cover"
-                  />
+              <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 sticky top-4">
+                {/* Mobile: Horizontal layout (image left, info right) */}
+                <div className="flex flex-row lg:flex-col gap-4 lg:gap-0">
+                  {/* Book Cover */}
+                  <div className="flex-shrink-0">
+                    <div className="relative w-28 sm:w-32 aspect-[3/4] lg:w-full lg:aspect-[3/4] lg:mb-6 rounded-lg overflow-hidden shadow-md">
+                      <Image
+                        src={book.coverImage ?? generateGradientDataURL({
+                          seed: generateBookSeed(book.title, book.author),
+                          width: 320,
+                          height: 480
+                        })}
+                        alt={book.title}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Mobile: Title and metadata next to image */}
+                  <div className="flex-1 min-w-0 lg:contents">
+                    {/* Book Title and Subtitle */}
+                    <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-1 lg:mb-2 line-clamp-2 lg:line-clamp-none">{book.title}</h1>
+                    {book.subtitle && (
+                      <p className="text-sm lg:text-base text-gray-600 mb-2 lg:mb-4 line-clamp-1 lg:line-clamp-none">{book.subtitle}</p>
+                    )}
+
+                    {/* Book Metadata */}
+                    <div className="space-y-1 lg:space-y-3 mb-3 lg:mb-6">
+                      <div className="flex items-center gap-2 text-sm lg:text-base text-gray-700">
+                        <User size={14} className="text-gray-500 flex-shrink-0" />
+                        <span className="font-medium truncate">{book.author}</span>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-sm lg:text-base text-gray-700">
+                        <CalendarDays size={14} className="text-gray-500 flex-shrink-0" />
+                        <time dateTime={book.publishedDate}>
+                          {format(new Date(book.publishedDate), 'MMMM yyyy')}
+                        </time>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-sm lg:text-base text-gray-700">
+                        <FileText size={14} className="text-gray-500 flex-shrink-0" />
+                        <span>{book.chapters.length} {t('books.chapters')}</span>
+                      </div>
+                    </div>
+
+                    {/* Tags - show limited on mobile, all on desktop */}
+                    {book.tags && book.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 lg:gap-2 lg:mb-6">
+                        {book.tags.map((tag, index) => (
+                          <span
+                            key={tag}
+                            className={`bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 lg:py-1 rounded-full ${index >= 3 ? 'hidden lg:inline' : ''}`}
+                          >
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                {/* Book Title and Subtitle */}
-                <h1 className="text-2xl font-bold text-gray-900 mb-2">{book.title}</h1>
-                {book.subtitle && (
-                  <p className="text-gray-600 mb-4">{book.subtitle}</p>
-                )}
-
-                {/* Book Metadata */}
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <User size={16} className="text-gray-500" />
-                    <span className="font-medium">{book.author}</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <CalendarDays size={16} className="text-gray-500" />
-                    <time dateTime={book.publishedDate}>
-                      {format(new Date(book.publishedDate), 'MMMM yyyy')}
-                    </time>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <FileText size={16} className="text-gray-500" />
-                    <span>{book.chapters.length} {t('books.chapters')}</span>
-                  </div>
-
-                </div>
-
-                {/* Tags */}
-                {book.tags && book.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    {book.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full"
-                      >
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                {/* Description */}
-                <div className="border-t pt-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">{t('books.about')}</h3>
-                  <p className="text-gray-700 leading-relaxed">{book.description}</p>
+                {/* Description - always below on both mobile and desktop */}
+                <div className="border-t pt-4 lg:pt-6 mt-4 lg:mt-0">
+                  <h3 className="text-base lg:text-lg font-semibold text-gray-900 mb-2 lg:mb-3">{t('books.about')}</h3>
+                  <p className="text-sm lg:text-base text-gray-700 leading-relaxed">{book.description}</p>
                 </div>
               </div>
             </div>

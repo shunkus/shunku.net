@@ -124,79 +124,83 @@ export default function BooksIndex({ books }: BooksIndexProps) {
           </div>
         </header>
 
-        <main className="max-w-6xl mx-auto px-4 py-8">
+        <main className="max-w-7xl mx-auto px-4 py-8">
           {books.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {books.map((book) => (
-                <article key={book.slug} className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group">
-                  <Link href={`/books/${book.slug}`}>
-                    <div className="relative h-64 overflow-hidden">
-                      <Image
-                        src={book.coverImage ?? generateGradientDataURL({
-                          seed: generateBookSeed(book.title, book.author),
-                          width: 300,
-                          height: 400
-                        })}
-                        alt={book.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                  </Link>
-                  
-                  <div className="p-6">
-                    <Link href={`/books/${book.slug}`}>
-                      <h2 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors mb-1">
-                        {book.title}
-                      </h2>
+                <article key={book.slug} className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 group">
+                  <div className="flex flex-row">
+                    {/* Book cover - left side */}
+                    <Link href={`/books/${book.slug}`} className="flex-shrink-0 p-3 sm:p-4">
+                      <div className="relative w-24 sm:w-32 h-36 sm:h-48 overflow-hidden rounded-md shadow-md">
+                        <Image
+                          src={book.coverImage ?? generateGradientDataURL({
+                            seed: generateBookSeed(book.title, book.author),
+                            width: 300,
+                            height: 400
+                          })}
+                          alt={book.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
                     </Link>
-                    
-                    {book.subtitle && (
-                      <p className="text-sm text-gray-600 mb-3">{book.subtitle}</p>
-                    )}
-                    
-                    <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                      <User size={14} />
-                      <span>{book.author}</span>
-                    </div>
-                    
-                    <p className="text-gray-700 text-sm leading-relaxed mb-4 line-clamp-3">
-                      {book.description}
-                    </p>
-                    
-                    <div className="flex items-center justify-between text-sm text-gray-600 mb-3">
-                      <div className="flex items-center gap-1">
-                        <FileText size={14} />
-                        <span>{book.chapterCount} {t('books.chapters')}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <CalendarDays size={14} />
-                        <time dateTime={book.publishedDate}>
-                          {format(new Date(book.publishedDate), 'MMM yyyy')}
-                        </time>
-                      </div>
-                    </div>
 
-                    {book.tags && book.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {book.tags.slice(0, 3).map((tag) => (
-                          <span
-                            key={tag}
-                            className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full"
-                          >
-                            #{tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
+                    {/* Book info - right side */}
+                    <div className="flex-1 p-4 sm:p-5 flex flex-col min-w-0">
+                      <Link href={`/books/${book.slug}`}>
+                        <h2 className="text-base sm:text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors mb-1 line-clamp-2">
+                          {book.title}
+                        </h2>
+                      </Link>
 
-                    <Link 
-                      href={`/books/${book.slug}`}
-                      className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium text-sm group"
-                    >
-                      {t('books.readBook')}
-                      <span className="ml-1 group-hover:translate-x-1 transition-transform">→</span>
-                    </Link>
+                      {book.subtitle && (
+                        <p className="text-xs sm:text-sm text-gray-600 mb-2 line-clamp-1">{book.subtitle}</p>
+                      )}
+
+                      <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 mb-2">
+                        <User size={12} />
+                        <span className="truncate">{book.author}</span>
+                      </div>
+
+                      <p className="text-gray-700 text-xs sm:text-sm leading-relaxed mb-3 line-clamp-2 hidden sm:block">
+                        {book.description}
+                      </p>
+
+                      <div className="flex items-center gap-3 text-xs text-gray-600 mb-2">
+                        <div className="flex items-center gap-1">
+                          <FileText size={12} />
+                          <span>{book.chapterCount} {t('books.chapters')}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <CalendarDays size={12} />
+                          <time dateTime={book.publishedDate}>
+                            {format(new Date(book.publishedDate), 'MMM yyyy')}
+                          </time>
+                        </div>
+                      </div>
+
+                      {book.tags && book.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-2">
+                          {book.tags.slice(0, 2).map((tag) => (
+                            <span
+                              key={tag}
+                              className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full"
+                            >
+                              #{tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      <Link
+                        href={`/books/${book.slug}`}
+                        className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium text-xs sm:text-sm mt-auto"
+                      >
+                        {t('books.readBook')}
+                        <span className="ml-1 group-hover:translate-x-1 transition-transform">→</span>
+                      </Link>
+                    </div>
                   </div>
                 </article>
               ))}
