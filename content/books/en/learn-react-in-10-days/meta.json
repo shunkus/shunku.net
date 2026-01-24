@@ -1,0 +1,10 @@
+{
+  "id": "learn-react-in-10-days",
+  "title": "Learn React in 10 Days",
+  "subtitle": "Your First Step to Building Modern UIs",
+  "author": "Shun Kushigami",
+  "publishedDate": "2026-01-24",
+  "description": "A React introduction for those with JavaScript fundamentals. Learn component design and Hooks through daily chapters, building practical React development skills. Updated for React 19.",
+  "coverImage": null,
+  "tags": ["React", "JavaScript", "Frontend", "Hooks", "Web Development"]
+}
