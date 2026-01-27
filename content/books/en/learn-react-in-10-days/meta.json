@@ -5,6 +5,6 @@
   "author": "Shun Kushigami",
   "publishedDate": "2026-01-24",
   "description": "A React introduction for those with JavaScript fundamentals. Learn component design and Hooks through daily chapters, building practical React development skills. Updated for React 19.",
-  "coverImage": null,
+  "coverImage": "/images/books/learn-react-in-10-days.png",
   "tags": ["React", "JavaScript", "Frontend", "Hooks", "Web Development"]
 }

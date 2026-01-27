@@ -5,6 +5,6 @@
   "author": "Shun Kushigami",
   "publishedDate": "2026-01-24",
   "description": "JavaScriptの基礎知識がある方向けのReact入門書です。1日1章のペースで、コンポーネント設計からHooksの活用まで、実践的なReact開発スキルを身につけます。最新のReact 19に対応。",
-  "coverImage": null,
+  "coverImage": "/images/books/learn-react-in-10-days.png",
   "tags": ["React", "JavaScript", "Frontend", "Hooks", "Web Development"]
 }

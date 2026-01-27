@@ -5,6 +5,6 @@
   "author": "Shun Kushigami",
   "publishedDate": "2026-01-27",
   "description": "A Next.js introduction for developers with React fundamentals. Master App Router, Server Components, data fetching, and deployment at a pace of one chapter per day. Covers Next.js 15.",
-  "coverImage": null,
+  "coverImage": "/images/books/learn-nextjs-in-10-days.png",
   "tags": ["Next.js", "React", "App Router", "Server Components", "Web Development"]
 }
