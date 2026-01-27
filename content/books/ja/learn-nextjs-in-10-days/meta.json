@@ -1,0 +1,10 @@
+{
+  "id": "learn-nextjs-in-10-days",
+  "title": "10日で覚えるNext.js",
+  "subtitle": "App Routerでモダンなウェブアプリを構築しよう",
+  "author": "Shun Kushigami",
+  "publishedDate": "2026-01-27",
+  "description": "Reactの基礎知識がある方向けのNext.js入門書です。1日1章のペースで、App Router、Server Components、データフェッチングからデプロイまで、実践的なNext.js開発スキルを身につけます。Next.js 15対応。",
+  "coverImage": null,
+  "tags": ["Next.js", "React", "App Router", "Server Components", "Web Development"]
+}

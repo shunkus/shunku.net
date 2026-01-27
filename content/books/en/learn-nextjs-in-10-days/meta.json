@@ -1,0 +1,10 @@
+{
+  "id": "learn-nextjs-in-10-days",
+  "title": "Learn Next.js in 10 Days",
+  "subtitle": "Build Modern Web Apps with App Router",
+  "author": "Shun Kushigami",
+  "publishedDate": "2026-01-27",
+  "description": "A Next.js introduction for developers with React fundamentals. Master App Router, Server Components, data fetching, and deployment at a pace of one chapter per day. Covers Next.js 15.",
+  "coverImage": null,
+  "tags": ["Next.js", "React", "App Router", "Server Components", "Web Development"]
+}
